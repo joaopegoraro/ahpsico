@@ -29,6 +29,13 @@
             {
               "client_id": "335245545296-coeh1kiaoge4nt4srbli65bn2brfhe51.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "335245545296-nkpvs0rmquifpdh5n430i22kena5idqc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.joaopegoraro.ahpsico"
+              }
             }
           ]
         }

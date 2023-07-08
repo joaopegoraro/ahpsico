@@ -90,7 +90,7 @@ packages:
     source: hosted
     version: "5.5.3"
   firebase_core:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: firebase_core
       sha256: a4a99204da264a0aa9d54a332ea0315ce7b0768075139c77abefe98093dd98be
@@ -113,11 +113,35 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.0"
+  firebase_crashlytics:
+    dependency: "direct main"
+    description:
+      name: firebase_crashlytics
+      sha256: "398012cf7838f8a373a25da65dd62fc3a3f4abe4b5f886caa634952c3387dce3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.3.3"
+  firebase_crashlytics_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_crashlytics_platform_interface
+      sha256: "39dfcc9a5ddfaa0588ad67f1016174dd9e19f6b31f592b8641bd559399567592"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.6.3"
   flutter:
     dependency: "direct main"
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_dotenv:
+    dependency: "direct main"
+    description:
+      name: flutter_dotenv
+      sha256: "9357883bdd153ab78cbf9ffa07656e336b8bbb2b5a3ca596b0b27e119f7c7d77"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.1.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -152,6 +176,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  intl:
+    dependency: "direct main"
+    description:
+      name: intl
+      sha256: "3bc132a9dbce73a7e4a21a17d06e1878839ffbf975568bc875c60537824b0c4d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.18.1"
   js:
     dependency: transitive
     description:
