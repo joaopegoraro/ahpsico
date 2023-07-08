@@ -14,35 +14,33 @@ class AuthException implements Exception {
 }
 
 class AuthSignInFailedException extends AuthException {
-  const AuthSignInFailedException()
+  const AuthSignInFailedException({String? message})
       : super(
-          message: "Houve um problema ao tentar fazer login, por favor, "
-              "tente novamente mais tarde ou entre em contato com o desenvolvedor",
+          message: "There was a problem trying to sign in: $message",
           code: "auth_sign_in_failed",
         );
 }
 
 class AuthAutoRetrievalFailedException extends AuthException {
-  const AuthAutoRetrievalFailedException()
+  const AuthAutoRetrievalFailedException({String? message})
       : super(
-          message: "Houve um problema ao tentar validar o código automaticamente, "
-              "por favor, digite o código recebido por SMS manualmente",
+          message: "There was a problem trying to automatically retrieve the SMS code: $message",
           code: "auth_auto_retrieval_failed",
         );
 }
 
 class AuthInvalidVerificationCodeException extends AuthException {
-  const AuthInvalidVerificationCodeException()
+  const AuthInvalidVerificationCodeException({String? message})
       : super(
-          message: "O id de verificação não é válido",
+          message: "The supplied verification ID isn't valid: $message",
           code: "auth_invalid_sign_in_verification_id",
         );
 }
 
 class AuthInvalidSignInCodeException extends AuthException {
-  const AuthInvalidSignInCodeException()
+  const AuthInvalidSignInCodeException({String? message})
       : super(
-          message: "O código inserido não é válido",
+          message: "The supplied SMS code isn't valid: $message",
           code: "auth_invalid_sign_in_code",
         );
 }

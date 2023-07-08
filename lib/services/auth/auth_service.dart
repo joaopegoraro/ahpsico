@@ -94,11 +94,11 @@ final class AuthServiceImpl implements AuthService {
     } on firebase_auth.FirebaseAuthException catch (err) {
       switch (err.code) {
         case "invalid-verification-code":
-          throw const AuthInvalidSignInCodeException();
+          throw AuthInvalidSignInCodeException(message: err.message);
         case "invalid-verification-id":
-          throw const AuthInvalidVerificationCodeException();
+          throw AuthInvalidVerificationCodeException(message: err.message);
         default:
-          throw const AuthSignInFailedException();
+          throw AuthSignInFailedException(message: err.message);
       }
     }
 
