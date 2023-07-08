@@ -1,5 +1,5 @@
 class AuthToken {
-  AuthToken(this.idToken);
+  const AuthToken(this.idToken);
 
   final String idToken;
 }
