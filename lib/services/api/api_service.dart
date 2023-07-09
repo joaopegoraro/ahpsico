@@ -74,6 +74,12 @@ abstract interface class ApiService {
   Future<List<Assignment>> getPatientAssignments(String patientId);
 
   Future<List<Advice>> getPatientAdvices(String patientId);
+
+  Future<Session> getSession(int id);
+
+  Future<Session> createSession(Session session);
+
+  Future<Session> updateSession(Session session);
 }
 
 final apiServiceProvider = Provider<ApiService>((ref) {
@@ -214,7 +220,7 @@ class ApiServiceImpl implements ApiService {
   Future<Doctor> updateDoctor(Doctor doctor) async {
     return await _request(
       method: "PUT",
-      endpoint: "doctors",
+      endpoint: "doctors/${doctor.uuid}",
       requestBody: () {
         return doctor.toMap();
       },
@@ -275,7 +281,7 @@ class ApiServiceImpl implements ApiService {
   Future<Patient> updatePatient(Patient patient) async {
     return await _request(
       method: "PUT",
-      endpoint: "patients",
+      endpoint: "patients/${patient.uuid}",
       requestBody: () {
         return patient.toMap();
       },
@@ -313,7 +319,7 @@ class ApiServiceImpl implements ApiService {
   Future<List<Assignment>> getPatientAssignments(String patientId) async {
     return await _request(
       method: "GET",
-      endpoint: "patients/$patientId/sessions",
+      endpoint: "patients/$patientId/assignments",
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Assignment.fromMap(e)).toList();
@@ -325,10 +331,49 @@ class ApiServiceImpl implements ApiService {
   Future<List<Advice>> getPatientAdvices(String patientId) async {
     return await _request(
       method: "GET",
-      endpoint: "patients/$patientId/sessions",
+      endpoint: "patients/$patientId/advices",
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Advice.fromMap(e)).toList();
+      },
+    );
+  }
+
+  @override
+  Future<Session> getSession(int id) async {
+    return await _request(
+      method: "GET",
+      endpoint: "sessions/$id",
+      parseSuccess: (response) {
+        return Session.fromJson(response.data);
+      },
+    );
+  }
+
+  @override
+  Future<Session> createSession(Session session) async {
+    return await _request(
+      method: "POST",
+      endpoint: "sessions/${session.id}",
+      requestBody: () {
+        return session.toMap();
+      },
+      parseSuccess: (response) {
+        return Session.fromJson(response.data);
+      },
+    );
+  }
+
+  @override
+  Future<Session> updateSession(Session session) async {
+    return await _request(
+      method: "PUT",
+      endpoint: "sessions/${session.id}",
+      requestBody: () {
+        return session.toMap();
+      },
+      parseSuccess: (response) {
+        return Session.fromJson(response.data);
       },
     );
   }

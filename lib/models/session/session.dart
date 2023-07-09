@@ -8,6 +8,7 @@ import 'package:ahpsico/models/session/session_type.dart';
 
 class Session {
   Session({
+    required this.id,
     required this.doctor,
     required this.patient,
     required this.groupId,
@@ -17,6 +18,7 @@ class Session {
     required this.date,
   });
 
+  final int id;
   final Doctor doctor;
   final Patient patient;
   final int groupId;
@@ -26,6 +28,7 @@ class Session {
   final String date;
 
   Session copyWith({
+    int? id,
     Doctor? doctor,
     Patient? patient,
     int? groupId,
@@ -35,6 +38,7 @@ class Session {
     String? date,
   }) {
     return Session(
+      id: id ?? this.id,
       doctor: doctor ?? this.doctor,
       patient: patient ?? this.patient,
       groupId: groupId ?? this.groupId,
@@ -47,6 +51,7 @@ class Session {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'id': id,
       'doctor': doctor.toMap(),
       'patient': patient.toMap(),
       'group_id': groupId,
@@ -59,6 +64,7 @@ class Session {
 
   factory Session.fromMap(Map<String, dynamic> map) {
     return Session(
+      id: map['id'] as int,
       doctor: Doctor.fromMap(map['doctor'] as Map<String, dynamic>),
       patient: Patient.fromMap(map['patient'] as Map<String, dynamic>),
       groupId: map['group_id'] as int,
@@ -69,20 +75,25 @@ class Session {
     );
   }
 
-  String toJson() => json.encode(toMap());
+  String toJson() {
+    return json.encode(toMap());
+  }
 
-  factory Session.fromJson(String source) => Session.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory Session.fromJson(String source) {
+    return Session.fromMap(json.decode(source) as Map<String, dynamic>);
+  }
 
   @override
   String toString() {
-    return 'Session(doctor: $doctor, patient: $patient, groupId: $groupId, groupIndex: $groupIndex, status: $status, type: $type, date: $date)';
+    return 'Session(id: $id, doctor: $doctor, patient: $patient, groupId: $groupId, groupIndex: $groupIndex, status: $status, type: $type, date: $date)';
   }
 
   @override
   bool operator ==(covariant Session other) {
     if (identical(this, other)) return true;
 
-    return other.doctor == doctor &&
+    return other.id == id &&
+        other.doctor == doctor &&
         other.patient == patient &&
         other.groupId == groupId &&
         other.groupIndex == groupIndex &&
@@ -93,7 +104,8 @@ class Session {
 
   @override
   int get hashCode {
-    return doctor.hashCode ^
+    return id.hashCode ^
+        doctor.hashCode ^
         patient.hashCode ^
         groupId.hashCode ^
         groupIndex.hashCode ^
