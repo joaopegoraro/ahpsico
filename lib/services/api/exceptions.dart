@@ -76,3 +76,19 @@ class ApiUserAlreadyRegisteredException extends ApiException {
           code: "api_user_already_registered",
         );
 }
+
+class ApiPatientNotRegisteredException extends ApiException {
+  const ApiPatientNotRegisteredException({String? message})
+      : super(
+          message: "There are not patients registered with this phone number yet: $message",
+          code: "api_patient_not_registered",
+        );
+}
+
+class ApiPatientAlreadyWithDoctorException extends ApiException {
+  const ApiPatientAlreadyWithDoctorException({String? message})
+      : super(
+          message: "You can't send the invite, the patient is already with the doctor: $message",
+          code: "api_patient_already_with_doctor",
+        );
+}

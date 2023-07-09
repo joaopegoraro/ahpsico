@@ -32,8 +32,8 @@ class User {
     return <String, dynamic>{
       'uid': uid,
       'name': name,
-      'phoneNumber': phoneNumber,
-      'isDoctor': isDoctor,
+      'phone_number': phoneNumber,
+      'is_doctor': isDoctor,
     };
   }
 

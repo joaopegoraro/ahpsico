@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:ahpsico/models/invite.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/auth_interceptor.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
@@ -10,13 +11,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 /// All service methods can throw [ApiException] :
+/// - base [ApiException] when the response returns with an error status;
 /// - [ApiTimeoutException] when the request times out;
 /// - [ApiConnectionException] when the request suffers any connection problems;
 /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
 /// - [ApiBadRequestException] when the response returns a status of 400;
 /// - [ApiEncodeRequestException] when there is a problem in encoding the request body;
 /// - [ApiDecodeResponseException] when there is a problem in decoding the response body;
-/// - default [ApiException] when an unknown error appears;
 abstract interface class ApiService {
   /// throws [ApiUserNotRegisteredException] when the user trying to login is
   /// not yet registered.
@@ -32,6 +33,20 @@ abstract interface class ApiService {
 
   /// Returns the user data
   Future<User> signUp();
+
+  /// throws:
+  /// - [ApiPatientNotRegisteredException] when there is not patient registered
+  /// with the phone number that was passed;
+  /// - [ApiPatientAlreadyWithDoctorException] when the patient you are trying to
+  /// invite already is your patient;
+  Future<void> createInvite(String phoneNumber);
+
+  /// Returns the queried invite
+  Future<Invite> getInvite(int id);
+
+  Future<void> deleteInvite(int id);
+
+  Future<void> acceptInvite(int id);
 }
 
 final apiServiceProvider = Provider<ApiService>((ref) {
@@ -40,11 +55,7 @@ final apiServiceProvider = Provider<ApiService>((ref) {
   final loggerInterceptor = PrettyDioLogger(
     requestHeader: true,
     requestBody: true,
-    responseBody: true,
     responseHeader: false,
-    error: true,
-    compact: true,
-    maxWidth: 90,
   );
   final dio = Dio(options)..interceptors.addAll([authInterceptor, loggerInterceptor]);
   return ApiServiceImpl(dio);
@@ -67,11 +78,13 @@ class ApiServiceImpl implements ApiService {
     return await _request(
       method: "POST",
       endpoint: "login",
-      parseResponse: (response) {
+      parseSuccess: (response) {
+        return User.fromJson(response.data);
+      },
+      parseFailure: (response) {
         if (response.statusCode == 406) {
           throw const ApiUserNotRegisteredException();
         }
-        return User.fromJson(response.data);
       },
     );
   }
@@ -85,35 +98,104 @@ class ApiServiceImpl implements ApiService {
     return await _request(
       method: "POST",
       endpoint: "signup",
-      parseResponse: (response) {
+      parseSuccess: (response) {
+        return User.fromJson(response.data);
+      },
+      parseFailure: (response) {
         if (response.statusCode == 406) {
           throw const ApiUserAlreadyRegisteredException();
         }
-        return User.fromJson(response.data);
       },
     );
   }
 
+  /// throws:
+  /// - [ApiPatientNotRegisteredException] when there is not patient registered
+  /// with the phone number that was passed;
+  /// - [ApiPatientAlreadyWithDoctorException] when the patient you are trying to
+  /// invite already is your patient;
+  ///
+  /// Returns the created invite
+  @override
+  Future<Invite> createInvite(String phoneNumber) async {
+    return await _request(
+      method: "POST",
+      endpoint: "invites",
+      requestBody: () {
+        return {"phone_number": phoneNumber};
+      },
+      parseSuccess: (response) {
+        return Invite.fromJson(response.data);
+      },
+      parseFailure: (response) {
+        if (response.statusCode == 404) {
+          final errorBody = json.decode(response.data) as Map<String, dynamic>;
+          final errorCode = errorBody['code'] as String;
+          switch (errorCode) {
+            case "patient_not_registered":
+              throw const ApiPatientNotRegisteredException();
+            case "patient_already_with_doctor":
+              throw const ApiPatientAlreadyWithDoctorException();
+          }
+        }
+      },
+    );
+  }
+
+  /// Returns the queried invite
+  @override
+  Future<Invite> getInvite(int id) async {
+    return await _request(
+      method: "GET",
+      endpoint: "invites/$id",
+      parseSuccess: (response) {
+        return Invite.fromJson(response.data);
+      },
+    );
+  }
+
+  @override
+  Future<void> deleteInvite(int id) async {
+    return await _request(
+      method: "DELETE",
+      endpoint: "invites/$id",
+      parseSuccess: (response) {/* SUCCESS! */},
+    );
+  }
+
+  @override
+  Future<void> acceptInvite(int id) async {
+    return await _request(
+      method: "POST",
+      endpoint: "invites/$id/accept",
+      parseSuccess: (response) {/* SUCCESS! */},
+    );
+  }
+
   /// throws [ApiException] :
+  /// - base [ApiException] when the response returns with an error status;
   /// - [ApiTimeoutException] when the request times out;
   /// - [ApiConnectionException] when the request suffers any connection problems;
   /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   /// - [ApiBadRequestException] when the response returns a status of 400;
   /// - [ApiEncodeRequestException] when there is a problem in encoding the request body;
   /// - [ApiDecodeResponseException] when there is a problem in decoding the response body;
-  /// - default [ApiException] when an unknown error appears;
   Future<T> _request<T>({
     required String method,
     required String endpoint,
-    required T Function(Response) parseResponse,
-    Object Function()? parseRequest,
+    required T Function(Response response) parseSuccess,
+    Never? Function(Response response)? parseFailure,
+    Object Function()? requestBody,
+    Map<String, dynamic>? queryParameters,
   }) async {
     try {
       final response = await _dio.request(
         endpoint,
-        data: parseRequest?.call(),
+        data: requestBody?.call(),
+        queryParameters: queryParameters,
         options: Options(method: method),
       );
+
       switch (response.statusCode) {
         case 400:
           final errorBody = json.decode(response.data) as Map<String, dynamic>;
@@ -122,7 +204,14 @@ class ApiServiceImpl implements ApiService {
         case 403:
           throw const ApiUnauthorizedException();
       }
-      return parseResponse(response);
+
+      if (response.statusCode == null || (response.statusCode! >= 200 && response.statusCode! < 300)) {
+        parseFailure?.call(response);
+        final errorBody = json.decode(response.data) as Map<String, dynamic>;
+        throw ApiException(message: errorBody.toString());
+      }
+
+      return parseSuccess(response);
     } on DioException catch (e, stackTrace) {
       switch (e.type) {
         case DioExceptionType.connectionTimeout:
@@ -132,7 +221,8 @@ class ApiServiceImpl implements ApiService {
         case DioExceptionType.connectionError:
           ApiConnectionException(message: e.message).throwWithStackTrace(stackTrace);
         default:
-          ApiException(message: e.message).throwWithStackTrace(stackTrace);
+          // ApiException(message: e.message).throwWithStackTrace(stackTrace);
+          rethrow;
       }
     } on JsonUnsupportedObjectError catch (e, stackTrace) {
       const ApiEncodeRequestException().throwWithStackTrace(stackTrace);
