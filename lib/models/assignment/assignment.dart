@@ -7,6 +7,7 @@ import 'package:ahpsico/models/session/session.dart';
 
 class Assignment {
   Assignment({
+    required this.id,
     required this.title,
     required this.description,
     required this.doctor,
@@ -15,6 +16,7 @@ class Assignment {
     required this.deliverySession,
   });
 
+  final int id;
   final String title;
   final String description;
   final Doctor doctor;
@@ -23,6 +25,7 @@ class Assignment {
   final Session deliverySession;
 
   Assignment copyWith({
+    int? id,
     String? title,
     String? description,
     Doctor? doctor,
@@ -31,6 +34,7 @@ class Assignment {
     Session? deliverySession,
   }) {
     return Assignment(
+      id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
       doctor: doctor ?? this.doctor,
@@ -42,6 +46,7 @@ class Assignment {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'id': id,
       'title': title,
       'description': description,
       'doctor': doctor.toMap(),
@@ -53,6 +58,7 @@ class Assignment {
 
   factory Assignment.fromMap(Map<String, dynamic> map) {
     return Assignment(
+      id: map['id'] as int,
       title: map['title'] as String,
       description: map['description'] as String,
       doctor: Doctor.fromMap(map['doctor'] as Map<String, dynamic>),
@@ -72,14 +78,15 @@ class Assignment {
 
   @override
   String toString() {
-    return 'Assignment(title: $title, description: $description, doctor: $doctor, patientId: $patientId, status: $status, deliverySession: $deliverySession)';
+    return 'Assignment(id: $id, title: $title, description: $description, doctor: $doctor, patientId: $patientId, status: $status, deliverySession: $deliverySession)';
   }
 
   @override
   bool operator ==(covariant Assignment other) {
     if (identical(this, other)) return true;
 
-    return other.title == title &&
+    return other.id == id &&
+        other.title == title &&
         other.description == description &&
         other.doctor == doctor &&
         other.patientId == patientId &&
@@ -89,7 +96,8 @@ class Assignment {
 
   @override
   int get hashCode {
-    return title.hashCode ^
+    return id.hashCode ^
+        title.hashCode ^
         description.hashCode ^
         doctor.hashCode ^
         patientId.hashCode ^

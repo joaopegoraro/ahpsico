@@ -80,6 +80,14 @@ abstract interface class ApiService {
   Future<Session> createSession(Session session);
 
   Future<Session> updateSession(Session session);
+
+  Future<Assignment> getAssignment(int id);
+
+  Future<Assignment> createAssignment(Assignment assignment);
+
+  Future<Assignment> updateAssignment(Assignment assignment);
+
+  Future<void> deleteAssignment(int id);
 }
 
 final apiServiceProvider = Provider<ApiService>((ref) {
@@ -354,7 +362,7 @@ class ApiServiceImpl implements ApiService {
   Future<Session> createSession(Session session) async {
     return await _request(
       method: "POST",
-      endpoint: "sessions/${session.id}",
+      endpoint: "sessions",
       requestBody: () {
         return session.toMap();
       },
@@ -375,6 +383,54 @@ class ApiServiceImpl implements ApiService {
       parseSuccess: (response) {
         return Session.fromJson(response.data);
       },
+    );
+  }
+
+  @override
+  Future<Assignment> getAssignment(int id) async {
+    return await _request(
+      method: "GET",
+      endpoint: "assignments/$id",
+      parseSuccess: (response) {
+        return Assignment.fromJson(response.data);
+      },
+    );
+  }
+
+  @override
+  Future<Assignment> createAssignment(Assignment assignment) async {
+    return await _request(
+      method: "POST",
+      endpoint: "assignments",
+      requestBody: () {
+        return assignment.toMap();
+      },
+      parseSuccess: (response) {
+        return Assignment.fromJson(response.data);
+      },
+    );
+  }
+
+  @override
+  Future<Assignment> updateAssignment(Assignment assignment) async {
+    return await _request(
+      method: "PUT",
+      endpoint: "assignments/${assignment.id}",
+      requestBody: () {
+        return assignment.toMap();
+      },
+      parseSuccess: (response) {
+        return Assignment.fromJson(response.data);
+      },
+    );
+  }
+
+  @override
+  Future<void> deleteAssignment(int id) async {
+    return await _request(
+      method: "PUT",
+      endpoint: "assignments/$id",
+      parseSuccess: (response) {/* SUCCESS */},
     );
   }
 
