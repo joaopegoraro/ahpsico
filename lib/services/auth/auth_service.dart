@@ -2,10 +2,12 @@ import 'package:ahpsico/services/auth/credentials.dart';
 import 'package:ahpsico/services/auth/exceptions.dart';
 import 'package:ahpsico/services/auth/token.dart';
 import 'package:ahpsico/services/auth/auth_user.dart';
+import 'package:ahpsico/utils/extensions.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 abstract interface class AuthService {
+  /// Returns the user authentication token, or null if the user is not authenticated
   Future<AuthToken?> getUserToken();
 
   Future<void> sendPhoneVerificationCode({
@@ -16,11 +18,10 @@ abstract interface class AuthService {
     required void Function(String verificationId) onAutoRetrievalTimeout,
   });
 
-  /// throws [AuthInvalidSignInCodeException] when the provided sms code is not valid;
-  ///
-  /// throws [AuthInvalidVerificationCodeException] when the provided verification code is not valid;
-  ///
-  /// throws [AuthSignInFailedException] when something unexpected happeneded when trying to sign in
+  /// throws [AuthException] :
+  /// - [AuthInvalidSignInCodeException] when the provided sms code is not valid;
+  /// - [AuthInvalidVerificationCodeException] when the provided verification code is not valid;
+  /// - [AuthSignInFailedException] when something unexpected happeneded when trying to sign in
   Future<AuthUserCredential> signInWithCredential(AuthPhoneCredential phoneCredential);
 }
 
@@ -81,6 +82,11 @@ final class AuthServiceImpl implements AuthService {
     );
   }
 
+  /// throws [AuthInvalidSignInCodeException] when the provided sms code is not valid;
+  ///
+  /// throws [AuthInvalidVerificationCodeException] when the provided verification code is not valid;
+  ///
+  /// throws [AuthSignInFailedException] when something unexpected happeneded when trying to sign in
   @override
   Future<AuthUserCredential> signInWithCredential(AuthPhoneCredential phoneCredential) async {
     final firebasePhoneCredential = firebase_auth.PhoneAuthProvider.credential(
@@ -91,27 +97,27 @@ final class AuthServiceImpl implements AuthService {
     firebase_auth.UserCredential firebaseUserCredential;
     try {
       firebaseUserCredential = await _firebaseAuth.signInWithCredential(firebasePhoneCredential);
-    } on firebase_auth.FirebaseAuthException catch (err) {
+    } on firebase_auth.FirebaseAuthException catch (err, stackTrace) {
       switch (err.code) {
         case "invalid-verification-code":
           throw AuthInvalidSignInCodeException(message: err.message);
         case "invalid-verification-id":
           throw AuthInvalidVerificationCodeException(message: err.message);
         default:
-          throw AuthSignInFailedException(message: err.message);
+          AuthSignInFailedException(message: err.message).throwWithStackTrace(stackTrace);
       }
     }
 
     final firebaseUser = firebaseUserCredential.user;
     if (firebaseUser == null) {
       await _firebaseAuth.signOut();
-      throw const AuthSignInFailedException();
+      throw const AuthSignInFailedException(message: "FirebaseUserCredential returned a null user");
     }
 
     final idToken = await firebaseUser.getIdToken();
     if (idToken.isEmpty) {
       await _firebaseAuth.signOut();
-      throw const AuthSignInFailedException();
+      throw const AuthSignInFailedException(message: "FirebaseUser returned an empty id token");
     }
     final token = AuthToken(idToken);
 
