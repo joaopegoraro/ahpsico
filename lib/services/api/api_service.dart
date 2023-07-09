@@ -88,6 +88,14 @@ abstract interface class ApiService {
   Future<Assignment> updateAssignment(Assignment assignment);
 
   Future<void> deleteAssignment(int id);
+
+  Future<Advice> getAdvice(int id);
+
+  Future<Advice> createAdvice(Advice advice);
+
+  Future<Advice> updateAdvice(Advice advice);
+
+  Future<void> deleteAdvice(int id);
 }
 
 final apiServiceProvider = Provider<ApiService>((ref) {
@@ -428,8 +436,56 @@ class ApiServiceImpl implements ApiService {
   @override
   Future<void> deleteAssignment(int id) async {
     return await _request(
-      method: "PUT",
+      method: "DELETE",
       endpoint: "assignments/$id",
+      parseSuccess: (response) {/* SUCCESS */},
+    );
+  }
+
+  @override
+  Future<Advice> getAdvice(int id) async {
+    return await _request(
+      method: "GET",
+      endpoint: "advices/$id",
+      parseSuccess: (response) {
+        return Advice.fromJson(response.data);
+      },
+    );
+  }
+
+  @override
+  Future<Advice> createAdvice(Advice advice) async {
+    return await _request(
+      method: "POST",
+      endpoint: "advices",
+      requestBody: () {
+        return advice.toMap();
+      },
+      parseSuccess: (response) {
+        return Advice.fromJson(response.data);
+      },
+    );
+  }
+
+  @override
+  Future<Advice> updateAdvice(Advice advice) async {
+    return await _request(
+      method: "PUT",
+      endpoint: "assignments/${advice.id}",
+      requestBody: () {
+        return advice.toMap();
+      },
+      parseSuccess: (response) {
+        return Advice.fromJson(response.data);
+      },
+    );
+  }
+
+  @override
+  Future<void> deleteAdvice(int id) async {
+    return await _request(
+      method: "DELETE",
+      endpoint: "advices/$id",
       parseSuccess: (response) {/* SUCCESS */},
     );
   }
