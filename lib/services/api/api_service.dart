@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/invite.dart';
+import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/auth_interceptor.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
@@ -47,6 +49,12 @@ abstract interface class ApiService {
   Future<void> deleteInvite(int id);
 
   Future<void> acceptInvite(int id);
+
+  Future<Doctor> getDoctor(String uuid);
+
+  Future<Doctor> updateDoctor(Doctor doctor);
+
+  Future<List<Patient>> getDoctorPatients(String uuid);
 }
 
 final apiServiceProvider = Provider<ApiService>((ref) {
@@ -169,6 +177,43 @@ class ApiServiceImpl implements ApiService {
       method: "POST",
       endpoint: "invites/$id/accept",
       parseSuccess: (response) {/* SUCCESS! */},
+    );
+  }
+
+  @override
+  Future<Doctor> getDoctor(String uuid) async {
+    return await _request(
+      method: "GET",
+      endpoint: "doctors/$uuid",
+      parseSuccess: (response) {
+        return Doctor.fromJson(response.data);
+      },
+    );
+  }
+
+  @override
+  Future<Doctor> updateDoctor(Doctor doctor) async {
+    return await _request(
+      method: "PUT",
+      endpoint: "doctors",
+      requestBody: () {
+        return doctor.toMap();
+      },
+      parseSuccess: (response) {
+        return Doctor.fromJson(response.data);
+      },
+    );
+  }
+
+  @override
+  Future<List<Patient>> getDoctorPatients(String uuid) async {
+    return await _request(
+      method: "GET",
+      endpoint: "doctors/$uuid/patients",
+      parseSuccess: (response) {
+        final List jsonList = json.decode(response.data);
+        return jsonList.map((e) => Patient.fromMap(e)).toList();
+      },
     );
   }
 
