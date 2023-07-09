@@ -1,0 +1,99 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:convert';
+
+import 'package:ahpsico/models/assignment/assignment_status.dart';
+import 'package:ahpsico/models/doctor.dart';
+import 'package:ahpsico/models/session/session.dart';
+
+class Assignment {
+  Assignment({
+    required this.title,
+    required this.description,
+    required this.doctor,
+    required this.patientId,
+    required this.status,
+    required this.deliverySession,
+  });
+
+  final String title;
+  final String description;
+  final Doctor doctor;
+  final String patientId;
+  final AssignmentStatus status;
+  final Session deliverySession;
+
+  Assignment copyWith({
+    String? title,
+    String? description,
+    Doctor? doctor,
+    String? patientId,
+    AssignmentStatus? status,
+    Session? deliverySession,
+  }) {
+    return Assignment(
+      title: title ?? this.title,
+      description: description ?? this.description,
+      doctor: doctor ?? this.doctor,
+      patientId: patientId ?? this.patientId,
+      status: status ?? this.status,
+      deliverySession: deliverySession ?? this.deliverySession,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'title': title,
+      'description': description,
+      'doctor': doctor.toMap(),
+      'patient': patientId,
+      'status': status.value,
+      'delivery_session': deliverySession.toMap(),
+    };
+  }
+
+  factory Assignment.fromMap(Map<String, dynamic> map) {
+    return Assignment(
+      title: map['title'] as String,
+      description: map['description'] as String,
+      doctor: Doctor.fromMap(map['doctor'] as Map<String, dynamic>),
+      patientId: map['patient'] as String,
+      status: AssignmentStatus.fromValue(map['status']),
+      deliverySession: Session.fromMap(map['delivery_session'] as Map<String, dynamic>),
+    );
+  }
+
+  String toJson() {
+    return json.encode(toMap());
+  }
+
+  factory Assignment.fromJson(String source) {
+    return Assignment.fromMap(json.decode(source) as Map<String, dynamic>);
+  }
+
+  @override
+  String toString() {
+    return 'Assignment(title: $title, description: $description, doctor: $doctor, patientId: $patientId, status: $status, deliverySession: $deliverySession)';
+  }
+
+  @override
+  bool operator ==(covariant Assignment other) {
+    if (identical(this, other)) return true;
+
+    return other.title == title &&
+        other.description == description &&
+        other.doctor == doctor &&
+        other.patientId == patientId &&
+        other.status == status &&
+        other.deliverySession == deliverySession;
+  }
+
+  @override
+  int get hashCode {
+    return title.hashCode ^
+        description.hashCode ^
+        doctor.hashCode ^
+        patientId.hashCode ^
+        status.hashCode ^
+        deliverySession.hashCode;
+  }
+}

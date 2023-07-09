@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/invite.dart';
 import 'package:ahpsico/models/patient.dart';
+import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/models/advice.dart';
@@ -56,11 +57,23 @@ abstract interface class ApiService {
 
   Future<Doctor> updateDoctor(Doctor doctor);
 
-  Future<List<Patient>> getDoctorPatients(String uuid);
+  Future<List<Patient>> getDoctorPatients(String doctorId);
 
-  Future<List<Session>> getDoctorSessions(String uuid);
+  Future<List<Session>> getDoctorSessions(String doctorId);
 
-  Future<List<Advice>> getDoctorAdvices(String uuid);
+  Future<List<Advice>> getDoctorAdvices(String doctorId);
+
+  Future<Patient> getPatient(String uuid);
+
+  Future<Patient> updatePatient(Patient patient);
+
+  Future<List<Doctor>> getPatientDoctors(String patientId);
+
+  Future<List<Session>> getPatientSessions(String patientId);
+
+  Future<List<Assignment>> getPatientAssignments(String patientId);
+
+  Future<List<Advice>> getPatientAdvices(String patientId);
 }
 
 final apiServiceProvider = Provider<ApiService>((ref) {
@@ -212,10 +225,10 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<Patient>> getDoctorPatients(String uuid) async {
+  Future<List<Patient>> getDoctorPatients(String doctorId) async {
     return await _request(
       method: "GET",
-      endpoint: "doctors/$uuid/patients",
+      endpoint: "doctors/$doctorId/patients",
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Patient.fromMap(e)).toList();
@@ -224,10 +237,10 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<Session>> getDoctorSessions(String uuid) async {
+  Future<List<Session>> getDoctorSessions(String doctorId) async {
     return await _request(
       method: "GET",
-      endpoint: "doctors/$uuid/sessions",
+      endpoint: "doctors/$doctorId/sessions",
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Session.fromMap(e)).toList();
@@ -236,10 +249,83 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<Advice>> getDoctorAdvices(String uuid) async {
+  Future<List<Advice>> getDoctorAdvices(String doctorId) async {
     return await _request(
       method: "GET",
-      endpoint: "doctors/$uuid/advices",
+      endpoint: "doctors/$doctorId/advices",
+      parseSuccess: (response) {
+        final List jsonList = json.decode(response.data);
+        return jsonList.map((e) => Advice.fromMap(e)).toList();
+      },
+    );
+  }
+
+  @override
+  Future<Patient> getPatient(String uuid) async {
+    return await _request(
+      method: "GET",
+      endpoint: "patients/$uuid",
+      parseSuccess: (response) {
+        return Patient.fromJson(response.data);
+      },
+    );
+  }
+
+  @override
+  Future<Patient> updatePatient(Patient patient) async {
+    return await _request(
+      method: "PUT",
+      endpoint: "patients",
+      requestBody: () {
+        return patient.toMap();
+      },
+      parseSuccess: (response) {
+        return Patient.fromJson(response.data);
+      },
+    );
+  }
+
+  @override
+  Future<List<Doctor>> getPatientDoctors(String patientId) async {
+    return await _request(
+      method: "GET",
+      endpoint: "patients/$patientId/doctors",
+      parseSuccess: (response) {
+        final List jsonList = json.decode(response.data);
+        return jsonList.map((e) => Doctor.fromMap(e)).toList();
+      },
+    );
+  }
+
+  @override
+  Future<List<Session>> getPatientSessions(String patientId) async {
+    return await _request(
+      method: "GET",
+      endpoint: "patients/$patientId/sessions",
+      parseSuccess: (response) {
+        final List jsonList = json.decode(response.data);
+        return jsonList.map((e) => Session.fromMap(e)).toList();
+      },
+    );
+  }
+
+  @override
+  Future<List<Assignment>> getPatientAssignments(String patientId) async {
+    return await _request(
+      method: "GET",
+      endpoint: "patients/$patientId/sessions",
+      parseSuccess: (response) {
+        final List jsonList = json.decode(response.data);
+        return jsonList.map((e) => Assignment.fromMap(e)).toList();
+      },
+    );
+  }
+
+  @override
+  Future<List<Advice>> getPatientAdvices(String patientId) async {
+    return await _request(
+      method: "GET",
+      endpoint: "patients/$patientId/sessions",
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Advice.fromMap(e)).toList();
