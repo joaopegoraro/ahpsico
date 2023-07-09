@@ -37,11 +37,11 @@ class ApiConnectionException extends ApiException {
         );
 }
 
-class ApiUserNotRegisteredException extends ApiException {
-  const ApiUserNotRegisteredException({String? message})
+class ApiBadRequestException extends ApiException {
+  const ApiBadRequestException({String? message})
       : super(
-          message: "The user can't login because it is not yet registered: $message",
-          code: "api_user_not_registered",
+          message: "The response reported bad request: $message",
+          code: "api_bad_request",
         );
 }
 
@@ -58,5 +58,21 @@ class ApiDecodeResponseException extends ApiException {
       : super(
           message: "There was a problem trying to decode the response body: $message",
           code: "api_response_decode_error",
+        );
+}
+
+class ApiUserNotRegisteredException extends ApiException {
+  const ApiUserNotRegisteredException({String? message})
+      : super(
+          message: "The user can't login because it is not yet registered: $message",
+          code: "api_user_not_registered",
+        );
+}
+
+class ApiUserAlreadyRegisteredException extends ApiException {
+  const ApiUserAlreadyRegisteredException({String? message})
+      : super(
+          message: "The user can't sign up because it is already registered: $message",
+          code: "api_user_already_registered",
         );
 }
