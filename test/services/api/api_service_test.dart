@@ -588,4 +588,41 @@ void main() {
       await apiService.deleteAssignment(mockedAssignment.id);
     });
   });
+
+  group("advices", () {
+    test("successfully retrieving a advice returns advice", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedAdvice.toJson(),
+      );
+      final advice = await apiService.getAdvice(mockedAdvice.id);
+      assert(advice == mockedAdvice);
+    });
+
+    test("successfully creating a advice returns advice", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedAdvice.toJson(),
+      );
+      final advice = await apiService.createAdvice(mockedAdvice);
+      assert(advice == mockedAdvice);
+    });
+
+    test("successfully updating a advice returns advice", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedAdvice.toJson(),
+      );
+      final advice = await apiService.updateAdvice(mockedAdvice);
+      assert(advice == mockedAdvice);
+    });
+
+    test("successfully deleting a advice doesn't throw", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedAdvice.toJson(),
+      );
+      await apiService.deleteAdvice(mockedAdvice.id);
+    });
+  });
 }
