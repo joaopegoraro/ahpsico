@@ -13,6 +13,7 @@ import 'package:ahpsico/utils/extensions.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meta/meta.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 /// All service methods can throw [ApiException] :
@@ -124,7 +125,7 @@ class ApiServiceImpl implements ApiService {
   /// Returns the user data
   @override
   Future<User> login() async {
-    return await _request(
+    return await request(
       method: "POST",
       endpoint: "login",
       parseSuccess: (response) {
@@ -144,7 +145,7 @@ class ApiServiceImpl implements ApiService {
   /// Returns the user data
   @override
   Future<User> signUp() async {
-    return await _request(
+    return await request(
       method: "POST",
       endpoint: "signup",
       parseSuccess: (response) {
@@ -167,7 +168,7 @@ class ApiServiceImpl implements ApiService {
   /// Returns the created invite
   @override
   Future<Invite> createInvite(String phoneNumber) async {
-    return await _request(
+    return await request(
       method: "POST",
       endpoint: "invites",
       requestBody: () {
@@ -194,7 +195,7 @@ class ApiServiceImpl implements ApiService {
   /// Returns the queried invite
   @override
   Future<Invite> getInvite(int id) async {
-    return await _request(
+    return await request(
       method: "GET",
       endpoint: "invites/$id",
       parseSuccess: (response) {
@@ -205,7 +206,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<void> deleteInvite(int id) async {
-    return await _request(
+    return await request(
       method: "DELETE",
       endpoint: "invites/$id",
       parseSuccess: (response) {/* SUCCESS! */},
@@ -214,7 +215,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<void> acceptInvite(int id) async {
-    return await _request(
+    return await request(
       method: "POST",
       endpoint: "invites/$id/accept",
       parseSuccess: (response) {/* SUCCESS! */},
@@ -223,7 +224,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<Doctor> getDoctor(String uuid) async {
-    return await _request(
+    return await request(
       method: "GET",
       endpoint: "doctors/$uuid",
       parseSuccess: (response) {
@@ -234,7 +235,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<Doctor> updateDoctor(Doctor doctor) async {
-    return await _request(
+    return await request(
       method: "PUT",
       endpoint: "doctors/${doctor.uuid}",
       requestBody: () {
@@ -248,7 +249,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<List<Patient>> getDoctorPatients(String doctorId) async {
-    return await _request(
+    return await request(
       method: "GET",
       endpoint: "doctors/$doctorId/patients",
       parseSuccess: (response) {
@@ -260,7 +261,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<List<Session>> getDoctorSessions(String doctorId) async {
-    return await _request(
+    return await request(
       method: "GET",
       endpoint: "doctors/$doctorId/sessions",
       parseSuccess: (response) {
@@ -272,7 +273,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<List<Advice>> getDoctorAdvices(String doctorId) async {
-    return await _request(
+    return await request(
       method: "GET",
       endpoint: "doctors/$doctorId/advices",
       parseSuccess: (response) {
@@ -284,7 +285,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<Patient> getPatient(String uuid) async {
-    return await _request(
+    return await request(
       method: "GET",
       endpoint: "patients/$uuid",
       parseSuccess: (response) {
@@ -295,7 +296,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<Patient> updatePatient(Patient patient) async {
-    return await _request(
+    return await request(
       method: "PUT",
       endpoint: "patients/${patient.uuid}",
       requestBody: () {
@@ -309,7 +310,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<List<Doctor>> getPatientDoctors(String patientId) async {
-    return await _request(
+    return await request(
       method: "GET",
       endpoint: "patients/$patientId/doctors",
       parseSuccess: (response) {
@@ -321,7 +322,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<List<Session>> getPatientSessions(String patientId) async {
-    return await _request(
+    return await request(
       method: "GET",
       endpoint: "patients/$patientId/sessions",
       parseSuccess: (response) {
@@ -333,7 +334,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<List<Assignment>> getPatientAssignments(String patientId) async {
-    return await _request(
+    return await request(
       method: "GET",
       endpoint: "patients/$patientId/assignments",
       parseSuccess: (response) {
@@ -345,7 +346,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<List<Advice>> getPatientAdvices(String patientId) async {
-    return await _request(
+    return await request(
       method: "GET",
       endpoint: "patients/$patientId/advices",
       parseSuccess: (response) {
@@ -357,7 +358,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<Session> getSession(int id) async {
-    return await _request(
+    return await request(
       method: "GET",
       endpoint: "sessions/$id",
       parseSuccess: (response) {
@@ -368,7 +369,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<Session> createSession(Session session) async {
-    return await _request(
+    return await request(
       method: "POST",
       endpoint: "sessions",
       requestBody: () {
@@ -382,7 +383,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<Session> updateSession(Session session) async {
-    return await _request(
+    return await request(
       method: "PUT",
       endpoint: "sessions/${session.id}",
       requestBody: () {
@@ -396,7 +397,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<Assignment> getAssignment(int id) async {
-    return await _request(
+    return await request(
       method: "GET",
       endpoint: "assignments/$id",
       parseSuccess: (response) {
@@ -407,7 +408,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<Assignment> createAssignment(Assignment assignment) async {
-    return await _request(
+    return await request(
       method: "POST",
       endpoint: "assignments",
       requestBody: () {
@@ -421,7 +422,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<Assignment> updateAssignment(Assignment assignment) async {
-    return await _request(
+    return await request(
       method: "PUT",
       endpoint: "assignments/${assignment.id}",
       requestBody: () {
@@ -435,7 +436,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<void> deleteAssignment(int id) async {
-    return await _request(
+    return await request(
       method: "DELETE",
       endpoint: "assignments/$id",
       parseSuccess: (response) {/* SUCCESS */},
@@ -444,7 +445,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<Advice> getAdvice(int id) async {
-    return await _request(
+    return await request(
       method: "GET",
       endpoint: "advices/$id",
       parseSuccess: (response) {
@@ -455,7 +456,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<Advice> createAdvice(Advice advice) async {
-    return await _request(
+    return await request(
       method: "POST",
       endpoint: "advices",
       requestBody: () {
@@ -469,7 +470,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<Advice> updateAdvice(Advice advice) async {
-    return await _request(
+    return await request(
       method: "PUT",
       endpoint: "assignments/${advice.id}",
       requestBody: () {
@@ -483,7 +484,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<void> deleteAdvice(int id) async {
-    return await _request(
+    return await request(
       method: "DELETE",
       endpoint: "advices/$id",
       parseSuccess: (response) {/* SUCCESS */},
@@ -498,12 +499,13 @@ class ApiServiceImpl implements ApiService {
   /// - [ApiBadRequestException] when the response returns a status of 400;
   /// - [ApiEncodeRequestException] when there is a problem in encoding the request body;
   /// - [ApiDecodeResponseException] when there is a problem in decoding the response body;
-  Future<T> _request<T>({
+  @visibleForTesting
+  Future<T> request<T>({
     required String method,
     required String endpoint,
     required T Function(Response response) parseSuccess,
     Never? Function(Response response)? parseFailure,
-    Object Function()? requestBody,
+    Object? Function()? requestBody,
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
@@ -523,10 +525,16 @@ class ApiServiceImpl implements ApiService {
           throw const ApiUnauthorizedException();
       }
 
-      if (response.statusCode == null || (response.statusCode! >= 200 && response.statusCode! < 300)) {
-        parseFailure?.call(response);
-        final errorBody = json.decode(response.data) as Map<String, dynamic>;
-        throw ApiException(message: errorBody.toString());
+      if (response.statusCode == null || !(response.statusCode! >= 200 && response.statusCode! < 300)) {
+        try {
+          parseFailure?.call(response);
+          final errorBody = json.decode(response.data) as Map<String, dynamic>;
+          throw ApiException(message: errorBody.toString());
+        } on FormatException catch (e, stackTrace) {
+          ApiException(message: e.message).throwWithStackTrace(stackTrace);
+        } on TypeError catch (e, stackTrace) {
+          ApiException(message: e.toString()).throwWithStackTrace(stackTrace);
+        }
       }
 
       return parseSuccess(response);
@@ -539,13 +547,14 @@ class ApiServiceImpl implements ApiService {
         case DioExceptionType.connectionError:
           ApiConnectionException(message: e.message).throwWithStackTrace(stackTrace);
         default:
-          // ApiException(message: e.message).throwWithStackTrace(stackTrace);
-          rethrow;
+          ApiException(message: e.message).throwWithStackTrace(stackTrace);
       }
     } on JsonUnsupportedObjectError catch (e, stackTrace) {
       const ApiEncodeRequestException().throwWithStackTrace(stackTrace);
     } on FormatException catch (e, stackTrace) {
       ApiDecodeResponseException(message: e.message).throwWithStackTrace(stackTrace);
+    } on TypeError catch (e, stackTrace) {
+      ApiDecodeResponseException(message: e.toString()).throwWithStackTrace(stackTrace);
     }
   }
 }
