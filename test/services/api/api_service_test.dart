@@ -1,11 +1,16 @@
 import 'dart:convert';
 
+import 'package:ahpsico/models/advice.dart';
 import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/invite.dart';
 import 'package:ahpsico/models/patient.dart';
+import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/session/session_status.dart';
+import 'package:ahpsico/models/session/session_type.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/api_service.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -45,6 +50,24 @@ void main() {
     doctor: mockedDoctor,
     patientId: mockedPatient.uuid,
     phoneNumber: mockedUser.phoneNumber,
+  );
+
+  final mockedSession = Session(
+    id: 1,
+    doctor: mockedDoctor,
+    patient: mockedPatient,
+    groupId: 1,
+    groupIndex: 1,
+    status: SessionStatus.canceled,
+    type: SessionType.individual,
+    date: "some date",
+  );
+
+  final mockedAdvice = Advice(
+    id: 1,
+    message: "some message",
+    doctor: mockedDoctor,
+    patientIds: List.generate(10, (index) => index.toString()),
   );
 
   Future<void> testRequest<T>({
@@ -310,44 +333,121 @@ void main() {
     });
   });
 
-  group("create invite", () {
-    test("response with code patient_not_registered throws ApiPatientNotRegisteredException", () async {
-      const body = {'code': "patient_not_registered"};
-      try {
+  group("invites", () {
+    group("create invite", () {
+      test("response with code patient_not_registered throws ApiPatientNotRegisteredException", () async {
+        const body = {'code': "patient_not_registered"};
+        try {
+          await testRequest(
+            onlyMock: true,
+            statusCode: 404,
+            responseBody: json.encode(body),
+          );
+          await apiService.createInvite(mockedInvite.phoneNumber);
+          assert(false);
+        } on ApiPatientNotRegisteredException catch (_) {
+          assert(true);
+        }
+      });
+
+      test("response with code patient_already_with_doctor throws ApiPatientNotRegisteredException", () async {
+        const body = {'code': "patient_already_with_doctor"};
+        try {
+          await testRequest(
+            onlyMock: true,
+            statusCode: 404,
+            responseBody: json.encode(body),
+          );
+          await apiService.createInvite(mockedInvite.phoneNumber);
+          assert(false);
+        } on ApiPatientAlreadyWithDoctorException catch (_) {
+          assert(true);
+        }
+      });
+
+      test("successful response returns invite", () async {
         await testRequest(
           onlyMock: true,
-          statusCode: 404,
-          responseBody: json.encode(body),
+          responseBody: mockedInvite.toJson(),
         );
-        await apiService.createInvite(mockedInvite.phoneNumber);
-        assert(false);
-      } on ApiPatientNotRegisteredException catch (_) {
-        assert(true);
-      }
+        final invite = await apiService.createInvite(mockedInvite.phoneNumber);
+        assert(invite == mockedInvite);
+      });
     });
 
-    test("response with code patient_already_with_doctor throws ApiPatientNotRegisteredException", () async {
-      const body = {'code': "patient_already_with_doctor"};
-      try {
-        await testRequest(
-          onlyMock: true,
-          statusCode: 404,
-          responseBody: json.encode(body),
-        );
-        await apiService.createInvite(mockedInvite.phoneNumber);
-        assert(false);
-      } on ApiPatientAlreadyWithDoctorException catch (_) {
-        assert(true);
-      }
-    });
-
-    test("successful response returns invite", () async {
+    test("successfully creating invite returns invite", () async {
       await testRequest(
         onlyMock: true,
         responseBody: mockedInvite.toJson(),
       );
-      final invite = await apiService.createInvite(mockedInvite.phoneNumber);
+      final invite = await apiService.getInvite(mockedInvite.id);
       assert(invite == mockedInvite);
+    });
+
+    test("successfully deleting invite doesn't throw", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedInvite.toJson(),
+      );
+      await apiService.deleteAdvice(mockedInvite.id);
+    });
+
+    test("successfully accepting invite doesn't throw", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedInvite.toJson(),
+      );
+      await apiService.acceptInvite(mockedInvite.id);
+    });
+  });
+
+  group("doctors", () {
+    test("successfully retrieving doctor returns doctor", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedDoctor.toJson(),
+      );
+      final doctor = await apiService.getDoctor(mockedDoctor.uuid);
+      assert(doctor == mockedDoctor);
+    });
+
+    test("successfully updating doctor returns doctor", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedDoctor.toJson(),
+      );
+      final doctor = await apiService.updateDoctor(mockedDoctor);
+      assert(doctor == mockedDoctor);
+    });
+
+    test("successfully retrieving doctor patients returns patient list", () async {
+      final expectedPatients = List.generate(1, (index) => mockedPatient.copyWith(uuid: "some other id $index"));
+      await testRequest(
+        onlyMock: true,
+        responseBody: json.encode(expectedPatients.map((patient) => patient.toMap()).toList()),
+      );
+      final patients = await apiService.getDoctorPatients(mockedDoctor.uuid);
+      assert(const ListEquality().equals(patients, expectedPatients));
+    });
+
+    test("successfully retrieving doctor sessions returns session list", () async {
+      final expectedSessions = List.generate(1, (index) => mockedSession.copyWith(id: index));
+      await testRequest(
+        onlyMock: true,
+        responseBody: json.encode(expectedSessions.map((e) => e.toMap()).toList()),
+      );
+      final sessions = await apiService.getDoctorSessions(mockedDoctor.uuid);
+      assert(const ListEquality().equals(sessions, expectedSessions));
+    });
+
+    test("successfully retrieving doctor advices returns advice list", () async {
+      final expectedAdvice = List.generate(1, (index) => mockedAdvice.copyWith(id: index));
+      await testRequest(
+        onlyMock: true,
+        responseBody: json.encode(expectedAdvice.map((e) => e.toMap()).toList()),
+      );
+      final advices = await apiService.getDoctorAdvices(mockedDoctor.uuid);
+      assert(const ListEquality().equals(advices, expectedAdvice));
     });
   });
 }

@@ -46,7 +46,7 @@ class Advice {
       id: map['id'] as int,
       message: map['message'] as String,
       doctor: Doctor.fromMap(map['doctor'] as Map<String, dynamic>),
-      patientIds: List<String>.from((map['patients'] as List<String>)),
+      patientIds: List<String>.from((map['patients'])),
     );
   }
 
