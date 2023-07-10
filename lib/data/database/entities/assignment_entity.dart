@@ -19,7 +19,7 @@ class AssignmentEntity {
   final String doctorId;
   final String patientId;
   final String status;
-  final String deliverySessionId;
+  final int deliverySessionId;
 
   static const tableName = "assignments";
   static const idColumn = "_id";
@@ -38,7 +38,7 @@ class AssignmentEntity {
      $doctorIdColumn TEXT,
      $patientIdColumn TEXT,
      $statusColumn TEXT,
-     $deliverySessionIdColumn TEXT,
+     $deliverySessionIdColumn INTEGER,
      FOREIGN KEY ($doctorIdColumn) REFERENCES Type (${DoctorEntity.uuidColumn}) ON DELETE CASCADE, 
      FOREIGN KEY ($patientIdColumn) REFERENCES Type (${PatientEntity.uuidColumn}) ON DELETE CASCADE, 
      FOREIGN KEY ($deliverySessionIdColumn) REFERENCES Type (${SessionEntity.idColumn}) ON DELETE CASCADE)
@@ -51,7 +51,7 @@ class AssignmentEntity {
     String? doctorId,
     String? patientId,
     String? status,
-    String? deliverySessionId,
+    int? deliverySessionId,
   }) {
     return AssignmentEntity(
       id: id ?? this.id,
@@ -84,7 +84,7 @@ class AssignmentEntity {
       doctorId: map[doctorIdColumn] as String,
       patientId: map[patientIdColumn] as String,
       status: map[statusColumn] as String,
-      deliverySessionId: map[deliverySessionIdColumn] as String,
+      deliverySessionId: map[deliverySessionIdColumn] as int,
     );
   }
 
