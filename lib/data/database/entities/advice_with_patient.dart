@@ -17,12 +17,11 @@ class AdviceWithPatient {
 
   static const creationStatement = """
     CREATE TABLE $tableName (
-     $idColumn INTEGER PRIMARY KEY AUTO_INCREMENT, 
+     $idColumn INTEGER PRIMARY KEY AUTOINCREMENT, 
      $adviceIdColumn INTEGER, 
      $patientIdColumn TEXT,
      FOREIGN KEY ($adviceIdColumn) REFERENCES Type (${AdviceEntity.idColumn}) ON DELETE CASCADE, 
-     FOREIGN KEY ($patientIdColumn) REFERENCES Type (${PatientEntity.uuidColumn}) ON DELETE CASCADE, 
-    );
+     FOREIGN KEY ($patientIdColumn) REFERENCES Type (${PatientEntity.uuidColumn}) ON DELETE CASCADE)
 """;
 
   AdviceWithPatient copyWith({

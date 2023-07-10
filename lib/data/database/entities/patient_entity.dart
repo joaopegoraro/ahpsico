@@ -18,8 +18,7 @@ class PatientEntity {
     CREATE TABLE $tableName (
      $uuidColumn UUID PRIMARY KEY, 
      $nameColumn TEXT, 
-     $phoneNumberColumn TEXT,
-    );
+     $phoneNumberColumn TEXT)
 """;
 
   PatientEntity copyWith({

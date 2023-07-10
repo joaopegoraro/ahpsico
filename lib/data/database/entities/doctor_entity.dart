@@ -34,8 +34,7 @@ class DoctorEntity {
      $descriptionColumn TEXT,
      $crpColumn TEXT,
      $pixKeyColumn TEXT,
-     $paymentDetailsColumn TEXT,
-    );
+     $paymentDetailsColumn TEXT)
 """;
 
   DoctorEntity copyWith({

@@ -21,8 +21,7 @@ class AdviceEntity {
      $idColumn INTEGER PRIMARY KEY, 
      $messageColumn TEXT, 
      $doctorIdColumn TEXT,
-     FOREIGN KEY ($doctorIdColumn) REFERENCES Type (${DoctorEntity.uuidColumn}) ON DELETE CASCADE, 
-    );
+     FOREIGN KEY ($doctorIdColumn) REFERENCES Type (${DoctorEntity.uuidColumn}) ON DELETE CASCADE)
 """;
 
   AdviceEntity copyWith({

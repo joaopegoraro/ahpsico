@@ -22,8 +22,7 @@ class UserEntity {
      $uidColumn UUID PRIMARY KEY, 
      $nameColumn TEXT, 
      $phoneNumberColumn TEXT,
-     $isDoctorColumn TINYINT(4)
-    );
+     $isDoctorColumn TINYINT(4))
 """;
 
   UserEntity copyWith({

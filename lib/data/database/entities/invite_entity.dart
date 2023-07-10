@@ -27,8 +27,7 @@ class InviteEntity {
      $patientIdColumn TEXT,
      $phoneNumberColumn TEXT,
      FOREIGN KEY ($doctorIdColumn) REFERENCES Type (${DoctorEntity.uuidColumn}) ON DELETE CASCADE, 
-     FOREIGN KEY ($patientIdColumn) REFERENCES Type (${PatientEntity.uuidColumn}) ON DELETE CASCADE, 
-    );
+     FOREIGN KEY ($patientIdColumn) REFERENCES Type (${PatientEntity.uuidColumn}) ON DELETE CASCADE)
 """;
 
   InviteEntity copyWith({

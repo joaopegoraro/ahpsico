@@ -1,3 +1,4 @@
+import 'package:ahpsico/data/database/ahpsico_database.dart';
 import 'package:flutter/material.dart';
 
 class MyApp extends StatelessWidget {
@@ -27,6 +28,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    AhpsicoDatabase.instance;
+  }
 
   void _incrementCounter() {
     setState(() {
