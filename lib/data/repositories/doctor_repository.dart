@@ -4,6 +4,7 @@ import 'package:ahpsico/data/database/entities/patient_with_doctor.dart';
 import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/database/mappers/doctor_mapper.dart';
 import 'package:ahpsico/models/doctor.dart';
+import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/services/api/api_service.dart';
 import 'package:ahpsico/utils/extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,9 +20,9 @@ abstract interface class DoctorRepository {
   Future<void> sync(String uuid);
 
   /// throws:
-  /// - [DatabaseNotFoundException] when no doctor was found with the provided [uuid];
+  /// - [DatabaseNotFoundException] when no [Doctor] was found with the provided [uuid];
   /// - [DatabaseMappingException] when something goes wrong when converting the
-  /// database data to a Doctor model;
+  /// database data to a [Doctor] model;
   ///
   /// returns:
   /// - the [Doctor] with the requested [uuid];
@@ -36,15 +37,16 @@ abstract interface class DoctorRepository {
   Future<Doctor> update(Doctor doctor);
 
   /// throws:
-  /// - [DatabaseNotFoundException] when something goes wrong when trying to retrieve the doctors;
+  /// - [DatabaseNotFoundException] when something goes wrong when trying to retrieve the
+  /// [Doctor] list;
   /// - [DatabaseMappingException] when something goes wrong when converting the
   /// database data to a list of [Doctor] models;
   ///
   /// returns:
-  /// - the [Doctor] list of the patient with [patientId];
+  /// - the [Doctor] list of the [Patient] with [patientId];
   Future<List<Doctor>> getPatientDoctors(String patientId);
 
-  /// Fetches from the API the [Doctor] list from the patient with the provided [uuid]
+  /// Fetches from the API the [Doctor] list from the [Patient] with the provided [uuid]
   /// and saves it in the local database;
   ///
   /// throws:
@@ -69,9 +71,6 @@ final class DoctorRepositoryImpl implements DoctorRepository {
   final ApiService _api;
   final sqflite.Database _db;
 
-  /// throws:
-  /// - [ApiException] when something goes wrong with the remote fethcing;
-  /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
   @override
   Future<void> sync(String uuid) async {
     final doctor = await _api.getDoctor(uuid);
@@ -86,13 +85,6 @@ final class DoctorRepositoryImpl implements DoctorRepository {
     }
   }
 
-  /// throws:
-  /// - [DatabaseNotFoundException] when no doctor was found with the provided [uuid];
-  /// - [DatabaseMappingException] when something goes wrong when converting the
-  /// database data to a [Doctor] model;
-  ///
-  /// returns:
-  /// - the [Doctor] with the requested [uuid];
   @override
   Future<Doctor> get(String uuid) async {
     final doctorMap = await _db.query(
@@ -114,12 +106,6 @@ final class DoctorRepositoryImpl implements DoctorRepository {
     }
   }
 
-  /// throws:
-  /// - [ApiException] when something goes wrong with the remote updating;
-  /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
-  ///
-  /// returns:
-  /// - the updated [Doctor];
   @override
   Future<Doctor> update(Doctor doctor) async {
     final updatedDoctor = await _api.updateDoctor(doctor);
@@ -137,13 +123,6 @@ final class DoctorRepositoryImpl implements DoctorRepository {
     }
   }
 
-  /// throws:
-  /// - [DatabaseNotFoundException] when something goes wrong when trying to retrieve the doctors;
-  /// - [DatabaseMappingException] when something goes wrong when converting the
-  /// database data to a list of [Doctor] models;
-  ///
-  /// returns:
-  /// - the [Doctor] list of the patient with [patientId];
   @override
   Future<List<Doctor>> getPatientDoctors(String patientId) async {
     try {
@@ -165,9 +144,6 @@ final class DoctorRepositoryImpl implements DoctorRepository {
     }
   }
 
-  /// throws:
-  /// - [ApiException] when something goes wrong with the remote fethcing;
-  /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
   @override
   Future<void> syncPatientDoctors(String uuid) async {
     final doctors = await _api.getPatientDoctors(uuid);

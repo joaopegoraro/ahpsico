@@ -1,19 +1,15 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
-
 class Patient {
   Patient({
     required this.uuid,
     required this.name,
     required this.phoneNumber,
-    required this.doctorIds,
   });
 
   final String uuid;
   final String name;
   final String phoneNumber;
-  final List<String> doctorIds;
 
   Patient copyWith({
     String? uuid,
@@ -25,7 +21,6 @@ class Patient {
       uuid: uuid ?? this.uuid,
       name: name ?? this.name,
       phoneNumber: phoneNumber ?? this.phoneNumber,
-      doctorIds: doctorIds ?? this.doctorIds,
     );
   }
 
@@ -34,7 +29,6 @@ class Patient {
       'uuid': uuid,
       'name': name,
       'phone_number': phoneNumber,
-      'doctors': doctorIds,
     };
   }
 
@@ -43,7 +37,6 @@ class Patient {
       uuid: map['uuid'] as String,
       name: map['name'] as String,
       phoneNumber: map['phone_number'] as String,
-      doctorIds: List<String>.from(map['doctors']),
     );
   }
 
@@ -57,21 +50,18 @@ class Patient {
 
   @override
   String toString() {
-    return 'Patient(uuid: $uuid, name: $name, phoneNumber: $phoneNumber, doctors: $doctorIds)';
+    return 'Patient(uuid: $uuid, name: $name, phoneNumber: $phoneNumber)';
   }
 
   @override
   bool operator ==(covariant Patient other) {
     if (identical(this, other)) return true;
 
-    return other.uuid == uuid &&
-        other.name == name &&
-        other.phoneNumber == phoneNumber &&
-        listEquals(other.doctorIds, doctorIds);
+    return other.uuid == uuid && other.name == name && other.phoneNumber == phoneNumber;
   }
 
   @override
   int get hashCode {
-    return uuid.hashCode ^ name.hashCode ^ phoneNumber.hashCode ^ doctorIds.hashCode;
+    return uuid.hashCode ^ name.hashCode ^ phoneNumber.hashCode;
   }
 }
