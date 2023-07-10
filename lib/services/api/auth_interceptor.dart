@@ -9,7 +9,7 @@ class AuthInterceptor extends Interceptor {
   final AuthService _authService;
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     final token = await _authService.getUserToken();
     if (token == null || token.idToken.isEmpty) {
       final message = "Invalid AuthToken: $token";
