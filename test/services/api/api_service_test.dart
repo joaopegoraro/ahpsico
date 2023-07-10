@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:ahpsico/models/advice.dart';
+import 'package:ahpsico/models/assignment/assignment.dart';
+import 'package:ahpsico/models/assignment/assignment_status.dart';
 import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/invite.dart';
 import 'package:ahpsico/models/patient.dart';
@@ -68,6 +70,16 @@ void main() {
     message: "some message",
     doctor: mockedDoctor,
     patientIds: List.generate(10, (index) => index.toString()),
+  );
+
+  final mockedAssignment = Assignment(
+    id: 1,
+    title: "some title",
+    description: "some description",
+    doctor: mockedDoctor,
+    patientId: mockedPatient.uuid,
+    status: AssignmentStatus.done,
+    deliverySession: mockedSession,
   );
 
   Future<void> testRequest<T>({
@@ -448,6 +460,66 @@ void main() {
       );
       final advices = await apiService.getDoctorAdvices(mockedDoctor.uuid);
       assert(const ListEquality().equals(advices, expectedAdvice));
+    });
+  });
+
+  group("patients", () {
+    test("successfully retrieving patient returns patient", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedPatient.toJson(),
+      );
+      final patient = await apiService.getPatient(mockedPatient.uuid);
+      assert(patient == mockedPatient);
+    });
+
+    test("successfully updating patient returns patient", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedPatient.toJson(),
+      );
+      final patient = await apiService.updatePatient(mockedPatient);
+      assert(patient == mockedPatient);
+    });
+
+    test("successfully retrieving patient doctors returns doctor list", () async {
+      final expectedDoctors = List.generate(1, (index) => mockedDoctor.copyWith(uuid: "some other id $index"));
+      await testRequest(
+        onlyMock: true,
+        responseBody: json.encode(expectedDoctors.map((e) => e.toMap()).toList()),
+      );
+      final doctors = await apiService.getPatientDoctors(mockedPatient.uuid);
+      assert(const ListEquality().equals(doctors, expectedDoctors));
+    });
+
+    test("successfully retrieving patient sessions returns session list", () async {
+      final expectedSessions = List.generate(1, (index) => mockedSession.copyWith(id: index));
+      await testRequest(
+        onlyMock: true,
+        responseBody: json.encode(expectedSessions.map((e) => e.toMap()).toList()),
+      );
+      final sessions = await apiService.getPatientSessions(mockedPatient.uuid);
+      assert(const ListEquality().equals(sessions, expectedSessions));
+    });
+
+    test("successfully retrieving patient advices returns advice list", () async {
+      final expectedAdvices = List.generate(1, (index) => mockedAdvice.copyWith(id: index));
+      await testRequest(
+        onlyMock: true,
+        responseBody: json.encode(expectedAdvices.map((e) => e.toMap()).toList()),
+      );
+      final advices = await apiService.getPatientAdvices(mockedPatient.uuid);
+      assert(const ListEquality().equals(advices, expectedAdvices));
+    });
+
+    test("successfully retrieving patient assignments returns assignment list", () async {
+      final expectedAssignments = List.generate(1, (index) => mockedAssignment.copyWith(id: index));
+      await testRequest(
+        onlyMock: true,
+        responseBody: json.encode(expectedAssignments.map((e) => e.toMap()).toList()),
+      );
+      final assignments = await apiService.getPatientAssignments(mockedPatient.uuid);
+      assert(const ListEquality().equals(assignments, expectedAssignments));
     });
   });
 }
