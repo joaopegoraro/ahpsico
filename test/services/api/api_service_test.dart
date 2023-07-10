@@ -522,4 +522,33 @@ void main() {
       assert(const ListEquality().equals(assignments, expectedAssignments));
     });
   });
+
+  group("sessions", () {
+    test("successfully retrieving session returns session", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedSession.toJson(),
+      );
+      final session = await apiService.getSession(mockedSession.id);
+      assert(session == mockedSession);
+    });
+
+    test("successfully creating session returns session", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedSession.toJson(),
+      );
+      final session = await apiService.createSession(mockedSession);
+      assert(session == mockedSession);
+    });
+
+    test("successfully updating session returns session", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedSession.toJson(),
+      );
+      final session = await apiService.updateSession(mockedSession);
+      assert(session == mockedSession);
+    });
+  });
 }
