@@ -38,7 +38,7 @@ abstract interface class ApiService {
   /// already registered.
 
   /// Returns the user data
-  Future<User> signUp();
+  Future<User> signUp(User user);
 
   /// throws:
   /// - [ApiPatientNotRegisteredException] when there is not patient registered
@@ -144,10 +144,13 @@ class ApiServiceImpl implements ApiService {
 
   /// Returns the user data
   @override
-  Future<User> signUp() async {
+  Future<User> signUp(User user) async {
     return await request(
       method: "POST",
       endpoint: "signup",
+      requestBody: () {
+        return user.toMap();
+      },
       parseSuccess: (response) {
         return User.fromJson(response.data);
       },

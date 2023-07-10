@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:ahpsico/models/doctor.dart';
 
 class Invite {
-  Invite({
+  const Invite({
     required this.id,
     required this.doctor,
     required this.patientId,

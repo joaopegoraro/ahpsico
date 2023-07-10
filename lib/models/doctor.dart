@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 class Doctor {
-  Doctor({
+  const Doctor({
     required this.uuid,
     required this.name,
     required this.phoneNumber,
