@@ -52,7 +52,7 @@ abstract interface class DoctorRepository {
   /// throws:
   /// - [ApiException] when something goes wrong with the remote fethcing;
   /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
-  Future<void> syncPatientDoctors(String uuid);
+  Future<void> syncPatientDoctors(String doctorId);
 }
 
 final doctorRepositoryProvider = Provider((ref) async {
@@ -126,11 +126,14 @@ final class DoctorRepositoryImpl implements DoctorRepository {
   @override
   Future<List<Doctor>> getPatientDoctors(String patientId) async {
     try {
-      final doctorsMap = await _db.rawQuery("""
+      final doctorsMap = await _db.rawQuery(
+        """
         SELECT * FROM ${DoctorEntity.tableName} d  
           LEFT JOIN ${PatientWithDoctor.tableName} pd ON pd.${PatientWithDoctor.doctorIdColumn} = d.${DoctorEntity.uuidColumn}  
-          WHERE pd.${PatientWithDoctor.patientIdColumn} = $patientId;
-      """);
+          WHERE pd.${PatientWithDoctor.patientIdColumn} = ?
+        """,
+        [patientId],
+      );
 
       final doctors = doctorsMap.map((e) {
         final entity = DoctorEntity.fromMap(e);
@@ -145,10 +148,20 @@ final class DoctorRepositoryImpl implements DoctorRepository {
   }
 
   @override
-  Future<void> syncPatientDoctors(String uuid) async {
-    final doctors = await _api.getPatientDoctors(uuid);
+  Future<void> syncPatientDoctors(String patientId) async {
+    final doctors = await _api.getPatientDoctors(patientId);
     try {
       final batch = _db.batch();
+
+      batch.rawDelete(
+        """
+        DELETE FROM ${DoctorEntity.tableName} d  
+          LEFT JOIN ${PatientWithDoctor.tableName} pd ON pd.${PatientWithDoctor.doctorIdColumn} = d.${DoctorEntity.uuidColumn}  
+          WHERE pd.${PatientWithDoctor.patientIdColumn} = ?
+        """,
+        [patientId],
+      );
+
       for (final doctor in doctors) {
         batch.insert(
           DoctorEntity.tableName,
@@ -157,7 +170,7 @@ final class DoctorRepositoryImpl implements DoctorRepository {
         );
         batch.insert(
           PatientWithDoctor.tableName,
-          PatientWithDoctor(patientId: uuid, doctorId: doctor.uuid).toMap(),
+          PatientWithDoctor(patientId: patientId, doctorId: doctor.uuid).toMap(),
           conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
         );
       }

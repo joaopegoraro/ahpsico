@@ -77,6 +77,22 @@ class ApiUserAlreadyRegisteredException extends ApiException {
         );
 }
 
+class ApiInviteAlreadySentException extends ApiException {
+  const ApiInviteAlreadySentException({String? message})
+      : super(
+          message: "This invite was already sent to the patient: $message",
+          code: "api_invite_already_sent",
+        );
+}
+
+class ApiInvitesNotFoundException extends ApiException {
+  const ApiInvitesNotFoundException({String? message})
+      : super(
+          message: "No invites were found for this account: $message",
+          code: "api_invites_not_found",
+        );
+}
+
 class ApiPatientNotRegisteredException extends ApiException {
   const ApiPatientNotRegisteredException({String? message})
       : super(

@@ -45,10 +45,12 @@ abstract interface class ApiService {
   /// with the phone number that was passed;
   /// - [ApiPatientAlreadyWithDoctorException] when the patient you are trying to
   /// invite already is your patient;
+  /// - [ApiInviteAlreadySentException] when this invite was already sent to the patient;
   Future<void> createInvite(String phoneNumber);
 
-  /// Returns the queried invite
-  Future<Invite> getInvite(int id);
+  /// throws:
+  /// - [ApiInvitesNotFoundException] when there are no invites tied to this account
+  Future<List<Invite>> getInvites();
 
   Future<void> deleteInvite(int id);
 
@@ -116,13 +118,6 @@ class ApiServiceImpl implements ApiService {
 
   final Dio _dio;
 
-  /// throws [ApiUserNotRegisteredException] when the user trying to login is
-  /// not yet registered.
-  ///
-  /// The login credential is the [AuthToken] that is passed
-  /// in the headers.
-  ///
-  /// Returns the user data
   @override
   Future<User> login() async {
     return await request(
@@ -139,10 +134,6 @@ class ApiServiceImpl implements ApiService {
     );
   }
 
-  /// throws [ApiUserAlreadyRegisteredException] when the user trying to sign up is
-  /// already registered.
-
-  /// Returns the user data
   @override
   Future<User> signUp(User user) async {
     return await request(
@@ -162,13 +153,6 @@ class ApiServiceImpl implements ApiService {
     );
   }
 
-  /// throws:
-  /// - [ApiPatientNotRegisteredException] when there is not patient registered
-  /// with the phone number that was passed;
-  /// - [ApiPatientAlreadyWithDoctorException] when the patient you are trying to
-  /// invite already is your patient;
-  ///
-  /// Returns the created invite
   @override
   Future<Invite> createInvite(String phoneNumber) async {
     return await request(
@@ -181,28 +165,36 @@ class ApiServiceImpl implements ApiService {
         return Invite.fromJson(response.data);
       },
       parseFailure: (response) {
-        if (response.statusCode == 404) {
-          final errorBody = json.decode(response.data) as Map<String, dynamic>;
-          final errorCode = errorBody['code'] as String;
-          switch (errorCode) {
-            case "patient_not_registered":
-              throw const ApiPatientNotRegisteredException();
-            case "patient_already_with_doctor":
-              throw const ApiPatientAlreadyWithDoctorException();
-          }
+        switch (response.statusCode) {
+          case 404:
+            throw const ApiPatientNotRegisteredException();
+          case 409:
+            final errorBody = json.decode(response.data) as Map<String, dynamic>;
+            final errorCode = errorBody['code'] as String;
+            switch (errorCode) {
+              case "invite_already_sent":
+                throw const ApiInviteAlreadySentException();
+              case "patient_already_with_doctor":
+                throw const ApiPatientAlreadyWithDoctorException();
+            }
         }
       },
     );
   }
 
-  /// Returns the queried invite
   @override
-  Future<Invite> getInvite(int id) async {
+  Future<List<Invite>> getInvites() async {
     return await request(
       method: "GET",
-      endpoint: "invites/$id",
+      endpoint: "invites",
       parseSuccess: (response) {
-        return Invite.fromJson(response.data);
+        final List jsonList = json.decode(response.data);
+        return jsonList.map((e) => Invite.fromMap(e)).toList();
+      },
+      parseFailure: (response) {
+        if (response.statusCode == 404) {
+          throw const ApiInvitesNotFoundException();
+        }
       },
     );
   }
