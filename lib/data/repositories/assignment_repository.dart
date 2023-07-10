@@ -6,5 +6,4 @@ final assignmentRepositoryProvider = Provider((ref) {
   return AssignmentRepositoryImpl();
 });
 
-final class AssignmentRepositoryImpl implements AssignmentRepository {
-}
+final class AssignmentRepositoryImpl implements AssignmentRepository {}
