@@ -551,4 +551,41 @@ void main() {
       assert(session == mockedSession);
     });
   });
+
+  group("assignments", () {
+    test("successfully retrieving assignment returns assignment", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedAssignment.toJson(),
+      );
+      final assignment = await apiService.getAssignment(mockedAssignment.id);
+      assert(assignment == mockedAssignment);
+    });
+
+    test("successfully creating assignment returns assignment", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedAssignment.toJson(),
+      );
+      final assignment = await apiService.createAssignment(mockedAssignment);
+      assert(assignment == mockedAssignment);
+    });
+
+    test("successfully update assignment returns assignment", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedAssignment.toJson(),
+      );
+      final assignment = await apiService.updateAssignment(mockedAssignment);
+      assert(assignment == mockedAssignment);
+    });
+
+    test("successfully delete assignment doesn't throw", () async {
+      await testRequest(
+        onlyMock: true,
+        responseBody: mockedAssignment.toJson(),
+      );
+      await apiService.deleteAssignment(mockedAssignment.id);
+    });
+  });
 }
