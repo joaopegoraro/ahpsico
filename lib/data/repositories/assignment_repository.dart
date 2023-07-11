@@ -41,7 +41,7 @@ abstract interface class AssignmentRepository {
   /// - the [Assignment] list of the [Patient] with [patientId];
   Future<List<Assignment>> getPatientAssignments(String patientId);
 
-  /// Fetches from the API the [Assignment] list from the [Doctor] with the provided [uuid]
+  /// Fetches from the API the [Assignment] list from the [Patient] with the provided [patientId]
   /// and saves it in the local database;
   ///
   /// throws:
