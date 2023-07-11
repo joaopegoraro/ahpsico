@@ -65,6 +65,12 @@ abstract interface class SessionRepository {
   /// - [ApiException] when something goes wrong with the remote fethcing;
   /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
   Future<void> syncDoctorSessions(String doctorId);
+
+  /// Clears the table;
+  ///
+  /// throws:
+  /// - [DatabaseInsertException] when something goes wrong when deleting the data;
+  Future<void> clear();
 }
 
 final sessionRepositoryProvider = Provider((ref) {
@@ -171,7 +177,7 @@ final class SessionRepositoryImpl implements SessionRepository {
       for (final session in sessions) {
         batch.insert(
           SessionEntity.tableName,
-          session.toMap(),
+          SessionMapper.toEntity(session).toMap(),
           conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
         );
       }
@@ -237,7 +243,7 @@ final class SessionRepositoryImpl implements SessionRepository {
       for (final session in sessions) {
         batch.insert(
           SessionEntity.tableName,
-          session.toMap(),
+          SessionMapper.toEntity(session).toMap(),
           conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
         );
       }
@@ -245,5 +251,10 @@ final class SessionRepositoryImpl implements SessionRepository {
     } on sqflite.DatabaseException catch (e, stackTrace) {
       DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
     }
+  }
+
+  @override
+  Future<void> clear() async {
+    await _db.delete(SessionEntity.tableName);
   }
 }

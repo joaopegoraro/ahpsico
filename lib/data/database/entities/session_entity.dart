@@ -71,8 +71,8 @@ class SessionEntity {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       idColumn: id,
-      doctorId: doctorId,
-      patientId: patientId,
+      doctorIdColumn: doctorId,
+      patientIdColumn: patientId,
       groupIdColumn: groupId,
       groupIndexColumn: groupIndex,
       statusColumn: status,
