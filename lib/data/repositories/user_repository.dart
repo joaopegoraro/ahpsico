@@ -32,6 +32,12 @@ abstract interface class UserRepository {
   /// returns:
   /// - the created [User];
   Future<User> create(User user);
+
+  /// Clears the table;
+  ///
+  /// throws:
+  /// - [DatabaseInsertException] when something goes wrong when deleting the data;
+  Future<void> clear();
 }
 
 final userRepositoryProvider = Provider((ref) async {
@@ -85,11 +91,20 @@ final class UserRepositoryImpl implements UserRepository {
   @override
   Future<User> get() async {
     final usersMap = await _db.query(UserEntity.tableName);
+
+    if (usersMap.isEmpty) {
+      throw const DatabaseNotFoundException(message: "No user found");
+    }
     try {
       final entity = UserEntity.fromMap(usersMap.first);
       return UserMapper.toUser(entity);
     } on TypeError catch (e, stackTrace) {
       DatabaseMappingException(message: e.toString()).throwWithStackTrace(stackTrace);
     }
+  }
+
+  @override
+  Future<void> clear() async {
+    await _db.delete(UserEntity.tableName);
   }
 }
