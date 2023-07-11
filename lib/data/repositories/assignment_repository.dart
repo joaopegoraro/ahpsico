@@ -48,6 +48,12 @@ abstract interface class AssignmentRepository {
   /// - [ApiException] when something goes wrong with the remote fethcing;
   /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
   Future<void> syncPatientAssignments(String patientId);
+
+  /// Clears the table;
+  ///
+  /// throws:
+  /// - [DatabaseInsertException] when something goes wrong when deleting the data;
+  Future<void> clear();
 }
 
 final assignmentRepositoryProvider = Provider((ref) {
@@ -113,7 +119,7 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
       for (final assignment in assignments) {
         batch.insert(
           AssignmentEntity.tableName,
-          assignment.toMap(),
+          AssignmentMapper.toEntity(assignment).toMap(),
           conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
         );
       }
@@ -169,5 +175,10 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
     } on TypeError catch (e, stackTrace) {
       DatabaseMappingException(message: e.toString()).throwWithStackTrace(stackTrace);
     }
+  }
+
+  @override
+  Future<void> clear() async {
+    await _db.delete(AssignmentEntity.tableName);
   }
 }
