@@ -1,3 +1,4 @@
+import 'package:ahpsico/ui/app/router.dart';
 import 'package:ahpsico/ui/app/theme/theme.dart';
 import 'package:flutter/material.dart';
 
@@ -6,10 +7,10 @@ class AhpsicoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Ahpsico',
       theme: AhpsicoTheme.themeData,
-      home: const Placeholder(),
+      routerConfig: AhpsicoRouter.router,
     );
   }
 }
