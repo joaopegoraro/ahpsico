@@ -1,4 +1,6 @@
 import 'package:ahpsico/ui/app/theme/colors.dart';
+import 'package:ahpsico/ui/app/theme/spacing.dart';
+import 'package:ahpsico/ui/components/button.dart';
 import 'package:ahpsico/ui/login/login_model.dart';
 import 'package:flutter/material.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
@@ -11,12 +13,28 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AhpsicoColors.violet,
-      body: ViewModelBuilder.nonReactive(
+      backgroundColor: AhpsicoColors.light,
+      body: ViewModelBuilder(
         provider: loginModelProvider,
         builder: (context, model) {
-          return const Placeholder(
-            color: AhpsicoColors.light,
+          return Padding(
+            padding: const EdgeInsets.all(32),
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AhpsicoButton.primary(
+                    "PRIMARIO",
+                    onPressed: () => "SOMETHING",
+                  ),
+                  AhpsicoSpacing.horizontalSpaceSmall,
+                  AhpsicoButton.secondary(
+                    "SECUNDARIO",
+                    onPressed: () => "SOMETHING",
+                  ),
+                ],
+              ),
+            ),
           );
         },
       ),
