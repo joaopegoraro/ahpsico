@@ -362,17 +362,32 @@ void main() {
         }
       });
 
-      test("response with code patient_already_with_doctor throws ApiPatientNotRegisteredException", () async {
+      test("response with code patient_already_with_doctor throws ApiPatientAlreadyWithDoctorException", () async {
         const body = {'code': "patient_already_with_doctor"};
         try {
           await testRequest(
             onlyMock: true,
-            statusCode: 404,
+            statusCode: 409,
             responseBody: json.encode(body),
           );
           await apiService.createInvite(mockedInvite.phoneNumber);
           assert(false);
         } on ApiPatientAlreadyWithDoctorException catch (_) {
+          assert(true);
+        }
+      });
+
+      test("response with code invite_already_sent throws ApiInviteAlreadySentException", () async {
+        const body = {'code': "invite_already_sent"};
+        try {
+          await testRequest(
+            onlyMock: true,
+            statusCode: 409,
+            responseBody: json.encode(body),
+          );
+          await apiService.createInvite(mockedInvite.phoneNumber);
+          assert(false);
+        } on ApiInviteAlreadySentException catch (_) {
           assert(true);
         }
       });
@@ -387,13 +402,30 @@ void main() {
       });
     });
 
-    test("successfully creating invite returns invite", () async {
-      await testRequest(
-        onlyMock: true,
-        responseBody: mockedInvite.toJson(),
-      );
-      final invite = await apiService.getInvite(mockedInvite.id);
-      assert(invite == mockedInvite);
+    group("get invite", () {
+      test("successfully getting invites returns invite list", () async {
+        await testRequest(
+          onlyMock: true,
+          responseBody: json.encode([mockedInvite.toMap()]),
+        );
+        final invites = await apiService.getInvites();
+        assert(const ListEquality().equals(invites, [mockedInvite]));
+      });
+
+      test("response with status 404 throws ApiInvitesNotFound", () async {
+        const body = {'code': "invite_already_sent"};
+        try {
+          await testRequest(
+            onlyMock: true,
+            statusCode: 404,
+            responseBody: json.encode(body),
+          );
+          await apiService.getInvites();
+          assert(false);
+        } on ApiInvitesNotFoundException catch (_) {
+          assert(true);
+        }
+      });
     });
 
     test("successfully deleting invite doesn't throw", () async {
@@ -553,15 +585,6 @@ void main() {
   });
 
   group("assignments", () {
-    test("successfully retrieving assignment returns assignment", () async {
-      await testRequest(
-        onlyMock: true,
-        responseBody: mockedAssignment.toJson(),
-      );
-      final assignment = await apiService.getAssignment(mockedAssignment.id);
-      assert(assignment == mockedAssignment);
-    });
-
     test("successfully creating assignment returns assignment", () async {
       await testRequest(
         onlyMock: true,
@@ -590,15 +613,6 @@ void main() {
   });
 
   group("advices", () {
-    test("successfully retrieving a advice returns advice", () async {
-      await testRequest(
-        onlyMock: true,
-        responseBody: mockedAdvice.toJson(),
-      );
-      final advice = await apiService.getAdvice(mockedAdvice.id);
-      assert(advice == mockedAdvice);
-    });
-
     test("successfully creating a advice returns advice", () async {
       await testRequest(
         onlyMock: true,

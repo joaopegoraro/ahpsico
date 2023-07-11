@@ -87,15 +87,11 @@ abstract interface class ApiService {
 
   Future<Session> updateSession(Session session);
 
-  Future<Assignment> getAssignment(int id);
-
   Future<Assignment> createAssignment(Assignment assignment);
 
   Future<Assignment> updateAssignment(Assignment assignment);
 
   Future<void> deleteAssignment(int id);
-
-  Future<Advice> getAdvice(int id);
 
   Future<Advice> createAdvice(Advice advice);
 
@@ -394,17 +390,6 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<Assignment> getAssignment(int id) async {
-    return await request(
-      method: "GET",
-      endpoint: "assignments/$id",
-      parseSuccess: (response) {
-        return Assignment.fromJson(response.data);
-      },
-    );
-  }
-
-  @override
   Future<Assignment> createAssignment(Assignment assignment) async {
     return await request(
       method: "POST",
@@ -438,17 +423,6 @@ class ApiServiceImpl implements ApiService {
       method: "DELETE",
       endpoint: "assignments/$id",
       parseSuccess: (response) {/* SUCCESS */},
-    );
-  }
-
-  @override
-  Future<Advice> getAdvice(int id) async {
-    return await request(
-      method: "GET",
-      endpoint: "advices/$id",
-      parseSuccess: (response) {
-        return Advice.fromJson(response.data);
-      },
     );
   }
 
