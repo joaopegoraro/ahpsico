@@ -53,6 +53,20 @@ abstract class AhpsicoDatabase {
   }
 }
 
+/// Needs to be instantiated in the `void main()`, like so:
+/// ```dart
+///  final database = await AhpsicoDatabase.instance;
+///
+///  runApp(
+///    ProviderScope(
+///      overrides: [
+///        ahpsicoDatabaseProvider.overrideWithValue(database),
+///      ],
+///      child: const MyApp(),
+///    ),
+///  );
+///}
+/// ```
 final ahpsicoDatabaseProvider = Provider<Database>((ref) {
   throw Exception('AhpsicoDatabase Provider was not initialized');
 });

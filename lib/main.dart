@@ -46,7 +46,7 @@ void main() async {
       overrides: [
         ahpsicoDatabaseProvider.overrideWithValue(database),
       ],
-      child: const MyApp(),
+      child: const AhpsicoApp(),
     ),
   );
 }
