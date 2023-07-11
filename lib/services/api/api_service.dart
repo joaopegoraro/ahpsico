@@ -46,7 +46,10 @@ abstract interface class ApiService {
   /// - [ApiPatientAlreadyWithDoctorException] when the patient you are trying to
   /// invite already is your patient;
   /// - [ApiInviteAlreadySentException] when this invite was already sent to the patient;
-  Future<void> createInvite(String phoneNumber);
+  ///
+  /// returns:
+  /// - The created [Invite]
+  Future<Invite> createInvite(String phoneNumber);
 
   /// throws:
   /// - [ApiInvitesNotFoundException] when there are no invites tied to this account

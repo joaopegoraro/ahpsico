@@ -10,6 +10,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class InviteRepository {
+  /// Creates remotely an [Invite] with the provided [phoneNumber] and then saves it
+  /// to the local database;
+  ///
+  /// throws:
+  /// - [ApiException] when something goes wrong with the remote creating;
+  /// - [DatabaseInsertException] when something goes wrong when inserting the new [Invite];
+  ///
+  /// returns:
+  /// - the created [Invite];
+  Future<Invite> create(String phoneNumber);
+
   /// Fetches from the API the [Invite] list tied to this account and saves it
   /// to the local database;
   ///
@@ -60,6 +71,21 @@ final class InviteRepositoryImpl implements InviteRepository {
 
   final ApiService _api;
   final sqflite.Database _db;
+
+  @override
+  Future<Invite> create(String phoneNumber) async {
+    final createdInvite = await _api.createInvite(phoneNumber);
+    try {
+      await _db.insert(
+        InviteEntity.tableName,
+        InviteMapper.toEntity(createdInvite).toMap(),
+        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
+      );
+    } on sqflite.DatabaseException catch (e, stackTrace) {
+      DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
+    }
+    return createdInvite;
+  }
 
   @override
   Future<void> sync() async {
