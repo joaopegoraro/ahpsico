@@ -53,6 +53,12 @@ abstract interface class PatientRepository {
   /// - [ApiException] when something goes wrong with the remote fethcing;
   /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
   Future<void> syncDoctorPatients(String doctorId);
+
+  /// Clears the table;
+  ///
+  /// throws:
+  /// - [DatabaseInsertException] when something goes wrong when deleting the data;
+  Future<void> clear();
 }
 
 final patientRepositoryProvider = Provider((ref) async {
@@ -155,9 +161,10 @@ final class PatientRepositoryImpl implements PatientRepository {
 
       batch.rawDelete(
         """
-        DELETE FROM ${PatientEntity.tableName} d  
-          LEFT JOIN ${PatientWithDoctor.tableName} pd ON pd.${PatientWithDoctor.patientIdColumn} = d.${PatientEntity.uuidColumn}  
-          WHERE pd.${PatientWithDoctor.doctorIdColumn} = ?
+        DELETE FROM ${PatientEntity.tableName} WHERE ${PatientEntity.uuidColumn} in (
+          SELECT ${PatientEntity.uuidColumn} FROM ${PatientEntity.tableName} d  
+            LEFT JOIN ${PatientWithDoctor.tableName} pd ON pd.${PatientWithDoctor.patientIdColumn} = d.${PatientEntity.uuidColumn}  
+            WHERE pd.${PatientWithDoctor.doctorIdColumn} = ?)
         """,
         [doctorId],
       );
@@ -165,7 +172,7 @@ final class PatientRepositoryImpl implements PatientRepository {
       for (final patient in patients) {
         batch.insert(
           PatientEntity.tableName,
-          patient.toMap(),
+          PatientMapper.toEntity(patient).toMap(),
           conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
         );
         batch.insert(
@@ -178,5 +185,10 @@ final class PatientRepositoryImpl implements PatientRepository {
     } on sqflite.DatabaseException catch (e, stackTrace) {
       DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
     }
+  }
+
+  @override
+  Future<void> clear() async {
+    await _db.delete(PatientEntity.tableName);
   }
 }
