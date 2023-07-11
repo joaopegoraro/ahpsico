@@ -3,7 +3,7 @@ import 'package:ahpsico/data/database/entities/doctor_entity.dart';
 import 'package:ahpsico/data/database/mappers/doctor_mapper.dart';
 import 'package:ahpsico/models/advice.dart';
 
-class AdviceMapper {
+abstract class AdviceMapper {
   static Advice toAdvice(
     AdviceEntity entity, {
     required DoctorEntity doctorEntity,

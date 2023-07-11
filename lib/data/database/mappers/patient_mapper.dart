@@ -1,7 +1,7 @@
 import 'package:ahpsico/data/database/entities/patient_entity.dart';
 import 'package:ahpsico/models/patient.dart';
 
-class PatientMapper {
+abstract class PatientMapper {
   static Patient toPatient(PatientEntity entity) {
     return Patient(
       uuid: entity.uuid,

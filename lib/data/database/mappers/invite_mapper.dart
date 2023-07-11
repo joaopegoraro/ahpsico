@@ -3,7 +3,7 @@ import 'package:ahpsico/data/database/entities/invite_entity.dart';
 import 'package:ahpsico/data/database/mappers/doctor_mapper.dart';
 import 'package:ahpsico/models/invite.dart';
 
-class InviteMapper {
+abstract class InviteMapper {
   static Invite toInvite(
     InviteEntity entity, {
     required DoctorEntity doctorEntity,

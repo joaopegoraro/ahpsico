@@ -15,7 +15,8 @@ abstract interface class DoctorRepository {
   /// database;
   ///
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote fethcing;
+  /// - [ApiException] awhen something goes wrong with the remote updating, as described
+  /// in [ApiService];
   /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
   Future<void> sync(String uuid);
 
@@ -29,7 +30,8 @@ abstract interface class DoctorRepository {
   Future<Doctor> get(String uuid);
 
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote updating;
+  /// - [ApiException] awhen something goes wrong with the remote updating, as described
+  /// in [ApiService];
   /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
   ///
   /// returns:
@@ -50,9 +52,16 @@ abstract interface class DoctorRepository {
   /// and saves it in the local database;
   ///
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote fethcing;
+  /// - [ApiException] awhen something goes wrong with the remote updating, as described
+  /// in [ApiService];
   /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
   Future<void> syncPatientDoctors(String doctorId);
+
+  /// Clears the table;
+  ///
+  /// throws:
+  /// - [DatabaseInsertException] when something goes wrong when deleting the data;
+  Future<void> clear();
 }
 
 final doctorRepositoryProvider = Provider((ref) async {
@@ -87,22 +96,26 @@ final class DoctorRepositoryImpl implements DoctorRepository {
 
   @override
   Future<Doctor> get(String uuid) async {
-    final doctorMap = await _db.query(
-      DoctorEntity.tableName,
-      where: "${DoctorEntity.uuidColumn} = ?",
-      whereArgs: [uuid],
-    );
-
-    if (doctorMap.isEmpty) {
-      throw DatabaseNotFoundException(message: "Doctor with id $uuid not found");
-    }
-
     try {
-      final doctorEntity = DoctorEntity.fromMap(doctorMap.first);
-      final doctor = DoctorMapper.toDoctor(doctorEntity);
-      return doctor;
-    } on TypeError catch (e, stackTrace) {
-      DatabaseMappingException(message: e.toString()).throwWithStackTrace(stackTrace);
+      final doctorMap = await _db.query(
+        DoctorEntity.tableName,
+        where: "${DoctorEntity.uuidColumn} = ?",
+        whereArgs: [uuid],
+      );
+
+      if (doctorMap.isEmpty) {
+        throw DatabaseNotFoundException(message: "Doctor with id $uuid not found");
+      }
+
+      try {
+        final doctorEntity = DoctorEntity.fromMap(doctorMap.first);
+        final doctor = DoctorMapper.toDoctor(doctorEntity);
+        return doctor;
+      } on TypeError catch (e, stackTrace) {
+        DatabaseMappingException(message: e.toString()).throwWithStackTrace(stackTrace);
+      }
+    } on sqflite.DatabaseException catch (e, stackTrace) {
+      DatabaseNotFoundException(message: e.toString()).throwWithStackTrace(stackTrace);
     }
   }
 
@@ -155,9 +168,10 @@ final class DoctorRepositoryImpl implements DoctorRepository {
 
       batch.rawDelete(
         """
-        DELETE FROM ${DoctorEntity.tableName} d  
-          LEFT JOIN ${PatientWithDoctor.tableName} pd ON pd.${PatientWithDoctor.doctorIdColumn} = d.${DoctorEntity.uuidColumn}  
-          WHERE pd.${PatientWithDoctor.patientIdColumn} = ?
+        DELETE FROM ${DoctorEntity.tableName} WHERE ${DoctorEntity.uuidColumn} in (
+          SELECT ${DoctorEntity.uuidColumn} FROM ${DoctorEntity.tableName} d  
+            LEFT JOIN ${PatientWithDoctor.tableName} pd ON pd.${PatientWithDoctor.doctorIdColumn} = d.${DoctorEntity.uuidColumn}  
+            WHERE pd.${PatientWithDoctor.patientIdColumn} = ?)
         """,
         [patientId],
       );
@@ -165,7 +179,7 @@ final class DoctorRepositoryImpl implements DoctorRepository {
       for (final doctor in doctors) {
         batch.insert(
           DoctorEntity.tableName,
-          doctor.toMap(),
+          DoctorMapper.toEntity(doctor).toMap(),
           conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
         );
         batch.insert(
@@ -178,5 +192,10 @@ final class DoctorRepositoryImpl implements DoctorRepository {
     } on sqflite.DatabaseException catch (e, stackTrace) {
       DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
     }
+  }
+
+  @override
+  Future<void> clear() async {
+    await _db.delete(DoctorEntity.tableName);
   }
 }

@@ -1,7 +1,7 @@
 import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/models/user.dart';
 
-class UserMapper {
+abstract class UserMapper {
   static User toUser(UserEntity entity) {
     return User(
       uid: entity.uid,

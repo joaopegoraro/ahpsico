@@ -10,7 +10,7 @@ class PatientWithDoctor {
   final String patientId;
   final String doctorId;
 
-  static const String tableName = "advice_patients";
+  static const String tableName = "patient_doctor";
   static const String idColumn = "_id";
   static const String patientIdColumn = "patient_id";
   static const String doctorIdColumn = "doctor_id";
@@ -20,8 +20,8 @@ class PatientWithDoctor {
      $idColumn INTEGER PRIMARY KEY AUTOINCREMENT, 
      $patientIdColumn TEXT,
      $doctorIdColumn TEXT,
-     FOREIGN KEY ($patientIdColumn) REFERENCES Type (${PatientEntity.uuidColumn}) ON DELETE CASCADE)
-     FOREIGN KEY ($doctorIdColumn) REFERENCES Type (${DoctorEntity.uuidColumn}) ON DELETE CASCADE, 
+     FOREIGN KEY ($patientIdColumn) REFERENCES ${PatientEntity.tableName} (${PatientEntity.uuidColumn}) ON DELETE CASCADE,
+     FOREIGN KEY ($doctorIdColumn) REFERENCES ${PatientEntity.tableName} (${DoctorEntity.uuidColumn}) ON DELETE CASCADE)
 """;
 
   PatientWithDoctor copyWith({

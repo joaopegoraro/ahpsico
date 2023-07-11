@@ -20,8 +20,8 @@ class AdviceWithPatient {
      $idColumn INTEGER PRIMARY KEY AUTOINCREMENT, 
      $adviceIdColumn INTEGER, 
      $patientIdColumn TEXT,
-     FOREIGN KEY ($adviceIdColumn) REFERENCES Type (${AdviceEntity.idColumn}) ON DELETE CASCADE, 
-     FOREIGN KEY ($patientIdColumn) REFERENCES Type (${PatientEntity.uuidColumn}) ON DELETE CASCADE)
+     FOREIGN KEY ($adviceIdColumn) REFERENCES ${AdviceEntity.tableName} (${AdviceEntity.idColumn}) ON DELETE CASCADE, 
+     FOREIGN KEY ($patientIdColumn) REFERENCES ${PatientEntity.tableName} (${PatientEntity.uuidColumn}) ON DELETE CASCADE)
 """;
 
   AdviceWithPatient copyWith({

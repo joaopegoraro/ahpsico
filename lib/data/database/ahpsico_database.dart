@@ -11,7 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-class AhpsicoDatabase {
+abstract class AhpsicoDatabase {
   static Database? _db;
 
   static const _dbName = "ahpsico.db";
@@ -40,9 +40,12 @@ class AhpsicoDatabase {
         await db.execute(AdviceWithPatient.creationStatement);
         await db.execute(AssignmentEntity.creationStatement);
         await db.execute(InviteEntity.creationStatement);
-        await db.execute(AdviceWithPatient.creationStatement);
       },
     );
+  }
+
+  static Future<void> closeDatabase() async {
+    await _db?.close();
   }
 }
 

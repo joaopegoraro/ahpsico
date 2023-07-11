@@ -7,7 +7,7 @@ import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/models/session/session_status.dart';
 import 'package:ahpsico/models/session/session_type.dart';
 
-class SessionMapper {
+abstract class SessionMapper {
   static Session toSession(
     SessionEntity entity, {
     required DoctorEntity doctorEntity,

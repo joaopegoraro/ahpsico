@@ -7,7 +7,7 @@ import 'package:ahpsico/data/database/mappers/session_mapper.dart';
 import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/assignment/assignment_status.dart';
 
-class AssignmentMapper {
+abstract class AssignmentMapper {
   static Assignment toAssignment(
     AssignmentEntity entity, {
     required DoctorEntity doctorEntity,
