@@ -54,6 +54,12 @@ abstract interface class InviteRepository {
   /// the provided [id];
   /// from the database;
   Future<void> accept(int id);
+
+  /// Clears the table;
+  ///
+  /// throws:
+  /// - [DatabaseInsertException] when something goes wrong when deleting the data;
+  Future<void> clear();
 }
 
 final inviteRepositoryProvider = Provider((ref) async {
@@ -110,6 +116,9 @@ final class InviteRepositoryImpl implements InviteRepository {
   Future<List<Invite>> get() async {
     final invitesMap = await _db.query(InviteEntity.tableName);
 
+    if (invitesMap.isEmpty) {
+      throw const DatabaseNotFoundException(message: "There were no invites found tied to this account");
+    }
     try {
       return Future.wait(
         invitesMap.map((inviteMap) async {
@@ -156,5 +165,10 @@ final class InviteRepositoryImpl implements InviteRepository {
     } on sqflite.DatabaseException catch (e, stackTrace) {
       DatabaseNotFoundException(message: e.toString()).throwWithStackTrace(stackTrace);
     }
+  }
+
+  @override
+  Future<void> clear() async {
+    await _db.delete(InviteEntity.tableName);
   }
 }
