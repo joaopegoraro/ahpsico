@@ -190,6 +190,48 @@ void main() {
     });
   });
 
+  group("delete", () {
+    test('api error throws', () async {
+      const code = "some code";
+      when(() => mockApiService.deleteAssignment(any())).thenAnswer((_) async => throw const ApiException(code: code));
+      try {
+        await assignmentRepository.delete(assignment.id);
+        assert(false);
+      } on ApiException catch (e) {
+        assert(e.code == code);
+      }
+    });
+
+    test('db error throws', () async {
+      when(() => mockApiService.deleteAssignment(any())).thenAnswer((_) async {});
+      when(() => mockAssignment.id).thenThrow(const DatabaseInsertException());
+      try {
+        await assignmentRepository.delete(mockAssignment.id);
+        assert(false);
+      } on DatabaseInsertException catch (_) {
+        assert(true);
+      }
+    });
+
+    test('successful delete removes from db', () async {
+      when(() => mockApiService.deleteAssignment(any())).thenAnswer((_) async {});
+      await database.insert(PatientEntity.tableName, PatientMapper.toEntity(patient).toMap());
+      await database.insert(DoctorEntity.tableName, DoctorMapper.toEntity(doctor).toMap());
+      await database.insert(SessionEntity.tableName, SessionMapper.toEntity(session).toMap());
+      assert(
+        await database.insert(AssignmentEntity.tableName, AssignmentMapper.toEntity(assignment).toMap()) ==
+            assignment.id,
+      );
+      await assignmentRepository.delete(assignment.id);
+      final savedAssignmentMap = await database.query(
+        AssignmentEntity.tableName,
+        where: "${AssignmentEntity.idColumn} = ?",
+        whereArgs: [assignment.id],
+      );
+      assert(savedAssignmentMap.isEmpty);
+    });
+  });
+
   group("syncPatientAssignments", () {
     test('api error throws', () async {
       const code = "some code";

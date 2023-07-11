@@ -166,6 +166,46 @@ void main() {
     });
   });
 
+  group("delete", () {
+    test('api error throws', () async {
+      const code = "some code";
+      when(() => mockApiService.deleteAdvice(any())).thenAnswer((_) async => throw const ApiException(code: code));
+      try {
+        await adviceRepository.delete(advice.id);
+        assert(false);
+      } on ApiException catch (e) {
+        assert(e.code == code);
+      }
+    });
+
+    test('db error throws', () async {
+      when(() => mockApiService.deleteAdvice(any())).thenAnswer((_) async {});
+      when(() => mockAdvice.id).thenThrow(const DatabaseInsertException());
+      try {
+        await adviceRepository.delete(mockAdvice.id);
+        assert(false);
+      } on DatabaseInsertException catch (_) {
+        assert(true);
+      }
+    });
+
+    test('successful delete removes from db', () async {
+      when(() => mockApiService.deleteAssignment(any())).thenAnswer((_) async {});
+      await database.insert(PatientEntity.tableName, PatientMapper.toEntity(patient).toMap());
+      await database.insert(DoctorEntity.tableName, DoctorMapper.toEntity(doctor).toMap());
+      assert(
+        await database.insert(AdviceEntity.tableName, AdviceMapper.toEntity(advice).toMap()) == advice.id,
+      );
+      await adviceRepository.delete(advice.id);
+      final savedAdvicesMap = await database.query(
+        AdviceEntity.tableName,
+        where: "${AdviceEntity.idColumn} = ?",
+        whereArgs: [advice.id],
+      );
+      assert(savedAdvicesMap.isEmpty);
+    });
+  });
+
   group("syncDoctorAdvices", () {
     test('api error throws', () async {
       const code = "some code";

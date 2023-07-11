@@ -32,6 +32,11 @@ abstract interface class AdviceRepository {
   Future<Advice> update(Advice advice);
 
   /// throws:
+  /// - [ApiException] when something goes wrong with the remote deleting;
+  /// - [DatabaseInsertException] when something goes wrong when deleting data;
+  Future<void> delete(int id);
+
+  /// throws:
   /// - [DatabaseNotFoundException] when something goes wrong when trying to retrieve the
   /// [Advice] list;
   /// - [DatabaseMappingException] when something goes wrong when converting the
@@ -117,6 +122,21 @@ final class AdviceRepositoryImpl implements AdviceRepository {
       );
 
       return updatedAdvice;
+    } on sqflite.DatabaseException catch (e, stackTrace) {
+      DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
+    }
+  }
+
+  @override
+  Future<void> delete(int id) async {
+    await _api.deleteAdvice(id);
+
+    try {
+      await _db.delete(
+        AdviceEntity.tableName,
+        where: "${AdviceEntity.idColumn} = ?",
+        whereArgs: [id],
+      );
     } on sqflite.DatabaseException catch (e, stackTrace) {
       DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
     }

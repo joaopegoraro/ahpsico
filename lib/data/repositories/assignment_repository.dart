@@ -32,6 +32,11 @@ abstract interface class AssignmentRepository {
   Future<Assignment> update(Assignment assignment);
 
   /// throws:
+  /// - [ApiException] when something goes wrong with the remote deleting;
+  /// - [DatabaseInsertException] when something goes wrong when deleting data;
+  Future<void> delete(int id);
+
+  /// throws:
   /// - [DatabaseNotFoundException] when something goes wrong when trying to retrieve the
   /// [Assignment] list;
   /// - [DatabaseMappingException] when something goes wrong when converting the
@@ -99,6 +104,21 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
       );
 
       return updatedAssignment;
+    } on sqflite.DatabaseException catch (e, stackTrace) {
+      DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
+    }
+  }
+
+  @override
+  Future<void> delete(int id) async {
+    await _api.deleteAssignment(id);
+
+    try {
+      await _db.delete(
+        AssignmentEntity.tableName,
+        where: "${AssignmentEntity.idColumn} = ?",
+        whereArgs: [id],
+      );
     } on sqflite.DatabaseException catch (e, stackTrace) {
       DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
     }
