@@ -134,7 +134,7 @@ final class PatientRepositoryImpl implements PatientRepository {
     try {
       final patientsMap = await _db.rawQuery(
         """
-        SELECT * FROM ${PatientEntity.tableName} d  
+        SELECT d.* FROM ${PatientEntity.tableName} d  
           LEFT JOIN ${PatientWithDoctor.tableName} pd ON pd.${PatientWithDoctor.patientIdColumn} = d.${PatientEntity.uuidColumn}  
           WHERE pd.${PatientWithDoctor.doctorIdColumn} = ?
         """,

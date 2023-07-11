@@ -49,7 +49,7 @@ void main() {
     registerFallbackValue(doctor);
 
     sqflite_ffi.sqfliteFfiInit();
-    sqflite_ffi.databaseFactory = sqflite_ffi.databaseFactoryFfi;
+    sqflite_ffi.databaseFactory = sqflite_ffi.databaseFactoryFfi..deleteDatabase(AhpsicoDatabase.dbName);
     database = await AhpsicoDatabase.instance;
     doctorRepository = DoctorRepositoryImpl(
       apiService: mockApiService,
@@ -59,6 +59,7 @@ void main() {
 
   tearDownAll(() async {
     await database.close();
+    sqflite_ffi.databaseFactory.deleteDatabase(AhpsicoDatabase.dbName);
   });
 
   tearDown(() async {

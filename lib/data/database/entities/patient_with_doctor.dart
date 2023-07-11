@@ -21,7 +21,7 @@ class PatientWithDoctor {
      $patientIdColumn TEXT,
      $doctorIdColumn TEXT,
      FOREIGN KEY ($patientIdColumn) REFERENCES ${PatientEntity.tableName} (${PatientEntity.uuidColumn}) ON DELETE CASCADE,
-     FOREIGN KEY ($doctorIdColumn) REFERENCES ${PatientEntity.tableName} (${DoctorEntity.uuidColumn}) ON DELETE CASCADE)
+     FOREIGN KEY ($doctorIdColumn) REFERENCES ${DoctorEntity.tableName} (${DoctorEntity.uuidColumn}) ON DELETE CASCADE)
 """;
 
   PatientWithDoctor copyWith({

@@ -8,13 +8,15 @@ import 'package:ahpsico/data/database/entities/patient_with_doctor.dart';
 import 'package:ahpsico/data/database/entities/session_entity.dart';
 import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 abstract class AhpsicoDatabase {
   static Database? _db;
 
-  static const _dbName = "ahpsico.db";
+  @visibleForTesting
+  static const dbName = "ahpsico.db";
   static const _dbVersion = 1;
 
   static Future<Database> get instance async {
@@ -27,10 +29,9 @@ abstract class AhpsicoDatabase {
     final dbPath = await getDatabasesPath();
 
     return await openDatabase(
-      join(dbPath, _dbName),
+      join(dbPath, dbName),
       version: _dbVersion,
       onCreate: (db, version) async {
-        await db.execute('PRAGMA foreign_keys = ON');
         await db.execute(UserEntity.creationStatement);
         await db.execute(DoctorEntity.creationStatement);
         await db.execute(PatientEntity.creationStatement);
@@ -40,6 +41,9 @@ abstract class AhpsicoDatabase {
         await db.execute(AdviceWithPatient.creationStatement);
         await db.execute(AssignmentEntity.creationStatement);
         await db.execute(InviteEntity.creationStatement);
+      },
+      onConfigure: (db) async {
+        await db.execute('PRAGMA foreign_keys = ON');
       },
     );
   }

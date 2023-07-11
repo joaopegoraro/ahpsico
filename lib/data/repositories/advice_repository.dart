@@ -66,6 +66,12 @@ abstract interface class AdviceRepository {
   /// - [ApiException] when something goes wrong with the remote fethcing;
   /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
   Future<void> syncDoctorAdvices(String doctorId);
+
+  /// Clears the table;
+  ///
+  /// throws:
+  /// - [DatabaseInsertException] when something goes wrong when deleting the data;
+  Future<int> clear();
 }
 
 final adviceRepositoryProvider = Provider((ref) {
@@ -121,9 +127,9 @@ final class AdviceRepositoryImpl implements AdviceRepository {
     try {
       final advicesMap = await _db.rawQuery(
         """
-        SELECT * FROM ${AdviceEntity.tableName} a  
-          LEFT JOIN ${AdviceWithPatient.tableName} ad ON ad.${AdviceWithPatient.adviceIdColumn} = a.${AdviceEntity.idColumn}  
-          WHERE ad.${AdviceWithPatient.patientIdColumn} = ?
+        SELECT a.* FROM ${AdviceEntity.tableName} a  
+          LEFT JOIN ${AdviceWithPatient.tableName} ap ON ap.${AdviceWithPatient.adviceIdColumn} = a.${AdviceEntity.idColumn}  
+          WHERE ap.${AdviceWithPatient.patientIdColumn} = ?
         """,
         [patientId],
       );
@@ -170,9 +176,10 @@ final class AdviceRepositoryImpl implements AdviceRepository {
 
       batch.rawDelete(
         """
-        DELETE FROM ${AdviceEntity.tableName} a  
-          LEFT JOIN ${AdviceWithPatient.tableName} ad ON ad.${AdviceWithPatient.adviceIdColumn} = a.${AdviceEntity.idColumn}  
-          WHERE ad.${AdviceWithPatient.patientIdColumn} = ?
+        DELETE FROM ${AdviceEntity.tableName} WHERE ${AdviceEntity.idColumn} in (
+          SELECT a.${AdviceEntity.idColumn} FROM ${AdviceEntity.tableName} a  
+           LEFT JOIN ${AdviceWithPatient.tableName} ap ON ap.${AdviceWithPatient.adviceIdColumn} = a.${AdviceEntity.idColumn}  
+           WHERE ap.${AdviceWithPatient.patientIdColumn} = ?)
         """,
         [patientId],
       );
@@ -180,7 +187,7 @@ final class AdviceRepositoryImpl implements AdviceRepository {
       for (final advice in advices) {
         batch.insert(
           AdviceEntity.tableName,
-          advice.toMap(),
+          AdviceMapper.toEntity(advice).toMap(),
           conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
         );
         batch.insert(
@@ -216,8 +223,8 @@ final class AdviceRepositoryImpl implements AdviceRepository {
 
         final patientsMap = await _db.rawQuery(
           """
-          SELECT * FROM ${PatientEntity.tableName} a  
-            LEFT JOIN ${AdviceWithPatient.tableName} ad ON ad.${AdviceWithPatient.patientIdColumn} = a.${PatientEntity.uuidColumn}  
+          SELECT  p.* FROM ${PatientEntity.tableName} p  
+            LEFT JOIN ${AdviceWithPatient.tableName} ad ON ad.${AdviceWithPatient.patientIdColumn} = p.${PatientEntity.uuidColumn}  
             WHERE ad.${AdviceWithPatient.adviceIdColumn} = ?
           """,
           [entity.id],
@@ -257,7 +264,7 @@ final class AdviceRepositoryImpl implements AdviceRepository {
       for (final advice in advices) {
         batch.insert(
           AdviceEntity.tableName,
-          advice.toMap(),
+          AdviceMapper.toEntity(advice).toMap(),
           conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
         );
         for (final patientId in advice.patientIds) {
@@ -272,5 +279,10 @@ final class AdviceRepositoryImpl implements AdviceRepository {
     } on sqflite.DatabaseException catch (e, stackTrace) {
       DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
     }
+  }
+
+  @override
+  Future<int> clear() async {
+    return await _db.delete(AdviceEntity.tableName);
   }
 }
