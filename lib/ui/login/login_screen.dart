@@ -10,6 +10,7 @@ import 'package:ahpsico/ui/login/widgets/numeric_keyboard.dart';
 import 'package:ahpsico/ui/patient/patient_home.dart';
 import 'package:ahpsico/ui/signup/signup_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
@@ -27,22 +28,27 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   late final TextEditingController _codeController;
   late final AnimationController _codeTimercontroller;
 
+  late final Function(AnimationStatus) _codeTimerStatusListener;
+
   @override
   void initState() {
     super.initState();
+    _codeTimerStatusListener = (_) => setState(() {});
     _phoneController = TextEditingController();
     _codeController = TextEditingController();
     _codeTimercontroller = AnimationController(
       vsync: this,
-      duration: const Duration(minutes: LoginModel.timerDuration),
-    );
+      duration: LoginModel.timerDuration,
+    )..addStatusListener(_codeTimerStatusListener);
   }
 
   @override
   void dispose() {
     _phoneController.dispose();
     _codeController.dispose();
-    _codeTimercontroller.dispose();
+    _codeTimercontroller
+      ..removeStatusListener(_codeTimerStatusListener)
+      ..dispose();
     super.dispose();
   }
 
@@ -110,6 +116,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                             readOnly: true,
                             errorText: _codeController.text.isNotEmpty && !model.isCodeValid ? "" : null,
                             borderColor: model.isCodeValid ? AhpsicoColors.green : null,
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(6),
+                            ],
                             inputType: TextInputType.number,
                             maxLenght: 6,
                             borderWidth: _codeController.text.isEmpty ? null : 2.0,
@@ -131,20 +140,20 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       AhpsicoSpacing.verticalSpaceRegular,
                       Row(
                         children: [
-                          const Spacer(),
                           Countdown(
                             animation: StepTween(
-                              begin: LoginModel.timerDuration,
+                              begin: LoginModel.timerDuration.inSeconds,
                               end: 0,
                             ).animate(_codeTimercontroller),
                           ),
+                          const Spacer(),
                           if (_codeTimercontroller.isCompleted) ...[
                             AhpsicoSpacing.horizontalSpaceRegular,
                             TextButton(
                               onPressed: model.isLoadingSignIn ? null : () => model.sendVerificationCode(),
                               child: Text(
                                 "Reenviar código",
-                                style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.blue40),
+                                style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.blue20),
                               ),
                             ),
                           ],
@@ -161,7 +170,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           ? const CircularProgressIndicator(color: AhpsicoColors.green80)
                           : Icon(
                               Icons.arrow_forward_ios,
-                              color: (model.isPhoneValid || model.isCodeValid)
+                              color: (!model.hasCodeBeenSent && model.isPhoneValid) ||
+                                      (model.hasCodeBeenSent && model.isCodeValid)
                                   ? AhpsicoColors.green80
                                   : AhpsicoColors.light60,
                             ),

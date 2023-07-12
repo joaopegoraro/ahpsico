@@ -52,7 +52,7 @@ class LoginModel extends ViewModel<LoginEvent> {
     type: MaskAutoCompletionType.eager,
   );
 
-  static const int timerDuration = 2;
+  static const timerDuration = Duration(minutes: 2);
 
   /* Fields */
 
@@ -100,9 +100,9 @@ class LoginModel extends ViewModel<LoginEvent> {
   }
 
   void deleteText() {
-    if (!isLoadingSignIn && hasCodeBeenSent) {
+    if (!isLoadingSignIn && hasCodeBeenSent && verificationCode.isNotEmpty) {
       _updateCode(verificationCode.substring(0, verificationCode.length - 1));
-    } else if (!isLoadingSendindCode && !hasCodeBeenSent) {
+    } else if (!isLoadingSendindCode && !hasCodeBeenSent && phoneNumber.isNotEmpty) {
       _updatePhone(phoneNumber.substring(0, phoneNumber.length - 1));
     }
   }
@@ -122,7 +122,9 @@ class LoginModel extends ViewModel<LoginEvent> {
 
   void _updateCode(String code) {
     updateUi(() {
-      _verificationCode = verificationCode;
+      if (code.length <= 6) {
+        _verificationCode = code;
+      }
       emitEvent(LoginEvent.updateCodeInputField);
     });
   }
@@ -148,9 +150,10 @@ class LoginModel extends ViewModel<LoginEvent> {
 
   Future<void> sendVerificationCode() async {
     updateUi(() => _isLoadingSendingCode = true);
+    final unmaskedPhone = "+55${_phoneMaskFormatter.unmaskText(phoneNumber)}";
 
     await _authService.sendPhoneVerificationCode(
-      phoneNumber: phoneNumber,
+      phoneNumber: unmaskedPhone,
       onCodeSent: (verificationId) {
         updateUi(() {
           emitEvent(LoginEvent.startCodeTimer);
@@ -165,7 +168,7 @@ class LoginModel extends ViewModel<LoginEvent> {
             "Ocorreu um erro desconhecido ao tentar enviar um SMS para o seu telefone. Tente novamente mais tarde ou entre em contato com o desenvolvedor",
             LoginEvent.showSnackbarError,
           );
-          _logger.e("An error ocurred while trying to send a verification code to $phoneNumber", err);
+          _logger.e("An error ocurred while trying to send a verification code to $unmaskedPhone", err);
         }
       },
       onAutoRetrievalCompleted: (credential) {
@@ -222,7 +225,7 @@ class LoginModel extends ViewModel<LoginEvent> {
       );
       _logger.e("An error ocurred while trying to login with the following phone credential $phoneCredential", err);
     }
-    updateUi(() => _isLoadingSignIn = true);
+    updateUi(() => _isLoadingSignIn = false);
   }
 
   Future<void> _autoSignIn() async {

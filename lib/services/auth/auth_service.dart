@@ -79,7 +79,6 @@ final class AuthServiceImpl implements AuthService {
         onCodeSent(verificationId);
       },
       codeAutoRetrievalTimeout: onAutoRetrievalTimeout ?? (_) {},
-      timeout: const Duration(minutes: 2),
     );
   }
 

@@ -12,7 +12,7 @@ class Countdown extends AnimatedWidget {
 
     return Text(
       '${clockTimer.inMinutes.remainder(60).toString()}:${clockTimer.inSeconds.remainder(60).toString().padLeft(2, '0')}',
-      style: AhpsicoText.smallStyle.copyWith(color: AhpsicoColors.light80),
+      style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.light80),
     );
   }
 }
