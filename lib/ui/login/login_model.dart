@@ -7,6 +7,7 @@ import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/services/auth/credentials.dart';
 import 'package:ahpsico/services/auth/exceptions.dart';
+import 'package:ahpsico/services/logger/logging_service.dart';
 import 'package:logger/logger.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
@@ -25,7 +26,7 @@ enum LoginEvent {
 final loginModelProvider = ViewModelProviderFactory.create((ref) {
   final userRepository = ref.watch(userRepositoryProvider);
   final authService = ref.watch(authServiceProvider);
-  final logger = Logger();
+  final logger = ref.watch(loggerProvider);
   return LoginModel(userRepository, authService, logger);
 });
 

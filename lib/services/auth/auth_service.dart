@@ -23,6 +23,9 @@ abstract interface class AuthService {
   /// - [AuthInvalidVerificationIdException] when the provided verification id is not valid;
   /// - [AuthSignInFailedException] when something unexpected happeneded when trying to sign in
   Future<AuthUserCredential> signInWithCredential(AuthPhoneCredential phoneCredential);
+
+  /// Signs out the current user.
+  Future<void> signOut();
 }
 
 final authServiceProvider = Provider<AuthService>((ref) {
@@ -122,5 +125,10 @@ final class AuthServiceImpl implements AuthService {
     );
 
     return AuthUserCredential(token: token, user: user);
+  }
+
+  @override
+  Future<void> signOut() async {
+    await _firebaseAuth.signOut();
   }
 }

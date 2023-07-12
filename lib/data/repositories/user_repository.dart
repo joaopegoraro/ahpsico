@@ -24,7 +24,7 @@ abstract interface class UserRepository {
   /// Creates remotely an [User] and then saves it to the local database;
   ///
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote creating;
+  /// - [ApiException] when something goes wrong with the [ApiService.signUp];
   ///
   /// returns:
   /// - the created [User];

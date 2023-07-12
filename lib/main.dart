@@ -1,3 +1,4 @@
+import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -20,8 +21,11 @@ void main() async {
   runApp(
     const MaterialApp(
       home: Scaffold(
+        backgroundColor: AhpsicoColors.violet,
         body: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(
+            color: AhpsicoColors.light80,
+          ),
         ),
       ),
     ),

@@ -1,17 +1,175 @@
+import 'package:ahpsico/ui/app/theme/colors.dart';
+import 'package:ahpsico/ui/app/theme/spacing.dart';
+import 'package:ahpsico/ui/app/theme/text.dart';
+import 'package:ahpsico/ui/components/button.dart';
+import 'package:ahpsico/ui/components/input_field.dart';
+import 'package:ahpsico/ui/components/snackbar.dart';
+import 'package:ahpsico/ui/doctor/doctor_home.dart';
+import 'package:ahpsico/ui/login/login_screen.dart';
+import 'package:ahpsico/ui/patient/patient_home.dart';
+import 'package:ahpsico/ui/signup/signup_model.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mvvm_riverpod/viewmodel_builder.dart';
 
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
   static const route = "/signup";
 
   @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
+  late final TextEditingController _nameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  void _listenToEvents(BuildContext context, SignUpModel model, SignUpEvent event) {
+    switch (event) {
+      case SignUpEvent.showSnackbarError:
+        AhpsicoSnackbar.showError(context, model.snackbarMessage);
+      case SignUpEvent.showSnackbarMessage:
+        AhpsicoSnackbar.showSuccess(context, model.snackbarMessage);
+      case SignUpEvent.navigateToDoctorHome:
+        context.go(DoctorHome.route);
+      case SignUpEvent.navigateToPatientHome:
+        context.go(PatientHome.route);
+      case SignUpEvent.navigateToLogin:
+        context.go(LoginScreen.route);
+      case SignUpEvent.openCancelationDialog:
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text("Aviso"),
+              content: const Text("Tem certeza que deseja cancelar o seu cadastro? Você irá voltar para tela de login"),
+              actions: [
+                TextButton(
+                  onPressed: () => model.cancelSignUp(),
+                  child: Text(
+                    'Sim, desejo cancelar meu cadastro',
+                    style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
+                  ),
+                ),
+                TextButton(
+                  onPressed: context.pop,
+                  child: Text(
+                    'Não, desejo continuar meu cadastro',
+                    style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      case SignUpEvent.openConfirmationDialog:
+        final accountType = model.isDoctor ? "Psicólogo" : "Paciente";
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text("Aviso"),
+              content: Text(
+                "${model.name}, tem certeza que deseja criar uma conta de $accountType? Não será possível mudar sua conta no futuro",
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    context.pop();
+                    model.completeSignUp();
+                  },
+                  child: Text(
+                    'Sim, sou um $accountType',
+                    style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
+                  ),
+                ),
+                TextButton(
+                  onPressed: context.pop,
+                  child: Text(
+                    'Não, acho que cliquei sem querer...',
+                    style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Placeholder(
-        child: Center(
-          child: Text("SIGN UP SCREEN"),
-        ),
+    return Scaffold(
+      backgroundColor: AhpsicoColors.light,
+      body: ViewModelBuilder(
+        provider: signUpModelProvider,
+        onEventEmitted: _listenToEvents,
+        builder: (context, model) {
+          return WillPopScope(
+            onWillPop: () {
+              if (!model.isLoadingSignUp) {
+                model.openCancelationDialog();
+              }
+              return Future.value(false);
+            },
+            child: SafeArea(
+              child: Container(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  children: [
+                    AhpsicoSpacing.verticalSpaceLarge,
+                    Text(
+                      "Só falta mais um pouco...",
+                      style: AhpsicoText.title1Style.copyWith(color: AhpsicoColors.dark50),
+                    ),
+                    AhpsicoSpacing.verticalSpaceMedium,
+                    Text(
+                      "Informe seu nome, e escolha se você é um Psicólogo ou um Paciente",
+                      style: AhpsicoText.regular3Style.copyWith(color: AhpsicoColors.dark25),
+                    ),
+                    AhpsicoSpacing.verticalSpaceRegular,
+                    AhpsicoInputField(
+                      controller: _nameController,
+                      hint: "Nome",
+                      enabled: !model.isLoadingSignUp,
+                      inputType: TextInputType.name,
+                      onChanged: model.updateName,
+                      errorText: model.isNameValid
+                          ? null
+                          : "Seu nome é muito grande. Por favor, informe um nome com menos de 150 caracteres",
+                    ),
+                    const Spacer(),
+                    AhpsicoButton.primary(
+                      "SOU PSICÓLOGO",
+                      width: double.infinity,
+                      isLoading: model.isDoctor && model.isLoadingSignUp,
+                      onPressed: model.isLoadingSignUp ? null : () => model.openConfirmationDialog(isDoctor: true),
+                    ),
+                    AhpsicoSpacing.verticalSpaceSmall,
+                    AhpsicoButton.secondary(
+                      "SOU PACIENTE",
+                      width: double.infinity,
+                      isLoading: !model.isDoctor && model.isLoadingSignUp,
+                      onPressed: model.isLoadingSignUp ? null : () => model.openConfirmationDialog(isDoctor: false),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -7,7 +7,10 @@ class AhpsicoButton extends StatelessWidget {
     this.text, {
     super.key,
     this.onPressed,
-    this.disableFlex = false,
+    this.width,
+    this.height,
+    this.isLoading = false,
+    this.enableFlex = false,
     this.flex = 1,
     this.flexFit = FlexFit.tight,
     this.color = AhpsicoColors.violet,
@@ -15,18 +18,24 @@ class AhpsicoButton extends StatelessWidget {
   });
 
   final String text;
+  final double? width;
+  final double? height;
+  final bool isLoading;
   final VoidCallback? onPressed;
   final Color color;
   final Color textColor;
-  final bool disableFlex;
+  final bool enableFlex;
   final int flex;
   final FlexFit flexFit;
 
   const AhpsicoButton.primary(
     this.text, {
     super.key,
+    this.width,
+    this.height,
     this.onPressed,
-    this.disableFlex = false,
+    this.enableFlex = false,
+    this.isLoading = false,
     this.flex = 1,
     this.flexFit = FlexFit.tight,
   })  : color = AhpsicoColors.violet,
@@ -35,7 +44,10 @@ class AhpsicoButton extends StatelessWidget {
   const AhpsicoButton.secondary(
     this.text, {
     super.key,
-    this.disableFlex = false,
+    this.width,
+    this.height,
+    this.enableFlex = false,
+    this.isLoading = false,
     this.onPressed,
     this.flex = 1,
     this.flexFit = FlexFit.tight,
@@ -45,36 +57,49 @@ class AhpsicoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return [
-      ElevatedButton(
-        style: ButtonStyle(
-          padding: MaterialStateProperty.all(const EdgeInsets.all(16)),
-          backgroundColor: MaterialStateProperty.all(color),
-          shape: MaterialStateProperty.all(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          ),
-        ),
-        onPressed: onPressed,
-        child: FittedBox(
-          fit: BoxFit.contain,
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            style: AhpsicoText.title3Style.copyWith(
-              color: textColor,
+      SizedBox(
+        width: width,
+        height: height,
+        child: ElevatedButton(
+          style: ButtonStyle(
+            padding: MaterialStateProperty.all(const EdgeInsets.all(20)),
+            backgroundColor: MaterialStateProperty.all(color),
+            shape: MaterialStateProperty.all(
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
+          ),
+          onPressed: onPressed,
+          child: FittedBox(
+            fit: BoxFit.contain,
+            child: isLoading
+                ? SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                      color: textColor,
+                      strokeWidth: 3.5,
+                    ),
+                  )
+                : Text(
+                    text,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    style: AhpsicoText.title3Style.copyWith(
+                      color: textColor,
+                    ),
+                  ),
           ),
         ),
       )
     ].map((button) {
-      if (disableFlex) {
-        return button;
+      if (enableFlex) {
+        return Flexible(
+          flex: flex,
+          fit: flexFit,
+          child: button,
+        );
       }
-      return Flexible(
-        flex: flex,
-        fit: flexFit,
-        child: button,
-      );
+      return button;
     }).first;
   }
 }

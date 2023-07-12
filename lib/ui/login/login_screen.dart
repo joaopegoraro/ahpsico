@@ -112,6 +112,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                     model.hasCodeBeenSent
                         ? AhpsicoInputField(
                             controller: _codeController,
+                            textAlign: TextAlign.center,
                             hint: "Código de seis dígitos",
                             readOnly: true,
                             errorText: _codeController.text.isNotEmpty && !model.isCodeValid ? "" : null,
@@ -126,6 +127,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           )
                         : AhpsicoInputField(
                             controller: _phoneController,
+                            textAlign: TextAlign.center,
                             hint: "Telefone",
                             readOnly: true,
                             inputType: TextInputType.phone,

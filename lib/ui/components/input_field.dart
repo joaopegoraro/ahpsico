@@ -13,8 +13,10 @@ class AhpsicoInputField extends StatelessWidget {
     this.errorText,
     this.errorColor,
     this.borderColor,
+    this.textAlign,
     this.errorBorderColor,
     this.borderWidth,
+    this.onChanged,
     this.inputType,
     this.maxLenght,
     this.maxLines,
@@ -36,6 +38,8 @@ class AhpsicoInputField extends StatelessWidget {
   final TextInputType? inputType;
   final int? maxLenght;
   final int? maxLines;
+  final TextAlign? textAlign;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +51,10 @@ class AhpsicoInputField extends StatelessWidget {
       canRequestFocus: canRequestFocus,
       maxLength: maxLenght,
       maxLines: maxLines,
+      onChanged: onChanged,
       style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.dark75),
-      textAlign: TextAlign.center,
+      textAlign: textAlign ?? TextAlign.start,
+      cursorColor: AhpsicoColors.violet,
       decoration: InputDecoration(
         enabled: enabled,
         errorText: errorText,
@@ -56,9 +62,16 @@ class AhpsicoInputField extends StatelessWidget {
         errorMaxLines: 10,
         counterStyle: AhpsicoText.smallStyle.copyWith(color: AhpsicoColors.light60),
         hintText: hint,
-        hintStyle: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.dark25),
+        hintStyle: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.light20),
         filled: true,
         fillColor: AhpsicoColors.light,
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(
+            color: AhpsicoColors.violet,
+            width: 2.5,
+          ),
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
         errorBorder: OutlineInputBorder(
           borderSide: BorderSide(
             color: errorBorderColor ?? AhpsicoColors.red,

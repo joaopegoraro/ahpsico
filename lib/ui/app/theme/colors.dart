@@ -5,14 +5,14 @@ final class AhpsicoColors {
 
   static const dark = Color(0xFF0D0E0F);
   static const dark75 = Color(0xFF161719);
-  static const dark50 = Color(0xFF464A4D);
-  static const dark25 = Color(0xFF7A7E80);
+  static const dark50 = Color(0xFF212325);
+  static const dark25 = Color(0xFF212325);
 
   static const light = Color(0xFFFFFFFF);
-  static const light80 = Color(0xFFFBFBFB);
-  static const light60 = Color(0xFFF7F9FA);
+  static const light80 = Color(0xFFFCFCFC);
+  static const light60 = Color(0xFFE3E5E5);
   static const light40 = Color(0xFFF2F4F5);
-  static const light20 = Color(0xFFE3E5E5);
+  static const light20 = Color(0xFF91919F);
 
   static const violet = Color(0xFF7F3DFF);
   static const violet80 = Color(0xFF8F57FF);
