@@ -15,7 +15,7 @@ abstract interface class AuthService {
     required void Function(String verificationId) onCodeSent,
     required void Function(AuthException exception) onFailed,
     required void Function(AuthPhoneCredential credential) onAutoRetrievalCompleted,
-    required void Function(String verificationId) onAutoRetrievalTimeout,
+    void Function(String verificationId)? onAutoRetrievalTimeout,
   });
 
   /// throws [AuthException] :
@@ -51,7 +51,7 @@ final class AuthServiceImpl implements AuthService {
     required void Function(String verificationId) onCodeSent,
     required void Function(AuthException exception) onFailed,
     required void Function(AuthPhoneCredential credential) onAutoRetrievalCompleted,
-    required void Function(String verificationId) onAutoRetrievalTimeout,
+    void Function(String verificationId)? onAutoRetrievalTimeout,
   }) async {
     return await _firebaseAuth.verifyPhoneNumber(
       phoneNumber: phoneNumber,
@@ -78,7 +78,8 @@ final class AuthServiceImpl implements AuthService {
       codeSent: (verificationId, forceResendingToken) {
         onCodeSent(verificationId);
       },
-      codeAutoRetrievalTimeout: onAutoRetrievalTimeout,
+      codeAutoRetrievalTimeout: onAutoRetrievalTimeout ?? (_) {},
+      timeout: const Duration(minutes: 2),
     );
   }
 

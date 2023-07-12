@@ -15,6 +15,9 @@ class AhpsicoInputField extends StatelessWidget {
     this.borderColor,
     this.errorBorderColor,
     this.borderWidth,
+    this.inputType,
+    this.maxLenght,
+    this.maxLines,
     this.canRequestFocus = true,
     this.inputFormatters,
   });
@@ -30,14 +33,20 @@ class AhpsicoInputField extends StatelessWidget {
   final Color? borderColor;
   final Color? errorBorderColor;
   final double? borderWidth;
+  final TextInputType? inputType;
+  final int? maxLenght;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
       readOnly: readOnly,
-      canRequestFocus: canRequestFocus,
       inputFormatters: inputFormatters,
+      keyboardType: inputType,
+      canRequestFocus: canRequestFocus,
+      maxLength: maxLenght,
+      maxLines: maxLines,
       style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.dark75),
       textAlign: TextAlign.center,
       decoration: InputDecoration(

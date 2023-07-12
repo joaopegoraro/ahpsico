@@ -16,7 +16,7 @@ abstract interface class UserRepository {
   Future<void> sync();
 
   /// throws:
-  /// - [DatabaseMappingException] when something goes wrong when converting the
+  /// - [DatabaseNotFoundException] when there are no users to retrieve;
   /// database data to a [User] model;
   ///
   /// returns:
@@ -95,12 +95,9 @@ final class UserRepositoryImpl implements UserRepository {
     if (usersMap.isEmpty) {
       throw const DatabaseNotFoundException(message: "No user found");
     }
-    try {
-      final entity = UserEntity.fromMap(usersMap.first);
-      return UserMapper.toUser(entity);
-    } on TypeError catch (e, stackTrace) {
-      DatabaseMappingException(message: e.toString()).throwWithStackTrace(stackTrace);
-    }
+
+    final entity = UserEntity.fromMap(usersMap.first);
+    return UserMapper.toUser(entity);
   }
 
   @override

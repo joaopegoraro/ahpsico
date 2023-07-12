@@ -9,20 +9,23 @@ class NumericKeyboard extends StatefulWidget {
   /// Display a custom right icon
   final Widget? rightIcon;
 
+  final bool allowLeftLongPress;
+  final bool allowRightLongPress;
+
   /// Action to trigger when right button is pressed
-  final Function()? rightButtonFn;
+  final Function()? onTapRightButton;
 
   /// Action to trigger when right button is long pressed
-  final Function()? rightButtonLongPressFn;
+  final Function()? onLongPressRightButton;
 
   /// Action to trigger when left button is long pressed
-  final Function()? leftButtonLongPressFn;
+  final Function()? onLongPressLeftButton;
 
   /// Display a custom left icon
   final Widget? leftIcon;
 
   /// Action to trigger when left button is pressed
-  final Function()? leftButtonFn;
+  final Function()? onTapLeftButton;
 
   /// Callback when an item is pressed
   final KeyboardTapCallback onKeyboardTap;
@@ -34,12 +37,14 @@ class NumericKeyboard extends StatefulWidget {
       {Key? key,
       required this.onKeyboardTap,
       this.textStyle = const TextStyle(color: Colors.black),
-      this.rightButtonFn,
-      this.rightButtonLongPressFn,
+      this.onTapRightButton,
+      this.onLongPressRightButton,
       this.rightIcon,
-      this.leftButtonLongPressFn,
-      this.leftButtonFn,
+      this.onLongPressLeftButton,
+      this.onTapLeftButton,
       this.leftIcon,
+      this.allowLeftLongPress = false,
+      this.allowRightLongPress = false,
       this.mainAxisAlignment = MainAxisAlignment.spaceBetween})
       : super(key: key);
 
@@ -89,14 +94,15 @@ class _NumericKeyboardState extends State<NumericKeyboard> {
               GestureDetector(
                 child: InkWell(
                   borderRadius: BorderRadius.circular(45),
-                  onTap: widget.leftButtonFn,
-                  onLongPress: widget.rightButtonLongPressFn,
+                  onTap: widget.onTapLeftButton,
+                  onLongPress:
+                      widget.allowLeftLongPress ? widget.onLongPressLeftButton ?? widget.onTapLeftButton : null,
                   child: Container(alignment: Alignment.center, width: 50, height: 50, child: widget.leftIcon),
                 ),
                 onLongPressStart: (_) async {
                   isLeftButtonPressed = true;
                   do {
-                    widget.leftButtonLongPressFn?.call();
+                    widget.onLongPressLeftButton?.call();
                     await Future.delayed(const Duration(milliseconds: 30));
                   } while (isLeftButtonPressed);
                 },
@@ -106,14 +112,15 @@ class _NumericKeyboardState extends State<NumericKeyboard> {
               GestureDetector(
                 child: InkWell(
                   borderRadius: BorderRadius.circular(45),
-                  onTap: widget.rightButtonFn,
-                  onLongPress: widget.rightButtonLongPressFn,
+                  onTap: widget.onTapRightButton,
+                  onLongPress:
+                      widget.allowRightLongPress ? widget.onLongPressRightButton ?? widget.onTapRightButton : null,
                   child: Container(alignment: Alignment.center, width: 50, height: 50, child: widget.rightIcon),
                 ),
                 onLongPressStart: (_) async {
                   isRightButtonPressed = true;
                   do {
-                    widget.rightButtonLongPressFn?.call();
+                    widget.onLongPressRightButton?.call();
                     await Future.delayed(const Duration(seconds: 1));
                     await Future.delayed(const Duration(seconds: 1));
                   } while (isRightButtonPressed);
