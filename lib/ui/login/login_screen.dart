@@ -2,10 +2,15 @@ import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/components/input_field.dart';
+import 'package:ahpsico/ui/components/snackbar.dart';
+import 'package:ahpsico/ui/doctor/doctor_home.dart';
 import 'package:ahpsico/ui/login/login_model.dart';
 import 'package:ahpsico/ui/login/widgets/countdown.dart';
 import 'package:ahpsico/ui/login/widgets/numeric_keyboard.dart';
+import 'package:ahpsico/ui/patient/patient_home.dart';
+import 'package:ahpsico/ui/signup/signup_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -51,11 +56,16 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         _codeTimercontroller
           ..reset()
           ..forward();
-      case LoginEvent.navigateToDoctorHome: // TODO
-      case LoginEvent.navigateToPatientHome: // TODO
-      case LoginEvent.navigateToSignUp: // TODO
-      case LoginEvent.showSnackbarError: // TODO
-      case LoginEvent.showSnackbarMessage: // TODO
+      case LoginEvent.showSnackbarError:
+        AhpsicoSnackbar.showError(context, model.snackbarMessage);
+      case LoginEvent.showSnackbarMessage:
+        AhpsicoSnackbar.showSuccess(context, model.snackbarMessage);
+      case LoginEvent.navigateToDoctorHome:
+        context.go(DoctorHome.route);
+      case LoginEvent.navigateToPatientHome:
+        context.go(PatientHome.route);
+      case LoginEvent.navigateToSignUp:
+        context.go(SignUpScreen.route);
     }
   }
 
@@ -77,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               ),
             );
           }
-    
+
           return WillPopScope(
             onWillPop: model.cancelCodeVerification,
             child: SafeArea(

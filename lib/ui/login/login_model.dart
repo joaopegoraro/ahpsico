@@ -181,6 +181,7 @@ class LoginModel extends ViewModel<LoginEvent> {
       await _authService.signInWithCredential(phoneCredential);
       await _userRepository.sync();
       final user = await _userRepository.get();
+      showSnackbar("Login bem sucedido!", LoginEvent.showSnackbarMessage);
       if (user.isDoctor) {
         emitEvent(LoginEvent.navigateToDoctorHome);
       } else {
