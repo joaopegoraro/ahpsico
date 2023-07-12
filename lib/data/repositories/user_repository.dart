@@ -40,7 +40,7 @@ abstract interface class UserRepository {
   Future<void> clear();
 }
 
-final userRepositoryProvider = Provider((ref) async {
+final userRepositoryProvider = Provider<UserRepository>((ref) {
   final apiService = ref.watch(apiServiceProvider);
   final database = ref.watch(ahpsicoDatabaseProvider);
   return UserRepositoryImpl(apiService: apiService, database: database);
