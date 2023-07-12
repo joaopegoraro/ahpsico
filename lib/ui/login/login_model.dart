@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:ahpsico/constants/app_constants.dart';
 import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
+import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
+import 'package:ahpsico/services/auth/credentials.dart';
 import 'package:ahpsico/services/auth/exceptions.dart';
 import 'package:logger/logger.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
@@ -80,7 +82,10 @@ class LoginModel extends ViewModel<LoginEvent> {
 
   Future<bool> cancelCodeVerification() async {
     if (hasCodeBeenSent) {
-      updateUi(() => _codeVerificationId = "");
+      updateUi(() {
+        _verificationCode = "";
+        _codeVerificationId = "";
+      });
       return false;
     }
     return true;
@@ -104,7 +109,12 @@ class LoginModel extends ViewModel<LoginEvent> {
 
   void confirmText() {
     if (!isLoadingSignIn && hasCodeBeenSent && isCodeValid) {
-      // TODO SIGN IN
+      final phoneCredential = AuthPhoneCredential(
+        phoneNumber: phoneNumber,
+        verificationId: _codeVerificationId,
+        smsCode: _verificationCode,
+      );
+      signIn(phoneCredential);
     } else if (!isLoadingSendindCode && !hasCodeBeenSent) {
       sendVerificationCode();
     }
@@ -152,16 +162,66 @@ class LoginModel extends ViewModel<LoginEvent> {
         if (err is! AuthAutoRetrievalFailedException) {
           updateUi(() => _isLoadingSendingCode = false);
           showSnackbar(
-            "Ocorreu um erro ao tentar enviar um SMS para o seu telefone. Tente novamente mais tarde ou entre em contato com o desenvolvedor",
+            "Ocorreu um erro desconhecido ao tentar enviar um SMS para o seu telefone. Tente novamente mais tarde ou entre em contato com o desenvolvedor",
             LoginEvent.showSnackbarError,
           );
           _logger.e("An error ocurred while trying to send a verification code to $phoneNumber", err);
         }
       },
       onAutoRetrievalCompleted: (credential) {
-        // TODO SIGN IN
+        updateUi(() => _verificationCode = credential.smsCode);
+        signIn(credential);
       },
     );
+  }
+
+  Future<void> signIn(AuthPhoneCredential phoneCredential) async {
+    updateUi(() => _isLoadingSignIn = true);
+    try {
+      await _authService.signInWithCredential(phoneCredential);
+      await _userRepository.sync();
+      final user = await _userRepository.get();
+      if (user.isDoctor) {
+        emitEvent(LoginEvent.navigateToDoctorHome);
+      } else {
+        emitEvent(LoginEvent.navigateToPatientHome);
+      }
+    } on DatabaseNotFoundException catch (_) {
+      emitEvent(LoginEvent.navigateToSignUp);
+    } on ApiUserNotRegisteredException catch (_) {
+      emitEvent(LoginEvent.navigateToSignUp);
+    } on AuthInvalidSignInCodeException catch (_) {
+      showSnackbar(
+        "O código digitado não é válido. Certifique-se de que o código informado é o mesmo código de seis dígitos recebido por SMS",
+        LoginEvent.showSnackbarError,
+      );
+    } on AuthException catch (err) {
+      showSnackbar(
+        "Ocorreu um erro desconhecido ao tentar validar o código por SMS. Por favor, tente novamente mais tarde ou entre em contato com o desenvolvedor.",
+        LoginEvent.showSnackbarError,
+      );
+      _logger.e(
+        "An error ocurred while trying to validate a verification code to $phoneNumber (validation code: $verificationCode)",
+        err,
+      );
+    } on ApiTimeoutException catch (_) {
+      showSnackbar(
+        "Ocorreu um erro ao tentar se conectar ao servidor. Por favor, tente novamente mais tarde ou entre em contato com o desenvolvedor.",
+        LoginEvent.showSnackbarError,
+      );
+    } on ApiConnectionException catch (_) {
+      showSnackbar(
+        "Ocorreu um erro ao tentar se conectar ao servidor. Certifique-se de que seu dispositivo esteja conectado corretamente com a internet",
+        LoginEvent.showSnackbarError,
+      );
+    } on ApiException catch (err) {
+      showSnackbar(
+        "Ocorreu um erro desconhecido ao tentar fazer login. Tente novamente mais tarde ou entre em contato com o desenvolvedor",
+        LoginEvent.showSnackbarError,
+      );
+      _logger.e("An error ocurred while trying to login with the following phone credential $phoneCredential", err);
+    }
+    updateUi(() => _isLoadingSignIn = true);
   }
 
   Future<void> _autoSignIn() async {

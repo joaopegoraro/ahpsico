@@ -310,7 +310,7 @@ void main() {
           .thenAnswer((_) => throw firebase_auth.FirebaseAuthException(code: "invalid-verification-id"));
       try {
         await authService.signInWithCredential(mockedAuthPhoneCredential);
-      } on AuthInvalidVerificationCodeException catch (_) {
+      } on AuthInvalidVerificationIdException catch (_) {
         assert(true);
       }
     });

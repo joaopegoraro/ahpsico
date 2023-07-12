@@ -20,7 +20,7 @@ abstract interface class AuthService {
 
   /// throws [AuthException] :
   /// - [AuthInvalidSignInCodeException] when the provided sms code is not valid;
-  /// - [AuthInvalidVerificationCodeException] when the provided verification code is not valid;
+  /// - [AuthInvalidVerificationIdException] when the provided verification id is not valid;
   /// - [AuthSignInFailedException] when something unexpected happeneded when trying to sign in
   Future<AuthUserCredential> signInWithCredential(AuthPhoneCredential phoneCredential);
 }
@@ -83,11 +83,6 @@ final class AuthServiceImpl implements AuthService {
     );
   }
 
-  /// throws [AuthInvalidSignInCodeException] when the provided sms code is not valid;
-  ///
-  /// throws [AuthInvalidVerificationCodeException] when the provided verification code is not valid;
-  ///
-  /// throws [AuthSignInFailedException] when something unexpected happeneded when trying to sign in
   @override
   Future<AuthUserCredential> signInWithCredential(AuthPhoneCredential phoneCredential) async {
     final firebasePhoneCredential = firebase_auth.PhoneAuthProvider.credential(
@@ -103,7 +98,7 @@ final class AuthServiceImpl implements AuthService {
         case "invalid-verification-code":
           throw AuthInvalidSignInCodeException(message: err.message);
         case "invalid-verification-id":
-          throw AuthInvalidVerificationCodeException(message: err.message);
+          throw AuthInvalidVerificationIdException(message: err.message);
         default:
           AuthSignInFailedException(message: err.message).throwWithStackTrace(stackTrace);
       }

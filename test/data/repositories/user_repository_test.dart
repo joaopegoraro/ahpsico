@@ -64,17 +64,6 @@ void main() {
       }
     });
 
-    test('db error throws', () async {
-      when(() => mockApiService.login()).thenAnswer((_) async => mockUser);
-      when(() => mockUser.uid).thenThrow(const DatabaseInsertException());
-      try {
-        await userRepository.sync();
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
-      }
-    });
-
     test('successful sync saves to db', () async {
       when(() => mockApiService.login()).thenAnswer((_) async => user);
       await userRepository.sync();
@@ -109,17 +98,6 @@ void main() {
         assert(false);
       } on ApiException catch (e) {
         assert(e.code == code);
-      }
-    });
-
-    test('db error throws', () async {
-      when(() => mockApiService.signUp(any())).thenAnswer((_) async => mockUser);
-      when(() => mockUser.uid).thenThrow(const DatabaseInsertException());
-      try {
-        await userRepository.create(mockUser);
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
       }
     });
 

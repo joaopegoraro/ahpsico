@@ -4,14 +4,12 @@ import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/database/mappers/user_mapper.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/utils/extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class UserRepository {
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote creating;
-  /// - [DatabaseInsertException] when something goes wrong when inserting
+  /// - [ApiException] when something goes wrong with [ApiService.login];
   /// the fetched [User];
   Future<void> sync();
 
@@ -27,16 +25,12 @@ abstract interface class UserRepository {
   ///
   /// throws:
   /// - [ApiException] when something goes wrong with the remote creating;
-  /// - [DatabaseInsertException] when something goes wrong when inserting the new [User];
   ///
   /// returns:
   /// - the created [User];
   Future<User> create(User user);
 
   /// Clears the table;
-  ///
-  /// throws:
-  /// - [DatabaseInsertException] when something goes wrong when deleting the data;
   Future<void> clear();
 }
 
@@ -59,33 +53,25 @@ final class UserRepositoryImpl implements UserRepository {
   @override
   Future<User> create(User user) async {
     final createdUser = await _api.signUp(user);
-    try {
-      await _db.insert(
-        UserEntity.tableName,
-        UserMapper.toEntity(createdUser).toMap(),
-        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-      );
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
-    }
+    await _db.insert(
+      UserEntity.tableName,
+      UserMapper.toEntity(createdUser).toMap(),
+      conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
+    );
     return createdUser;
   }
 
   @override
   Future<void> sync() async {
     final user = await _api.login();
-    try {
-      final batch = _db.batch();
-      batch.delete(UserEntity.tableName);
-      batch.insert(
-        UserEntity.tableName,
-        UserMapper.toEntity(user).toMap(),
-        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-      );
-      await batch.commit(noResult: true);
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
-    }
+    final batch = _db.batch();
+    batch.delete(UserEntity.tableName);
+    batch.insert(
+      UserEntity.tableName,
+      UserMapper.toEntity(user).toMap(),
+      conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
+    );
+    await batch.commit(noResult: true);
   }
 
   @override

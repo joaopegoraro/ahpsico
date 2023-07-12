@@ -29,8 +29,8 @@ class AuthAutoRetrievalFailedException extends AuthException {
         );
 }
 
-class AuthInvalidVerificationCodeException extends AuthException {
-  const AuthInvalidVerificationCodeException({String? message})
+class AuthInvalidVerificationIdException extends AuthException {
+  const AuthInvalidVerificationIdException({String? message})
       : super(
           message: "The supplied verification ID isn't valid: $message",
           code: "auth_invalid_sign_in_verification_id",
