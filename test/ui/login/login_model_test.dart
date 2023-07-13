@@ -9,6 +9,7 @@ import 'package:ahpsico/services/auth/exceptions.dart';
 import 'package:ahpsico/services/auth/token.dart';
 import 'package:ahpsico/ui/login/login_model.dart';
 import 'package:faker/faker.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -29,6 +30,16 @@ void main() {
     phoneNumber: faker.phoneNumber.random.fromPattern([LoginModel.phoneMaskPattern]),
     isDoctor: false,
   );
+
+  setUpAll(() {
+    registerFallbackValue(
+      const AuthPhoneCredential(
+        phoneNumber: "",
+        verificationId: "",
+        smsCode: "",
+      ),
+    );
+  });
 
   setUp(() {
     loginModel = LoginModel(mockUserRepository, mockAuthService);
@@ -77,7 +88,7 @@ void main() {
     });
   });
 
-  group("auto sign in", () {
+  group("sign in", () {
     final phoneCredential = AuthPhoneCredential(
       phoneNumber: user.phoneNumber,
       verificationId: "some verification id",
@@ -341,6 +352,191 @@ void main() {
 
       expect(loginModel!.eventStream, neverEmits(anything));
       loginModel!.dispose();
+    });
+  });
+
+  test("mask phone masks succesfully", () {
+    const phone = "99999999999";
+    final masked = loginModel!.maskPhone(phone);
+    assert(masked == "(99) 99999-9999");
+  });
+
+  group("validate phone", () {
+    test("valid phone sets isPhoneValid to true", () {
+      String phone = "99 99999-9999";
+      loginModel!.validatePhone(phone);
+      assert(loginModel!.isPhoneValid);
+
+      phone = "99999999999";
+      loginModel!.validatePhone(phone);
+      assert(loginModel!.isPhoneValid);
+
+      phone = "(99) 99999-9999";
+      loginModel!.validatePhone(phone);
+      assert(loginModel!.isPhoneValid);
+    });
+
+    test("invalid phone returns false", () {
+      String phone = "9999";
+      loginModel!.validatePhone(phone);
+      assert(!loginModel!.isPhoneValid);
+
+      phone = "(99) 89999-9999";
+      loginModel!.validatePhone(phone);
+      assert(!loginModel!.isPhoneValid);
+    });
+  });
+
+  test("update phone", () {
+    const phone = "99 99999-9999";
+    assert(loginModel!.phoneNumber.isEmpty);
+    assert(!loginModel!.isPhoneValid);
+    loginModel!.updatePhone(phone);
+    assert(loginModel!.phoneNumber == phone);
+    assert(loginModel!.isPhoneValid);
+
+    expect(loginModel!.eventStream, emitsInOrder([LoginEvent.updatePhoneInputField]));
+  });
+
+  group("update code", () {
+    test("valid code updates code and emits event", () {
+      const code = "123456";
+      assert(loginModel!.verificationCode.isEmpty);
+      loginModel!.updateCode(code);
+      assert(loginModel!.verificationCode == code);
+
+      expect(loginModel!.eventStream, emitsInOrder([LoginEvent.updateCodeInputField]));
+    });
+    test("big code wont update code but still emits event", () {
+      const code = "123456789";
+      assert(loginModel!.verificationCode.isEmpty);
+      loginModel!.updateCode(code);
+      assert(loginModel!.verificationCode.isEmpty);
+
+      expect(loginModel!.eventStream, emitsInOrder([LoginEvent.updateCodeInputField]));
+    });
+  });
+
+  group("confirm text", () {
+    test("valid code tries to sign in", () async {
+      const code = "123456";
+      loginModel!.updateCode(code);
+      loginModel!.codeVerificationId = "some code verification id";
+
+      when(() => mockAuthService.signInWithCredential(any()))
+          .thenAnswer((_) async => throw const AuthException(message: "", code: ""));
+
+      loginModel!.confirmText();
+
+      verify(() => mockAuthService.signInWithCredential(any()));
+    });
+
+    test("valid phone sends verification code", () async {
+      const phone = "99 99999-9999";
+      loginModel!.updatePhone(phone);
+
+      when(() => mockAuthService.sendPhoneVerificationCode(
+            phoneNumber: any(named: "phoneNumber"),
+            onCodeSent: any(named: "onCodeSent"),
+            onFailed: any(named: "onFailed"),
+            onAutoRetrievalCompleted: any(named: "onAutoRetrievalCompleted"),
+            onAutoRetrievalTimeout: any(named: "onAutoRetrievalTimeout"),
+          )).thenAnswer((_) async {});
+
+      loginModel!.confirmText();
+
+      verify(() => mockAuthService.sendPhoneVerificationCode(
+            phoneNumber: any(named: "phoneNumber"),
+            onCodeSent: any(named: "onCodeSent"),
+            onFailed: any(named: "onFailed"),
+            onAutoRetrievalCompleted: captureAny(named: "onAutoRetrievalCompleted"),
+            onAutoRetrievalTimeout: any(named: "onAutoRetrievalTimeout"),
+          ));
+    });
+  });
+
+  group("update text", () {
+    test("updates code", () {
+      const text = "6";
+      loginModel!.codeVerificationId = "some verification id";
+      assert(loginModel!.verificationCode.isEmpty);
+      loginModel!.updateText(text);
+      assert(loginModel!.verificationCode == text);
+
+      expect(loginModel!.eventStream, emitsInOrder([LoginEvent.updateCodeInputField]));
+    });
+
+    test("updates phone", () {
+      const text = "9";
+      const expectedPhone = "($text";
+      assert(loginModel!.phoneNumber.isEmpty);
+      loginModel!.updateText(text);
+      assert(loginModel!.phoneNumber == expectedPhone);
+
+      expect(loginModel!.eventStream, emitsInOrder([LoginEvent.updatePhoneInputField]));
+    });
+  });
+
+  group("delete text", () {
+    test("deletes code", () {
+      const code = "123456";
+      const expectedCode = "12345";
+      loginModel!.updateCode(code);
+      loginModel!.codeVerificationId = "some verification id";
+      assert(loginModel!.verificationCode == code);
+      loginModel!.deleteText();
+      assert(loginModel!.verificationCode == expectedCode);
+
+      expect(
+          loginModel!.eventStream,
+          emitsInOrder([
+            LoginEvent.updateCodeInputField,
+            LoginEvent.updateCodeInputField,
+          ]));
+    });
+
+    test("deletes phone", () {
+      const phone = "(99) 99999";
+      const expectedPhone = "(99) 9999";
+      loginModel!.updatePhone(phone);
+      assert(loginModel!.phoneNumber == phone);
+      loginModel!.deleteText();
+      assert(loginModel!.phoneNumber == expectedPhone);
+
+      expect(
+          loginModel!.eventStream,
+          emitsInOrder([
+            LoginEvent.updatePhoneInputField,
+            LoginEvent.updatePhoneInputField,
+          ]));
+    });
+  });
+
+  group("cancel code verification", () {
+    test("code has been sent resets the code and verification id and returns false", () async {
+      const code = "1234";
+      const verificationId = "some verification id";
+      loginModel!.updateCode(code);
+      loginModel!.codeVerificationId = verificationId;
+      assert(loginModel!.codeVerificationId == verificationId);
+      assert(loginModel!.hasCodeBeenSent);
+      assert(loginModel!.verificationCode == code);
+      final canPopNavigation = await loginModel!.cancelCodeVerification();
+      assert(!canPopNavigation);
+      assert(loginModel!.codeVerificationId.isEmpty);
+      assert(!loginModel!.hasCodeBeenSent);
+      assert(loginModel!.verificationCode.isEmpty);
+    });
+
+    test("code has not been sent returns true", () async {
+      assert(loginModel!.codeVerificationId.isEmpty);
+      assert(!loginModel!.hasCodeBeenSent);
+      assert(loginModel!.verificationCode.isEmpty);
+      final canPopNavigation = await loginModel!.cancelCodeVerification();
+      assert(canPopNavigation);
+      assert(loginModel!.codeVerificationId.isEmpty);
+      assert(!loginModel!.hasCodeBeenSent);
+      assert(loginModel!.verificationCode.isEmpty);
     });
   });
 }

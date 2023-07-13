@@ -94,17 +94,17 @@ class LoginModel extends ViewModel<LoginEvent> {
 
   void updateText(String text) {
     if (!isLoadingSignIn && hasCodeBeenSent) {
-      _updateCode(verificationCode + text);
+      updateCode(verificationCode + text);
     } else if (!isLoadingSendindCode && !hasCodeBeenSent) {
-      _updatePhone(_maskPhone(phoneNumber + text));
+      updatePhone(maskPhone(phoneNumber + text));
     }
   }
 
   void deleteText() {
     if (!isLoadingSignIn && hasCodeBeenSent && verificationCode.isNotEmpty) {
-      _updateCode(verificationCode.substring(0, verificationCode.length - 1));
+      updateCode(verificationCode.substring(0, verificationCode.length - 1));
     } else if (!isLoadingSendindCode && !hasCodeBeenSent && phoneNumber.isNotEmpty) {
-      _updatePhone(phoneNumber.substring(0, phoneNumber.length - 1));
+      updatePhone(phoneNumber.substring(0, phoneNumber.length - 1));
     }
   }
 
@@ -116,12 +116,13 @@ class LoginModel extends ViewModel<LoginEvent> {
         smsCode: _verificationCode,
       );
       signIn(phoneCredential);
-    } else if (!isLoadingSendindCode && !hasCodeBeenSent) {
+    } else if (!isLoadingSendindCode && !hasCodeBeenSent && isPhoneValid) {
       sendVerificationCode();
     }
   }
 
-  void _updateCode(String code) {
+  @visibleForTesting
+  void updateCode(String code) {
     updateUi(() {
       if (code.length <= 6) {
         _verificationCode = code;
@@ -130,20 +131,23 @@ class LoginModel extends ViewModel<LoginEvent> {
     });
   }
 
-  void _updatePhone(String phoneNumber) {
+  @visibleForTesting
+  void updatePhone(String phoneNumber) {
     updateUi(() {
       _phoneNumber = phoneNumber;
-      _validatePhone(_phoneNumber);
+      validatePhone(_phoneNumber);
       emitEvent(LoginEvent.updatePhoneInputField);
     });
   }
 
-  void _validatePhone(String phoneNumber) {
+  @visibleForTesting
+  void validatePhone(String phoneNumber) {
     final regExp = RegExp(AppConstants.phoneRegex);
     _isPhoneValid = regExp.hasMatch(phoneNumber);
   }
 
-  String _maskPhone(String phoneNumber) {
+  @visibleForTesting
+  String maskPhone(String phoneNumber) {
     return _phoneMaskFormatter.maskText(phoneNumber);
   }
 
