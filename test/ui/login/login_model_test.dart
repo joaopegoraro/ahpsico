@@ -229,4 +229,118 @@ void main() {
           "Ocorreu um erro desconhecido ao tentar validar o código por SMS. Por favor, tente novamente mais tarde ou entre em contato com o desenvolvedor.");
     });
   });
+
+  group("send verification code", () {
+    test("code sent emits event", () async {
+      const verificationId = "some id";
+
+      when(() => mockAuthService.sendPhoneVerificationCode(
+            phoneNumber: any(named: "phoneNumber"),
+            onCodeSent: any(named: "onCodeSent"),
+            onFailed: any(named: "onFailed"),
+            onAutoRetrievalCompleted: any(named: "onAutoRetrievalCompleted"),
+            onAutoRetrievalTimeout: any(named: "onAutoRetrievalTimeout"),
+          )).thenAnswer((_) async {});
+
+      await loginModel!.sendVerificationCode();
+
+      final captured = verify(() => mockAuthService.sendPhoneVerificationCode(
+            phoneNumber: any(named: "phoneNumber"),
+            onCodeSent: captureAny(named: "onCodeSent"),
+            onFailed: any(named: "onFailed"),
+            onAutoRetrievalCompleted: any(named: "onAutoRetrievalCompleted"),
+            onAutoRetrievalTimeout: any(named: "onAutoRetrievalTimeout"),
+          )).captured.first as void Function(String);
+      captured(verificationId);
+
+      expect(loginModel!.eventStream, emits(LoginEvent.startCodeTimer));
+      assert(loginModel!.isLoadingSendindCode == false);
+      assert(loginModel!.codeVerificationId == verificationId);
+    });
+
+    test("on auto retrieval completed calls sign in", () async {
+      final credential = AuthPhoneCredential(
+        phoneNumber: user.phoneNumber,
+        verificationId: "some id",
+        smsCode: "some code",
+      );
+
+      when(() => mockAuthService.sendPhoneVerificationCode(
+            phoneNumber: any(named: "phoneNumber"),
+            onCodeSent: any(named: "onCodeSent"),
+            onFailed: any(named: "onFailed"),
+            onAutoRetrievalCompleted: any(named: "onAutoRetrievalCompleted"),
+            onAutoRetrievalTimeout: any(named: "onAutoRetrievalTimeout"),
+          )).thenAnswer((_) async {});
+
+      await loginModel!.sendVerificationCode();
+
+      final captured = verify(() => mockAuthService.sendPhoneVerificationCode(
+            phoneNumber: any(named: "phoneNumber"),
+            onCodeSent: any(named: "onCodeSent"),
+            onFailed: any(named: "onFailed"),
+            onAutoRetrievalCompleted: captureAny(named: "onAutoRetrievalCompleted"),
+            onAutoRetrievalTimeout: any(named: "onAutoRetrievalTimeout"),
+          )).captured.first as void Function(AuthPhoneCredential);
+
+      when(() => mockAuthService.signInWithCredential(credential))
+          .thenAnswer((_) async => throw const AuthException(message: "", code: ""));
+      captured(credential);
+
+      assert(loginModel!.isLoadingSendindCode == true);
+      assert(loginModel!.verificationCode == credential.smsCode);
+
+      verify(() => mockAuthService.signInWithCredential(credential));
+    });
+
+    test("error that is not AuthAutoRetrievalFailedExceptions emits event", () async {
+      when(() => mockAuthService.sendPhoneVerificationCode(
+            phoneNumber: any(named: "phoneNumber"),
+            onCodeSent: any(named: "onCodeSent"),
+            onFailed: any(named: "onFailed"),
+            onAutoRetrievalCompleted: any(named: "onAutoRetrievalCompleted"),
+            onAutoRetrievalTimeout: any(named: "onAutoRetrievalTimeout"),
+          )).thenAnswer((_) async {});
+
+      await loginModel!.sendVerificationCode();
+
+      final captured = verify(() => mockAuthService.sendPhoneVerificationCode(
+            phoneNumber: any(named: "phoneNumber"),
+            onCodeSent: any(named: "onCodeSent"),
+            onFailed: captureAny(named: "onFailed"),
+            onAutoRetrievalCompleted: any(named: "onAutoRetrievalCompleted"),
+            onAutoRetrievalTimeout: any(named: "onAutoRetrievalTimeout"),
+          )).captured.first as void Function(AuthException);
+      captured(const AuthException(message: "", code: ""));
+
+      expect(loginModel!.eventStream, emits(LoginEvent.showSnackbarError));
+      assert(loginModel!.snackbarMessage ==
+          "Ocorreu um erro desconhecido ao tentar enviar um SMS para o seu telefone. Tente novamente mais tarde ou entre em contato com o desenvolvedor");
+      assert(loginModel!.isLoadingSendindCode == false);
+    });
+
+    test("error that AuthAutoRetrievalFailedExceptions doesnt emit event", () async {
+      when(() => mockAuthService.sendPhoneVerificationCode(
+            phoneNumber: any(named: "phoneNumber"),
+            onCodeSent: any(named: "onCodeSent"),
+            onFailed: any(named: "onFailed"),
+            onAutoRetrievalCompleted: any(named: "onAutoRetrievalCompleted"),
+            onAutoRetrievalTimeout: any(named: "onAutoRetrievalTimeout"),
+          )).thenAnswer((_) async {});
+
+      await loginModel!.sendVerificationCode();
+
+      final captured = verify(() => mockAuthService.sendPhoneVerificationCode(
+            phoneNumber: any(named: "phoneNumber"),
+            onCodeSent: any(named: "onCodeSent"),
+            onFailed: captureAny(named: "onFailed"),
+            onAutoRetrievalCompleted: any(named: "onAutoRetrievalCompleted"),
+            onAutoRetrievalTimeout: any(named: "onAutoRetrievalTimeout"),
+          )).captured.first as void Function(AuthException);
+      captured(const AuthAutoRetrievalFailedException());
+
+      expect(loginModel!.eventStream, neverEmits(anything));
+      loginModel!.dispose();
+    });
+  });
 }

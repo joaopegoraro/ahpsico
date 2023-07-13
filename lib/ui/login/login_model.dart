@@ -75,8 +75,9 @@ class LoginModel extends ViewModel<LoginEvent> {
   String get verificationCode => _verificationCode;
   bool get isCodeValid => verificationCode.length == 6;
 
-  String _codeVerificationId = "";
-  bool get hasCodeBeenSent => _codeVerificationId.isNotEmpty;
+  @visibleForTesting
+  String codeVerificationId = "";
+  bool get hasCodeBeenSent => codeVerificationId.isNotEmpty;
 
   /* Methods */
 
@@ -84,7 +85,7 @@ class LoginModel extends ViewModel<LoginEvent> {
     if (hasCodeBeenSent) {
       updateUi(() {
         _verificationCode = "";
-        _codeVerificationId = "";
+        codeVerificationId = "";
       });
       return false;
     }
@@ -111,7 +112,7 @@ class LoginModel extends ViewModel<LoginEvent> {
     if (!isLoadingSignIn && hasCodeBeenSent && isCodeValid) {
       final phoneCredential = AuthPhoneCredential(
         phoneNumber: phoneNumber,
-        verificationId: _codeVerificationId,
+        verificationId: codeVerificationId,
         smsCode: _verificationCode,
       );
       signIn(phoneCredential);
@@ -158,7 +159,7 @@ class LoginModel extends ViewModel<LoginEvent> {
         updateUi(() {
           emitEvent(LoginEvent.startCodeTimer);
           _isLoadingSendingCode = false;
-          _codeVerificationId = verificationId;
+          codeVerificationId = verificationId;
         });
       },
       onFailed: (err) {
