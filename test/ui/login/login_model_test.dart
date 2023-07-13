@@ -9,7 +9,6 @@ import 'package:ahpsico/services/auth/exceptions.dart';
 import 'package:ahpsico/services/auth/token.dart';
 import 'package:ahpsico/ui/login/login_model.dart';
 import 'package:faker/faker.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

@@ -26,15 +26,15 @@ final signUpModelProvider = ViewModelProviderFactory.create((ref) {
 class SignUpModel extends ViewModel<SignUpEvent> {
   SignUpModel(
     this._userRepository,
-    this._authService,
+    this._authService, [
     this._logger,
-  );
+  ]);
 
   /* Services */
 
   final UserRepository _userRepository;
   final AuthService _authService;
-  final Logger _logger;
+  final Logger? _logger;
 
   /* Fields */
 
@@ -109,8 +109,9 @@ class SignUpModel extends ViewModel<SignUpEvent> {
       } else {
         emitEvent(SignUpEvent.navigateToPatientHome);
       }
+      updateUi(() => _isLoadingSignUp = true);
     } on ApiUserAlreadyRegisteredException catch (_) {
-      cancelSignUp(message: "Ops! Parece que você já possui uma conta. Tente fazer login novamente");
+      await cancelSignUp(message: "Ops! Parece que você já possui uma conta. Tente fazer login novamente");
     } on ApiTimeoutException catch (_) {
       showSnackbar(
         "Ocorreu um erro ao tentar se conectar ao servidor. Por favor, tente novamente mais tarde ou entre em contato com o desenvolvedor.",
@@ -126,7 +127,7 @@ class SignUpModel extends ViewModel<SignUpEvent> {
         "Ocorreu um erro desconhecido ao tentar fazer o cadastro. Tente novamente mais tarde ou entre em contato com o desenvolvedor",
         SignUpEvent.showSnackbarError,
       );
-      _logger.e("An error ocurred while trying to sign up", err);
+      _logger?.e("An error ocurred while trying to sign up", err);
     }
 
     updateUi(() => _isLoadingSignUp = false);
