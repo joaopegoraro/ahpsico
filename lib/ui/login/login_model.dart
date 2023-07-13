@@ -10,6 +10,7 @@ import 'package:ahpsico/services/auth/exceptions.dart';
 import 'package:ahpsico/services/logger/logging_service.dart';
 import 'package:logger/logger.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:meta/meta.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum LoginEvent {
@@ -33,22 +34,23 @@ final loginModelProvider = ViewModelProviderFactory.create((ref) {
 class LoginModel extends ViewModel<LoginEvent> {
   LoginModel(
     this._userRepository,
-    this._authService,
+    this._authService, [
     this._logger,
-  ) {
-    _autoSignIn();
-  }
+  ]);
 
   /* Services */
 
   final UserRepository _userRepository;
   final AuthService _authService;
-  final Logger _logger;
+  final Logger? _logger;
 
   /* Utils */
 
+  @visibleForTesting
+  static const phoneMaskPattern = '(##) #####-####';
+
   final _phoneMaskFormatter = MaskTextInputFormatter(
-    mask: '(##) #####-####',
+    mask: phoneMaskPattern,
     filter: {"#": RegExp(r'[0-9]')},
     type: MaskAutoCompletionType.eager,
   );
@@ -62,9 +64,6 @@ class LoginModel extends ViewModel<LoginEvent> {
 
   bool _isLoadingSendingCode = false;
   bool get isLoadingSendindCode => _isLoadingSendingCode;
-
-  bool _isLoadingAutoSignIn = true;
-  bool get isLoadingAutoSignIn => _isLoadingAutoSignIn;
 
   String _phoneNumber = "";
   String get phoneNumber => _phoneNumber;
@@ -169,7 +168,7 @@ class LoginModel extends ViewModel<LoginEvent> {
             "Ocorreu um erro desconhecido ao tentar enviar um SMS para o seu telefone. Tente novamente mais tarde ou entre em contato com o desenvolvedor",
             LoginEvent.showSnackbarError,
           );
-          _logger.e("An error ocurred while trying to send a verification code to $unmaskedPhone", err);
+          _logger?.e("An error ocurred while trying to send a verification code to $unmaskedPhone", err);
         }
       },
       onAutoRetrievalCompleted: (credential) {
@@ -193,8 +192,6 @@ class LoginModel extends ViewModel<LoginEvent> {
       }
     } on DatabaseNotFoundException catch (_) {
       emitEvent(LoginEvent.navigateToSignUp);
-    } on ApiUserNotRegisteredException catch (_) {
-      emitEvent(LoginEvent.navigateToSignUp);
     } on AuthInvalidSignInCodeException catch (_) {
       showSnackbar(
         "O código digitado não é válido. Certifique-se de que o código informado é o mesmo código de seis dígitos recebido por SMS",
@@ -205,10 +202,12 @@ class LoginModel extends ViewModel<LoginEvent> {
         "Ocorreu um erro desconhecido ao tentar validar o código por SMS. Por favor, tente novamente mais tarde ou entre em contato com o desenvolvedor.",
         LoginEvent.showSnackbarError,
       );
-      _logger.e(
+      _logger?.e(
         "An error ocurred while trying to validate a verification code to $phoneNumber (validation code: $verificationCode)",
         err,
       );
+    } on ApiUserNotRegisteredException catch (_) {
+      emitEvent(LoginEvent.navigateToSignUp);
     } on ApiTimeoutException catch (_) {
       showSnackbar(
         "Ocorreu um erro ao tentar se conectar ao servidor. Por favor, tente novamente mais tarde ou entre em contato com o desenvolvedor.",
@@ -224,18 +223,16 @@ class LoginModel extends ViewModel<LoginEvent> {
         "Ocorreu um erro desconhecido ao tentar fazer login. Tente novamente mais tarde ou entre em contato com o desenvolvedor",
         LoginEvent.showSnackbarError,
       );
-      _logger.e("An error ocurred while trying to login with the following phone credential $phoneCredential", err);
+      _logger?.e("An error ocurred while trying to login with the following phone credential $phoneCredential", err);
     }
     updateUi(() => _isLoadingSignIn = false);
   }
 
-  Future<void> _autoSignIn() async {
-    updateUi(() => _isLoadingAutoSignIn = true);
-
+  Future<void> autoSignIn() async {
     final token = await _authService.getUserToken();
 
     final isUserAuthenticated = token?.idToken.isNotEmpty == true;
-    if (!isUserAuthenticated) return updateUi(() => _isLoadingAutoSignIn = false);
+    if (!isUserAuthenticated) return;
 
     try {
       final user = await _userRepository.get();
@@ -247,7 +244,5 @@ class LoginModel extends ViewModel<LoginEvent> {
     } on DatabaseNotFoundException catch (_) {
       emitEvent(LoginEvent.navigateToSignUp);
     }
-
-    updateUi(() => _isLoadingAutoSignIn = false);
   }
 }
