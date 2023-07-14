@@ -15,10 +15,9 @@ class AhpsicoTopbar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
+    return SliverAppBar(
       backgroundColor: AhpsicoColors.light,
       elevation: 0,
-      centerTitle: true,
       leading: Padding(
         padding: const EdgeInsets.only(left: 16),
         child: IconButton(

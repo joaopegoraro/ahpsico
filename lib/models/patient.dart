@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 class Patient {
-  Patient({
+  const Patient({
     required this.uuid,
     required this.name,
     required this.phoneNumber,
