@@ -1,6 +1,7 @@
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
+import 'package:ahpsico/ui/components/topbar.dart';
 import 'package:ahpsico/ui/doctor/doctor_home_model.dart';
 import 'package:ahpsico/ui/doctor/widgets/home_button.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,13 @@ class DoctorHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: const AhpsicoTopbar(title: "Olá, Andréa"),
       backgroundColor: AhpsicoColors.light,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {/* TODO */},
+        child: const Icon(Icons.add),
+        backgroundColor: AhpsicoColors.violet,
+      ),
       body: ViewModelBuilder(
         provider: doctorHomeModelProvider,
         onEventEmitted: _listenToEvents,
@@ -30,27 +37,58 @@ class DoctorHome extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  HomeButton(
-                    text: "VER PACIENTES",
-                    color: AhpsicoColors.violet,
-                    icon: Icons.groups,
-                    onPressed: () {},
+                  Text(
+                    "Hoje você possui",
+                    style: AhpsicoText.regular3Style.copyWith(
+                      color: AhpsicoColors.light20,
+                    ),
                   ),
                   AhpsicoSpacing.verticalSpaceSmall,
-                  HomeButton(
-                    text: "VER DICAS ENVIADAS",
-                    color: AhpsicoColors.green,
-                    icon: Icons.tips_and_updates,
-                    onPressed: () {},
+                  Text(
+                    "3 sessões",
+                    style: AhpsicoText.title1Style.copyWith(
+                      color: AhpsicoColors.dark75,
+                    ),
                   ),
                   AhpsicoSpacing.verticalSpaceMedium,
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Sessões de hoje",
-                      style: AhpsicoText.title3Style.copyWith(
-                        color: AhpsicoColors.dark,
+                  Row(
+                    children: [
+                      HomeButton(
+                        text: "VER PACIENTES",
+                        enableFlex: true,
+                        color: AhpsicoColors.violet,
+                        icon: Icons.groups,
+                        onPressed: () {/* TODO */},
                       ),
+                      AhpsicoSpacing.horizontalSpaceSmall,
+                      HomeButton(
+                        text: "VER DICAS ENVIADAS",
+                        enableFlex: true,
+                        color: AhpsicoColors.green,
+                        icon: Icons.tips_and_updates,
+                        onPressed: () {/* TODO */},
+                      ),
+                    ],
+                  ),
+                  AhpsicoSpacing.verticalSpaceMedium,
+                  TextButton(
+                    onPressed: () {/* TODO */},
+                    style: const ButtonStyle(
+                      shape: MaterialStatePropertyAll(RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(28)),
+                      )),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          "Sessões de hoje",
+                          style: AhpsicoText.title3Style.copyWith(
+                            color: AhpsicoColors.dark,
+                          ),
+                        ),
+                        const Spacer(),
+                        const Icon(Icons.arrow_forward),
+                      ],
                     ),
                   ),
                 ],

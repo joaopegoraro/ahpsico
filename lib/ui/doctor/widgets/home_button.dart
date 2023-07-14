@@ -2,7 +2,6 @@ import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class HomeButton extends StatelessWidget {
   const HomeButton({
@@ -14,6 +13,9 @@ class HomeButton extends StatelessWidget {
     this.iconForegroundColor,
     this.iconBackgroundColor = AhpsicoColors.light80,
     this.textColor = AhpsicoColors.light80,
+    this.enableFlex = false,
+    this.flex = 1,
+    this.flexFit = FlexFit.tight,
   });
 
   final String text;
@@ -23,37 +25,54 @@ class HomeButton extends StatelessWidget {
   final Color? iconForegroundColor;
   final Color? textColor;
   final VoidCallback? onPressed;
+  final bool enableFlex;
+  final int flex;
+  final FlexFit flexFit;
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ButtonStyle(
-          padding: const MaterialStatePropertyAll(EdgeInsets.all(16)),
-          backgroundColor: MaterialStatePropertyAll(color),
-          shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(28)),
-          ))),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: iconBackgroundColor,
-              borderRadius: const BorderRadius.all(Radius.circular(16)),
+    return [
+      ElevatedButton(
+        onPressed: onPressed,
+        style: ButtonStyle(
+            padding: const MaterialStatePropertyAll(EdgeInsets.all(16)),
+            backgroundColor: MaterialStatePropertyAll(color),
+            shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(28)),
+            ))),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: iconBackgroundColor,
+                borderRadius: const BorderRadius.all(Radius.circular(16)),
+              ),
+              child: Icon(
+                icon,
+                color: iconForegroundColor ?? color,
+              ),
             ),
-            child: Icon(
-              icon,
-              color: iconForegroundColor ?? color,
+            AhpsicoSpacing.horizontalSpaceSmall,
+            Flexible(
+              child: Text(
+                text,
+                style: AhpsicoText.regular2Style.copyWith(color: textColor),
+                maxLines: 3,
+              ),
             ),
-          ),
-          AhpsicoSpacing.horizontalSpaceMedium,
-          Text(
-            text,
-            style: AhpsicoText.regular2Style.copyWith(color: textColor),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      )
+    ].map((button) {
+      if (enableFlex) {
+        return Flexible(
+          flex: flex,
+          fit: flexFit,
+          child: button,
+        );
+      }
+      return button;
+    }).first;
   }
 }
