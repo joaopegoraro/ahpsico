@@ -25,7 +25,7 @@ class AhpsicoTopbar extends StatelessWidget implements PreferredSizeWidget {
           onPressed: () {/* TODO */},
           padding: EdgeInsets.zero,
           splashRadius: 24,
-          constraints: BoxConstraints(),
+          constraints: const BoxConstraints(),
           icon: CircleAvatar(
             backgroundColor: AhpsicoColors.violet,
             radius: 32,
