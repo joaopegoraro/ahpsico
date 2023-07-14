@@ -1,9 +1,12 @@
 import 'dart:convert';
 
+import 'package:ahpsico/constants/app_constants.dart';
 import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/session/session_status.dart';
 import 'package:ahpsico/models/session/session_type.dart';
+import 'package:ahpsico/utils/time_utils.dart';
+import 'package:intl/intl.dart';
 
 class Session {
   Session({
@@ -24,7 +27,7 @@ class Session {
   final int groupIndex;
   final SessionStatus status;
   final SessionType type;
-  final String date;
+  final DateTime date;
 
   Session copyWith({
     int? id,
@@ -34,7 +37,7 @@ class Session {
     int? groupIndex,
     SessionStatus? status,
     SessionType? type,
-    String? date,
+    DateTime? date,
   }) {
     return Session(
       id: id ?? this.id,
@@ -57,7 +60,7 @@ class Session {
       'group_index': groupIndex,
       'status': status.value,
       'type': type.value,
-      'date': date,
+      'date': TimeUtils.formatDateWithOffset(date, AppConstants.datePattern),
     };
   }
 
@@ -70,7 +73,7 @@ class Session {
       groupIndex: map['group_index'] as int,
       status: SessionStatus.fromValue(map['status']),
       type: SessionType.fromValue(map['type']),
-      date: map['date'] as String,
+      date: DateFormat(AppConstants.datePattern).parse(map['date']),
     );
   }
 

@@ -6,6 +6,7 @@ import 'package:ahpsico/data/database/entities/session_entity.dart';
 import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/database/mappers/assignment_mapper.dart';
 import 'package:ahpsico/models/assignment/assignment.dart';
+import 'package:ahpsico/models/assignment/assignment_status.dart';
 import 'package:ahpsico/services/api/api_service.dart';
 import 'package:ahpsico/utils/extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,7 +45,10 @@ abstract interface class AssignmentRepository {
   ///
   /// returns:
   /// - the [Assignment] list of the [Patient] with [patientId];
-  Future<List<Assignment>> getPatientAssignments(String patientId);
+  Future<List<Assignment>> getPatientAssignments(
+    String patientId, {
+    bool pending = false,
+  });
 
   /// Fetches from the API the [Assignment] list from the [Patient] with the provided [patientId]
   /// and saves it in the local database;
@@ -52,7 +56,10 @@ abstract interface class AssignmentRepository {
   /// throws:
   /// - [ApiException] when something goes wrong with the remote fethcing;
   /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
-  Future<void> syncPatientAssignments(String patientId);
+  Future<void> syncPatientAssignments(
+    String patientId, {
+    bool? pending,
+  });
 
   /// Clears the table;
   ///
@@ -125,15 +132,19 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
   }
 
   @override
-  Future<void> syncPatientAssignments(String patientId) async {
-    final assignments = await _api.getPatientAssignments(patientId);
+  Future<void> syncPatientAssignments(
+    String patientId, {
+    bool? pending,
+  }) async {
+    final assignments = await _api.getPatientAssignments(patientId, pending: pending);
     try {
       final batch = _db.batch();
 
       batch.delete(
         AssignmentEntity.tableName,
-        where: "${AssignmentEntity.patientIdColumn} = ?",
-        whereArgs: [patientId],
+        where: "${AssignmentEntity.patientIdColumn} = ?"
+            "${pending == true ? " AND ${AssignmentEntity.statusColumn} = ?" : ""}",
+        whereArgs: [patientId, if (pending == true) AssignmentStatus.pending.value],
       );
 
       for (final assignment in assignments) {
@@ -150,12 +161,16 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
   }
 
   @override
-  Future<List<Assignment>> getPatientAssignments(String patientId) async {
+  Future<List<Assignment>> getPatientAssignments(
+    String patientId, {
+    bool pending = false,
+  }) async {
     try {
       final assignmentsMap = await _db.query(
         AssignmentEntity.tableName,
-        where: "${AssignmentEntity.patientIdColumn} = ?",
-        whereArgs: [patientId],
+        where: "${AssignmentEntity.patientIdColumn} = ?"
+            "${pending ? " AND ${AssignmentEntity.statusColumn} = ?" : ""}",
+        whereArgs: [patientId, if (pending) AssignmentStatus.pending.value],
       );
 
       final assignments = Future.wait(assignmentsMap.map((assignmentMap) async {

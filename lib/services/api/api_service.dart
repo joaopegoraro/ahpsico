@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:ahpsico/constants/app_constants.dart';
 import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/invite.dart';
 import 'package:ahpsico/models/patient.dart';
@@ -13,6 +14,7 @@ import 'package:ahpsico/utils/extensions.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
@@ -65,7 +67,10 @@ abstract interface class ApiService {
 
   Future<List<Patient>> getDoctorPatients(String doctorId);
 
-  Future<List<Session>> getDoctorSessions(String doctorId);
+  Future<List<Session>> getDoctorSessions(
+    String doctorId, {
+    DateTime? date,
+  });
 
   Future<List<Advice>> getDoctorAdvices(String doctorId);
 
@@ -75,9 +80,15 @@ abstract interface class ApiService {
 
   Future<List<Doctor>> getPatientDoctors(String patientId);
 
-  Future<List<Session>> getPatientSessions(String patientId);
+  Future<List<Session>> getPatientSessions(
+    String patientId, {
+    bool? upcoming,
+  });
 
-  Future<List<Assignment>> getPatientAssignments(String patientId);
+  Future<List<Assignment>> getPatientAssignments(
+    String patientId, {
+    bool? pending,
+  });
 
   Future<List<Advice>> getPatientAdvices(String patientId);
 
@@ -254,10 +265,18 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<Session>> getDoctorSessions(String doctorId) async {
+  Future<List<Session>> getDoctorSessions(
+    String doctorId, {
+    DateTime? date,
+  }) async {
     return await request(
       method: "GET",
       endpoint: "doctors/$doctorId/sessions",
+      buildQueryParameters: () {
+        if (date == null) return null;
+        final formatter = DateFormat(AppConstants.datePattern);
+        return {"date": formatter.format(date)};
+      },
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Session.fromMap(e)).toList();
@@ -315,10 +334,14 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<Session>> getPatientSessions(String patientId) async {
+  Future<List<Session>> getPatientSessions(
+    String patientId, {
+    bool? upcoming,
+  }) async {
     return await request(
       method: "GET",
       endpoint: "patients/$patientId/sessions",
+      buildQueryParameters: upcoming != true ? null : () => {"upcoming": upcoming},
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Session.fromMap(e)).toList();
@@ -327,10 +350,14 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<Assignment>> getPatientAssignments(String patientId) async {
+  Future<List<Assignment>> getPatientAssignments(
+    String patientId, {
+    bool? pending,
+  }) async {
     return await request(
       method: "GET",
       endpoint: "patients/$patientId/assignments",
+      buildQueryParameters: pending != true ? null : () => {"pending": pending},
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Assignment.fromMap(e)).toList();
@@ -478,13 +505,13 @@ class ApiServiceImpl implements ApiService {
     required T Function(Response response) parseSuccess,
     Never? Function(Response response)? parseFailure,
     Object? Function()? requestBody,
-    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? Function()? buildQueryParameters,
   }) async {
     try {
       final response = await _dio.request(
         endpoint,
         data: requestBody?.call(),
-        queryParameters: queryParameters,
+        queryParameters: buildQueryParameters?.call(),
         options: Options(method: method),
       );
 

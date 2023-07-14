@@ -21,7 +21,7 @@ abstract class SessionMapper {
       groupIndex: entity.groupIndex,
       status: SessionStatus.fromValue(entity.status),
       type: SessionType.fromValue(entity.type),
-      date: entity.date,
+      date: DateTime.fromMillisecondsSinceEpoch(entity.dateInMillisecondsSinceEpoch),
     );
   }
 
@@ -34,7 +34,7 @@ abstract class SessionMapper {
       groupIndex: session.groupIndex,
       status: session.status.value,
       type: session.type.value,
-      date: session.date,
+      dateInMillisecondsSinceEpoch: session.date.millisecondsSinceEpoch,
     );
   }
 }

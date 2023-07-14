@@ -17,7 +17,6 @@ import 'package:collection/collection.dart';
 import 'package:faker/faker.dart';
 import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:intl/intl.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqflite_ffi;
 import 'package:sqflite/sqflite.dart' as sqflite;
@@ -50,7 +49,6 @@ void main() {
     phoneNumber: faker.phoneNumber.us(),
   );
 
-  final DateFormat formatter = DateFormat("yyyy-MM-ddThh:mm:ssZ");
   final session = Session(
     id: 0,
     doctor: doctor,
@@ -59,7 +57,7 @@ void main() {
     groupIndex: 0,
     status: SessionStatus.canceled,
     type: SessionType.monthly,
-    date: formatter.format(faker.date.dateTime()),
+    date: DateTime.fromMillisecondsSinceEpoch(faker.date.dateTime().millisecondsSinceEpoch),
   );
 
   setUpAll(() async {

@@ -38,7 +38,10 @@ abstract interface class SessionRepository {
   ///
   /// returns:
   /// - the [Session] list of the [Patient] with [patientId];
-  Future<List<Session>> getPatientSessions(String patientId);
+  Future<List<Session>> getPatientSessions(
+    String patientId, {
+    bool upcoming = false,
+  });
 
   /// Fetches from the API the [Session] list from the [Patient] with the provided [patientId]
   /// and saves it in the local database;
@@ -46,7 +49,10 @@ abstract interface class SessionRepository {
   /// throws:
   /// - [ApiException] when something goes wrong with the remote fethcing;
   /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
-  Future<void> syncPatientSessions(String patientId);
+  Future<void> syncPatientSessions(
+    String patientId, {
+    bool? upcoming,
+  });
 
   /// throws:
   /// - [DatabaseNotFoundException] when something goes wrong when trying to retrieve the
@@ -56,7 +62,10 @@ abstract interface class SessionRepository {
   ///
   /// returns:
   /// - the [Session] list of the [Doctor] with [doctorId];
-  Future<List<Session>> getDoctorSessions(String doctorId);
+  Future<List<Session>> getDoctorSessions(
+    String doctorId, {
+    DateTime? date,
+  });
 
   /// Fetches from the API the [Session] list from the [Doctor] with the provided [doctorId]
   /// and saves it in the local database;
@@ -64,7 +73,10 @@ abstract interface class SessionRepository {
   /// throws:
   /// - [ApiException] when something goes wrong with the remote fethcing;
   /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
-  Future<void> syncDoctorSessions(String doctorId);
+  Future<void> syncDoctorSessions(
+    String doctorId, {
+    DateTime? date,
+  });
 
   /// Clears the table;
   ///
@@ -122,12 +134,17 @@ final class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Future<List<Session>> getPatientSessions(String patientId) async {
+  Future<List<Session>> getPatientSessions(
+    String patientId, {
+    bool upcoming = false,
+  }) async {
     try {
+      // substract one hour so ongoing sessions also count as upcoming
+      final now = DateTime.now().subtract(const Duration(hours: 1)).millisecondsSinceEpoch;
       final sessionsMap = await _db.query(
         SessionEntity.tableName,
-        where: "${SessionEntity.patientIdColumn} = ?",
-        whereArgs: [patientId],
+        where: "${SessionEntity.patientIdColumn} = ?${upcoming ? " AND ${SessionEntity.dateColumn} >= ?" : ""}",
+        whereArgs: [patientId, if (upcoming) now],
       );
 
       final sessions = sessionsMap.map((sessionMap) async {
@@ -163,15 +180,20 @@ final class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Future<void> syncPatientSessions(String patientId) async {
-    final sessions = await _api.getPatientSessions(patientId);
+  Future<void> syncPatientSessions(
+    String patientId, {
+    bool? upcoming,
+  }) async {
+    // substract one hour so ongoing sessions also count as upcoming
+    final now = DateTime.now().subtract(const Duration(hours: 1)).millisecondsSinceEpoch;
+    final sessions = await _api.getPatientSessions(patientId, upcoming: upcoming);
     try {
       final batch = _db.batch();
 
       batch.delete(
         SessionEntity.tableName,
-        where: "${SessionEntity.patientIdColumn} = ?",
-        whereArgs: [patientId],
+        where: "${SessionEntity.patientIdColumn} = ?${upcoming == true ? " AND ${SessionEntity.dateColumn} >= ?" : ""}",
+        whereArgs: [patientId, if (upcoming == true) now],
       );
 
       for (final session in sessions) {
@@ -188,12 +210,28 @@ final class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Future<List<Session>> getDoctorSessions(String doctorId) async {
+  Future<List<Session>> getDoctorSessions(
+    String doctorId, {
+    DateTime? date,
+  }) async {
     try {
+      final today = DateTime.now();
+      final startOfToday = DateTime(today.year, today.month, today.day);
+
+      final tomorrow = today.add(const Duration(days: 1));
+      final startOfTomorrow = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
+
       final sessionsMap = await _db.query(
         SessionEntity.tableName,
-        where: "${SessionEntity.doctorIdColumn} = ?",
-        whereArgs: [doctorId],
+        where: "${SessionEntity.doctorIdColumn} = ?"
+            "${date == null ? "" : " AND ${SessionEntity.dateColumn} >= ? AND ${SessionEntity.dateColumn} <= ?"}",
+        whereArgs: [
+          doctorId,
+          if (date != null) ...[
+            startOfToday.millisecondsSinceEpoch,
+            startOfTomorrow.millisecondsSinceEpoch,
+          ]
+        ],
       );
 
       final sessions = sessionsMap.map((sessionMap) async {
@@ -229,15 +267,31 @@ final class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Future<void> syncDoctorSessions(String doctorId) async {
-    final sessions = await _api.getDoctorSessions(doctorId);
+  Future<void> syncDoctorSessions(
+    String doctorId, {
+    DateTime? date,
+  }) async {
+    final sessions = await _api.getDoctorSessions(doctorId, date: date);
     try {
       final batch = _db.batch();
 
+      final today = DateTime.now();
+      final startOfToday = DateTime(today.year, today.month, today.day);
+
+      final tomorrow = today.add(const Duration(days: 1));
+      final startOfTomorrow = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
+
       batch.delete(
         SessionEntity.tableName,
-        where: "${SessionEntity.doctorIdColumn} = ?",
-        whereArgs: [doctorId],
+        where: "${SessionEntity.doctorIdColumn} = ?"
+            "${date == null ? "" : " AND ${SessionEntity.dateColumn} >= ? AND ${SessionEntity.dateColumn} <= ?"}",
+        whereArgs: [
+          doctorId,
+          if (date != null) ...[
+            startOfToday.millisecondsSinceEpoch,
+            startOfTomorrow.millisecondsSinceEpoch,
+          ]
+        ],
       );
 
       for (final session in sessions) {

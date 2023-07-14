@@ -54,6 +54,8 @@ void main() {
     phoneNumber: mockedUser.phoneNumber,
   );
 
+  final now = DateTime.now();
+
   final mockedSession = Session(
     id: 1,
     doctor: mockedDoctor,
@@ -62,7 +64,7 @@ void main() {
     groupIndex: 1,
     status: SessionStatus.canceled,
     type: SessionType.individual,
-    date: "some date",
+    date: DateTime(now.year, now.month, now.day),
   );
 
   final mockedAdvice = Advice(
