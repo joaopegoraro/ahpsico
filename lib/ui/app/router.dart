@@ -8,7 +8,7 @@ final class AhpsicoRouter {
   AhpsicoRouter._();
 
   static final router = GoRouter(
-    initialLocation: LoginScreen.route,
+    initialLocation: DoctorHome.route,
     routes: [
       GoRoute(
         path: '/',

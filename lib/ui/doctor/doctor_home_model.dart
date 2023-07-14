@@ -4,4 +4,8 @@ enum DoctorHomeEvent {
   nothing,
 }
 
+final doctorHomeModelProvider = ViewModelProviderFactory.create((ref) {
+  return DoctorHomeModel();
+});
+
 class DoctorHomeModel extends ViewModel<DoctorHomeEvent> {}

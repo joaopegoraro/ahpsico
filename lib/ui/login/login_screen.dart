@@ -52,7 +52,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     super.dispose();
   }
 
-  void _listenToEvents(BuildContext context, LoginModel model, LoginEvent event) {
+  void _listenToEvents(
+    BuildContext context,
+    LoginModel model,
+    LoginEvent event,
+  ) {
     switch (event) {
       case LoginEvent.updateCodeInputField:
         setState(() => _codeController.text = model.verificationCode);
