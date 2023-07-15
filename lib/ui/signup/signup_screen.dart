@@ -7,6 +7,8 @@ import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/doctor/home/doctor_home.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:ahpsico/ui/patient/home/patient_home.dart';
+import 'package:ahpsico/ui/signup/dialogs/signup_cancelation_dialog.dart';
+import 'package:ahpsico/ui/signup/dialogs/signup_confirmation_dialog.dart';
 import 'package:ahpsico/ui/signup/signup_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -51,60 +53,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
       case SignUpEvent.openCancelationDialog:
         showDialog(
           context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text("Aviso"),
-              content: const Text("Tem certeza que deseja cancelar o seu cadastro? Você irá voltar para tela de login"),
-              actions: [
-                TextButton(
-                  onPressed: () => model.cancelSignUp(),
-                  child: Text(
-                    'Sim, desejo cancelar meu cadastro',
-                    style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
-                  ),
-                ),
-                TextButton(
-                  onPressed: context.pop,
-                  child: Text(
-                    'Não, desejo continuar meu cadastro',
-                    style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
-                  ),
-                ),
-              ],
-            );
-          },
+          builder: (context) => SignUpCancelationDialog(
+            cancelSignUp: model.cancelSignUp,
+            abortCancelation: context.pop,
+          ),
         );
       case SignUpEvent.openConfirmationDialog:
-        final accountType = model.isDoctor ? "Psicólogo" : "Paciente";
         showDialog(
           context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text("Aviso"),
-              content: Text(
-                "${model.name}, tem certeza que deseja criar uma conta de $accountType? Não será possível mudar sua conta no futuro",
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    context.pop();
-                    model.completeSignUp();
-                  },
-                  child: Text(
-                    'Sim, sou um $accountType',
-                    style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
-                  ),
-                ),
-                TextButton(
-                  onPressed: context.pop,
-                  child: Text(
-                    'Não, acho que cliquei sem querer...',
-                    style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
-                  ),
-                ),
-              ],
-            );
-          },
+          builder: (context) => SignUpConfirmationDialog(
+            name: model.name,
+            isDoctor: model.isDoctor,
+            onConfirm: () {
+              context.pop();
+              model.completeSignUp();
+            },
+            onCancel: context.pop,
+          ),
         );
     }
   }
