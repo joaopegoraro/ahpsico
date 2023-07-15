@@ -4,12 +4,10 @@ import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
-import 'package:ahpsico/utils/mask_formatters.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum InvitePatientEvent {
   openPatientNotRegisteredDialog,
-  updatePhoneInputText,
   showSnackbarError,
   navigateToLoginScreen,
 }
@@ -54,9 +52,8 @@ class InvitePatientModel extends BaseViewModel<InvitePatientEvent> {
 
   void updatePhone(String phoneNumber) {
     updateUi(() {
-      _phoneNumber = _maskPhone(phoneNumber);
+      _phoneNumber = phoneNumber;
       _validatePhone(_phoneNumber);
-      emitEvent(InvitePatientEvent.updatePhoneInputText);
     });
   }
 
@@ -65,21 +62,17 @@ class InvitePatientModel extends BaseViewModel<InvitePatientEvent> {
     _isPhoneValid = regExp.hasMatch(phoneNumber);
   }
 
-  String _maskPhone(String phoneNumber) {
-    return MaskFormatters.phoneMaskFormatter.maskText(phoneNumber);
-  }
-
   /* Calls */
 
   Future<void> invitePatient() async {
-    updateUi(() => _isLoading = true);
-
     if (!isPhoneValid) {
       return showSnackbar(
         "Por favor, digite um número de telefone válido",
         InvitePatientEvent.showSnackbarError,
       );
     }
+
+    updateUi(() => _isLoading = true);
 
     try {
       await _inviteRepository.create(phoneNumber);

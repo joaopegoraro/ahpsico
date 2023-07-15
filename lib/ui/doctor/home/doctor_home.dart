@@ -40,6 +40,10 @@ class DoctorHome extends StatelessWidget {
       case DoctorHomeEvent.openInvitePatientBottomSheet:
         showModalBottomSheet(
           context: context,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+          ),
+          showDragHandle: true,
           builder: (context) => const InvitePatientSheet(),
         );
       case DoctorHomeEvent.openSendAdviceBottomSheet:
@@ -66,9 +70,13 @@ class DoctorHome extends StatelessWidget {
       body: ViewModelBuilder(
         provider: doctorHomeModelProvider,
         onEventEmitted: _listenToEvents,
-        onCreate: (model) => model.fetchScreenData(),
+        onCreate: (model) {
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => model.fetchScreenData(),
+          );
+        },
         builder: (context, model) {
-          if (model.isLoading) {
+          if (model.isLoading || model.user == null) {
             return const Center(
               child: CircularProgressIndicator(
                 color: AhpsicoColors.violet,
@@ -170,11 +178,11 @@ class DoctorHome extends StatelessWidget {
                   }).toList(),
                 ),
               ),
-              if (model.isLoading)
+              if (!model.isLoading)
                 Align(
                   alignment: Alignment.bottomRight,
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(16.0),
                     child: DoctorFab(
                       distance: 112,
                       children: [

@@ -88,7 +88,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       body: ViewModelBuilder(
         provider: loginModelProvider,
         onEventEmitted: _listenToEvents,
-        onCreate: (model) => model.autoSignIn(),
+        onCreate: (model) {
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => model.autoSignIn(),
+          );
+        },
         builder: (context, model) {
           if (model.isLoadingAutoSignIn) {
             return const SafeArea(
@@ -133,6 +137,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           )
                         : PhoneInputField(
                             controller: _phoneController,
+                            errorColor: AhpsicoColors.red60,
                             isPhoneValid: model.isPhoneValid,
                             readOnly: true,
                           ),

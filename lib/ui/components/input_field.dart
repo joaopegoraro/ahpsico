@@ -58,7 +58,9 @@ class AhpsicoInputField extends StatelessWidget {
       decoration: InputDecoration(
         enabled: enabled,
         errorText: errorText,
-        errorStyle: AhpsicoText.smallStyle.copyWith(color: AhpsicoColors.red40),
+        errorStyle: AhpsicoText.smallStyle.copyWith(
+          color: errorColor ?? AhpsicoColors.red,
+        ),
         errorMaxLines: 10,
         counterStyle: AhpsicoText.smallStyle.copyWith(color: AhpsicoColors.light60),
         hintText: hint,

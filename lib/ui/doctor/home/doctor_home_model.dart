@@ -72,6 +72,16 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
 
   Future<void> fetchScreenData() async {
     updateUi(() => _isLoading = true);
+
+    // TODO REMOVE THIS LINE
+    _user = const User(
+      uid: "some uid",
+      name: "Andréa Hahmeyer Pegoraro",
+      phoneNumber: "",
+      isDoctor: true,
+    );
+    return updateUi(() => _isLoading = false);
+
     await _getUserData();
     await _getTodaySessions();
     updateUi(() => _isLoading = false);

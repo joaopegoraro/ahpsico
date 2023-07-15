@@ -4,6 +4,7 @@ import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/components/button.dart';
 import 'package:ahpsico/ui/components/phone_input_field.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
+import 'package:ahpsico/ui/doctor/invite_patient/invite_patient_dialog.dart';
 import 'package:ahpsico/ui/doctor/invite_patient/invite_patient_model.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:flutter/material.dart';
@@ -38,49 +39,53 @@ class _InvitePatientSheetState extends State<InvitePatientSheet> {
     InvitePatientEvent event,
   ) {
     switch (event) {
-      case InvitePatientEvent.updatePhoneInputText:
-        setState(() => _controller.text = model.phoneNumber);
       case InvitePatientEvent.navigateToLoginScreen:
         context.go(LoginScreen.route);
       case InvitePatientEvent.showSnackbarError:
         AhpsicoSnackbar.showError(context, model.snackbarMessage);
       case InvitePatientEvent.openPatientNotRegisteredDialog:
-      // TODO
+        showDialog(
+          context: context,
+          builder: (context) => const InvitePatientDialog(),
+        );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: ViewModelBuilder(
-          provider: invitePatientModelProvider,
-          onEventEmitted: _listenToEvents,
-          builder: (context, model) {
-            return Container(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Digite o número de telefone do paciente",
-                    style: AhpsicoText.title3Style.copyWith(color: AhpsicoColors.dark75),
-                  ),
-                  AhpsicoSpacing.verticalSpaceRegular,
-                  PhoneInputField(
-                    onChanged: model.updatePhone,
-                    controller: _controller,
-                    isPhoneValid: model.isPhoneValid,
-                  ),
-                  AhpsicoSpacing.verticalSpaceRegular,
-                  AhpsicoButton(
-                    "ENVIAR CONVITE PARA TERAPIA",
-                    onPressed: model.invitePatient,
-                    isLoading: model.isLoading,
-                  ),
-                ],
-              ),
-            );
-          }),
+        provider: invitePatientModelProvider,
+        onEventEmitted: _listenToEvents,
+        builder: (context, model) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Text(
+                  "Digite o número de telefone do paciente",
+                  style: AhpsicoText.title3Style.copyWith(color: AhpsicoColors.dark75),
+                ),
+                AhpsicoSpacing.verticalSpaceRegular,
+                PhoneInputField(
+                  onChanged: model.updatePhone,
+                  textAlign: TextAlign.start,
+                  controller: _controller,
+                  isPhoneValid: model.isPhoneValid,
+                ),
+                AhpsicoSpacing.verticalSpaceRegular,
+                AhpsicoButton(
+                  "ENVIAR CONVITE PARA TERAPIA",
+                  width: double.infinity,
+                  onPressed: model.invitePatient,
+                  isLoading: model.isLoading,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

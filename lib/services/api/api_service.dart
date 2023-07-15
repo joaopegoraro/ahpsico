@@ -596,6 +596,7 @@ class ApiServiceImpl implements ApiService {
 
       return parseSuccess(response);
     } on DioException catch (e, stackTrace) {
+      if (e.error is ApiException) throw e.error!;
       switch (e.type) {
         case DioExceptionType.connectionTimeout:
         case DioExceptionType.sendTimeout:
@@ -603,7 +604,7 @@ class ApiServiceImpl implements ApiService {
         case DioExceptionType.connectionError:
           ApiConnectionException(message: e.message).throwWithStackTrace(stackTrace);
         default:
-          ApiException(message: e.message).throwWithStackTrace(stackTrace);
+          rethrow;
       }
     }
   }

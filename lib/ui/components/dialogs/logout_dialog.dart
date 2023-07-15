@@ -21,6 +21,7 @@ class LogoutDialog extends StatelessWidget {
           onPressed: onLogout,
           child: Text(
             'Sim, desejo fazer logout',
+            textAlign: TextAlign.end,
             style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
           ),
         ),
@@ -28,6 +29,7 @@ class LogoutDialog extends StatelessWidget {
           onPressed: context.pop,
           child: Text(
             'Não, desejo continuar usando o aplicativo',
+            textAlign: TextAlign.end,
             style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
           ),
         ),

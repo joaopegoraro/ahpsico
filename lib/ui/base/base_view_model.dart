@@ -27,7 +27,6 @@ abstract class BaseViewModel<T> extends ViewModel<T> {
   @protected
   final T navigateToLoginEvent;
 
-  @protected
   Future<void> logout({bool showError = false}) async {
     await userRepository.clear();
     await authService.signOut();
