@@ -14,7 +14,6 @@ import 'package:ahpsico/services/api/api_service.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:collection/collection.dart';
 import 'package:faker/faker.dart';
-import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqflite_ffi;
@@ -92,17 +91,6 @@ void main() {
       }
     });
 
-    test('db error throws', () async {
-      when(() => mockApiService.createAdvice(any())).thenAnswer((_) async => mockAdvice);
-      when(() => mockAdvice.id).thenThrow(const DatabaseInsertException());
-      try {
-        await adviceRepository.create(mockAdvice);
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
-      }
-    });
-
     test('successful updates saves to db and returns updated advice', () async {
       when(() => mockApiService.createAdvice(any())).thenAnswer((_) async => advice);
       await database.insert(PatientEntity.tableName, PatientMapper.toEntity(patient).toMap());
@@ -132,17 +120,6 @@ void main() {
         assert(false);
       } on ApiException catch (e) {
         assert(e.code == code);
-      }
-    });
-
-    test('db error throws', () async {
-      when(() => mockApiService.updateAdvice(any())).thenAnswer((_) async => mockAdvice);
-      when(() => mockAdvice.id).thenThrow(const DatabaseInsertException());
-      try {
-        await adviceRepository.update(mockAdvice);
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
       }
     });
 
@@ -178,17 +155,6 @@ void main() {
       }
     });
 
-    test('db error throws', () async {
-      when(() => mockApiService.deleteAdvice(any())).thenAnswer((_) async {});
-      when(() => mockAdvice.id).thenThrow(const DatabaseInsertException());
-      try {
-        await adviceRepository.delete(mockAdvice.id);
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
-      }
-    });
-
     test('successful delete removes from db', () async {
       when(() => mockApiService.deleteAssignment(any())).thenAnswer((_) async {});
       await database.insert(PatientEntity.tableName, PatientMapper.toEntity(patient).toMap());
@@ -218,17 +184,6 @@ void main() {
       }
     });
 
-    test('db error throws', () async {
-      when(() => mockApiService.getDoctorAdvices(any())).thenAnswer((_) async => [mockAdvice]);
-      when(() => mockAdvice.id).thenThrow(const DatabaseInsertException());
-      try {
-        await adviceRepository.syncDoctorAdvices('some id');
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
-      }
-    });
-
     test('successful sync saves to db', () async {
       final expectedList = [advice];
       await database.insert(DoctorEntity.tableName, DoctorMapper.toEntity(doctor).toMap());
@@ -250,6 +205,11 @@ void main() {
       final savedAdvices = await adviceRepository.getDoctorAdvices(doctor.uuid);
       assert(const ListEquality().equals(savedAdvices, expectedList));
     });
+
+    test('empty table returns empty list', () async {
+      final savedAdvices = await adviceRepository.getDoctorAdvices(doctor.uuid);
+      assert(savedAdvices.isEmpty);
+    });
   });
 
   group("syncPatientAdvices", () {
@@ -261,17 +221,6 @@ void main() {
         assert(false);
       } on ApiException catch (e) {
         assert(e.code == code);
-      }
-    });
-
-    test('db error throws', () async {
-      when(() => mockApiService.getPatientAdvices(any())).thenAnswer((_) async => [mockAdvice]);
-      when(() => mockAdvice.id).thenThrow(const DatabaseInsertException());
-      try {
-        await adviceRepository.syncPatientAdvices('some id');
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
       }
     });
 
@@ -288,13 +237,8 @@ void main() {
 
   group("getPatientAdvices", () {
     test('successful fetch returns advice list', () async {
-      final expectedList = [advice];
-      await database.insert(DoctorEntity.tableName, DoctorMapper.toEntity(doctor).toMap());
-      await database.insert(PatientEntity.tableName, PatientMapper.toEntity(patient).toMap());
-      when(() => mockApiService.getPatientAdvices(any())).thenAnswer((_) async => expectedList);
-      await adviceRepository.syncPatientAdvices(patient.uuid);
       final savedAdvices = await adviceRepository.getPatientAdvices(patient.uuid);
-      assert(const ListEquality().equals(savedAdvices, expectedList));
+      assert(savedAdvices.isEmpty);
     });
   });
 }

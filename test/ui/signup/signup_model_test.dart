@@ -59,17 +59,6 @@ void main() {
       assert(!signUpModel!.isLoadingSignUp);
     });
 
-    test("timeout emits event", () async {
-      when(() => mockUserRepository.create(any())).thenAnswer(
-        (_) async => throw const ApiTimeoutException(),
-      );
-      await signUpModel!.completeSignUp();
-      expect(signUpModel!.eventStream, emitsInOrder([SignUpEvent.showSnackbarError]));
-      assert(signUpModel!.snackbarMessage ==
-          "Ocorreu um erro ao tentar se conectar ao servidor. Por favor, tente novamente mais tarde ou entre em contato com o desenvolvedor.");
-      assert(!signUpModel!.isLoadingSignUp);
-    });
-
     test("connection error emits event", () async {
       when(() => mockUserRepository.create(any())).thenAnswer(
         (_) async => throw const ApiConnectionException(),

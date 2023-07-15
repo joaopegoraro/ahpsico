@@ -586,7 +586,7 @@ class ApiServiceImpl implements ApiService {
 
       if (response.statusCode == null || !(response.statusCode! >= 200 && response.statusCode! < 300)) {
         parseFailure?.call(response);
-        final errorBody = json.decode(response.data) as Map<String, dynamic>;
+        final errorBody = json.decode(response.data) as Map<dynamic, dynamic>;
         throw ApiException(message: errorBody.toString());
       }
 

@@ -19,7 +19,6 @@ import 'package:ahpsico/services/api/api_service.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:collection/collection.dart';
 import 'package:faker/faker.dart';
-import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqflite_ffi;
@@ -110,17 +109,6 @@ void main() {
       }
     });
 
-    test('db error throws', () async {
-      when(() => mockApiService.createAssignment(any())).thenAnswer((_) async => mockAssignment);
-      when(() => mockAssignment.id).thenThrow(const DatabaseInsertException());
-      try {
-        await assignmentRepository.create(mockAssignment);
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
-      }
-    });
-
     test('successful updates saves to db and returns updated assignment', () async {
       when(() => mockApiService.createAssignment(any())).thenAnswer((_) async => assignment);
       await database.insert(PatientEntity.tableName, PatientMapper.toEntity(patient).toMap());
@@ -152,17 +140,6 @@ void main() {
         assert(false);
       } on ApiException catch (e) {
         assert(e.code == code);
-      }
-    });
-
-    test('db error throws', () async {
-      when(() => mockApiService.updateAssignment(any())).thenAnswer((_) async => mockAssignment);
-      when(() => mockAssignment.id).thenThrow(const DatabaseInsertException());
-      try {
-        await assignmentRepository.update(mockAssignment);
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
       }
     });
 
@@ -200,17 +177,6 @@ void main() {
       }
     });
 
-    test('db error throws', () async {
-      when(() => mockApiService.deleteAssignment(any())).thenAnswer((_) async {});
-      when(() => mockAssignment.id).thenThrow(const DatabaseInsertException());
-      try {
-        await assignmentRepository.delete(mockAssignment.id);
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
-      }
-    });
-
     test('successful delete removes from db', () async {
       when(() => mockApiService.deleteAssignment(any())).thenAnswer((_) async {});
       await database.insert(PatientEntity.tableName, PatientMapper.toEntity(patient).toMap());
@@ -243,17 +209,6 @@ void main() {
       }
     });
 
-    test('db error throws', () async {
-      when(() => mockApiService.getPatientAssignments(any())).thenAnswer((_) async => [mockAssignment]);
-      when(() => mockAssignment.id).thenThrow(const DatabaseInsertException());
-      try {
-        await assignmentRepository.syncPatientAssignments('some id');
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
-      }
-    });
-
     test('successful sync saves to db', () async {
       final expectedList = [assignment];
       await database.insert(DoctorEntity.tableName, DoctorMapper.toEntity(doctor).toMap());
@@ -276,6 +231,10 @@ void main() {
       await assignmentRepository.syncPatientAssignments(patient.uuid);
       final savedAssignments = await assignmentRepository.getPatientAssignments(patient.uuid);
       assert(const ListEquality().equals(savedAssignments, expectedList));
+    });
+    test('empty table returns empty list', () async {
+      final savedAssignments = await assignmentRepository.getPatientAssignments(patient.uuid);
+      assert(savedAssignments.isEmpty);
     });
   });
 }

@@ -2,8 +2,6 @@ import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
-import 'package:ahpsico/services/logger/logging_service.dart';
-import 'package:logger/logger.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum SignUpEvent {
@@ -19,22 +17,19 @@ enum SignUpEvent {
 final signUpModelProvider = ViewModelProviderFactory.create((ref) {
   final userRepository = ref.watch(userRepositoryProvider);
   final authService = ref.watch(authServiceProvider);
-  final logger = ref.watch(loggerProvider);
-  return SignUpModel(userRepository, authService, logger);
+  return SignUpModel(userRepository, authService);
 });
 
 class SignUpModel extends ViewModel<SignUpEvent> {
   SignUpModel(
     this._userRepository,
-    this._authService, [
-    this._logger,
-  ]);
+    this._authService,
+  );
 
   /* Services */
 
   final UserRepository _userRepository;
   final AuthService _authService;
-  final Logger? _logger;
 
   /* Fields */
 
@@ -112,22 +107,11 @@ class SignUpModel extends ViewModel<SignUpEvent> {
       updateUi(() => _isLoadingSignUp = true);
     } on ApiUserAlreadyRegisteredException catch (_) {
       await cancelSignUp(message: "Ops! Parece que você já possui uma conta. Tente fazer login novamente");
-    } on ApiTimeoutException catch (_) {
-      showSnackbar(
-        "Ocorreu um erro ao tentar se conectar ao servidor. Por favor, tente novamente mais tarde ou entre em contato com o desenvolvedor.",
-        SignUpEvent.showSnackbarError,
-      );
     } on ApiConnectionException catch (_) {
       showSnackbar(
         "Ocorreu um erro ao tentar se conectar ao servidor. Certifique-se de que seu dispositivo esteja conectado corretamente com a internet",
         SignUpEvent.showSnackbarError,
       );
-    } on ApiException catch (err) {
-      showSnackbar(
-        "Ocorreu um erro desconhecido ao tentar fazer o cadastro. Tente novamente mais tarde ou entre em contato com o desenvolvedor",
-        SignUpEvent.showSnackbarError,
-      );
-      _logger?.e("An error ocurred while trying to sign up", err);
     }
 
     updateUi(() => _isLoadingSignUp = false);

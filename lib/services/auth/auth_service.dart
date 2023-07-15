@@ -67,9 +67,11 @@ final class AuthServiceImpl implements AuthService {
           onAutoRetrievalCompleted(phoneCredential);
         }
       },
-      verificationFailed: (error) {
-        final authException = AuthException(message: error.message, code: error.code);
-        onFailed(authException);
+      verificationFailed: (err) {
+        if (err.code == "invalid-verification-code") {
+          return onFailed(AuthInvalidSignInCodeException(message: err.message));
+        }
+        onFailed(AuthException(message: err.message, code: err.code));
       },
       codeSent: (verificationId, forceResendingToken) {
         onCodeSent(verificationId);

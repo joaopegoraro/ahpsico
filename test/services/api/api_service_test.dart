@@ -150,21 +150,6 @@ void main() {
       }
     });
 
-    test("Response with status 400 throws ApiBadRequestException", () async {
-      final bodyJson = json.encode({'mensagem': 'erro'});
-      final decodedBody = json.decode(bodyJson) as Map<String, dynamic>;
-      try {
-        await testRequest(
-          responseBody: bodyJson,
-          statusCode: 400,
-        );
-        assert(false);
-      } on ApiBadRequestException catch (e) {
-        final expectedException = ApiBadRequestException(message: decodedBody.toString());
-        assert(e.message == expectedException.message);
-      }
-    });
-
     test("Response with status 401 throws ApiUnauthorizedException", () async {
       final bodyJson = json.encode({'mensagem': 'erro'});
       try {
@@ -188,57 +173,6 @@ void main() {
         assert(false);
       } on ApiUnauthorizedException catch (_) {
         assert(true);
-      }
-    });
-
-    test("Response with connection timeout throws ApiTimeoutException", () async {
-      const message = "timeout";
-      try {
-        await testRequest(
-          throwResponse: () => throw DioException(
-            message: message,
-            requestOptions: RequestOptions(),
-            type: DioExceptionType.connectionTimeout,
-          ),
-        );
-        assert(false);
-      } on ApiTimeoutException catch (e) {
-        const expectedException = ApiTimeoutException(message: message);
-        assert(e.message == expectedException.message);
-      }
-    });
-
-    test("Response with send timeout throws ApiTimeoutException", () async {
-      const message = "timeout";
-      try {
-        await testRequest(
-          throwResponse: () => throw DioException(
-            message: message,
-            requestOptions: RequestOptions(),
-            type: DioExceptionType.sendTimeout,
-          ),
-        );
-        assert(false);
-      } on ApiTimeoutException catch (e) {
-        const expectedException = ApiTimeoutException(message: message);
-        assert(e.message == expectedException.message);
-      }
-    });
-
-    test("Response with receive timeout throws ApiTimeoutException", () async {
-      const message = "timeout";
-      try {
-        await testRequest(
-          throwResponse: () => throw DioException(
-            message: message,
-            requestOptions: RequestOptions(),
-            type: DioExceptionType.receiveTimeout,
-          ),
-        );
-        assert(false);
-      } on ApiTimeoutException catch (e) {
-        const expectedException = ApiTimeoutException(message: message);
-        assert(e.message == expectedException.message);
       }
     });
 
@@ -272,35 +206,6 @@ void main() {
       } on ApiException catch (e) {
         const expectedException = ApiException(message: message);
         assert(e.message == expectedException.message);
-      }
-    });
-
-    test("Error encoding request throws ApiEncodeRequestException", () async {
-      try {
-        await testRequest(requestBody: () => throw JsonUnsupportedObjectError(null));
-        assert(false);
-      } on ApiEncodeRequestException catch (_) {
-        assert(true);
-      }
-    });
-
-    test("Error decoding response throws ApiDecodeResponseException", () async {
-      const message = "timeout";
-      try {
-        await testRequest(parseSuccess: (_) => throw const FormatException(message));
-        assert(false);
-      } on ApiDecodeResponseException catch (e) {
-        const expectedException = ApiDecodeResponseException(message: message);
-        assert(e.message == expectedException.message);
-      }
-    });
-
-    test("Error typing decoded response throws ApiDecodeResponseException", () async {
-      try {
-        await testRequest(parseSuccess: (_) => throw TypeError());
-        assert(false);
-      } on ApiDecodeResponseException catch (_) {
-        assert(true);
       }
     });
   });

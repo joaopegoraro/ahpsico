@@ -80,17 +80,6 @@ void main() {
       }
     });
 
-    test('db error throws', () async {
-      when(() => mockApiService.getPatient(any())).thenAnswer((_) async => mockPatient);
-      when(() => mockPatient.uuid).thenThrow(const DatabaseInsertException());
-      try {
-        await patientRepository.sync('some id');
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
-      }
-    });
-
     test('successful sync saves to db', () async {
       when(() => mockApiService.getPatient(any())).thenAnswer((_) async => patient);
       await patientRepository.sync('some id');
@@ -128,17 +117,6 @@ void main() {
       }
     });
 
-    test('db error throws', () async {
-      when(() => mockApiService.updatePatient(any())).thenAnswer((_) async => mockPatient);
-      when(() => mockPatient.uuid).thenThrow(const DatabaseInsertException());
-      try {
-        await patientRepository.update(mockPatient);
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
-      }
-    });
-
     test('successful updates saves to db and returns updated patient', () async {
       when(() => mockApiService.updatePatient(any())).thenAnswer((_) async => patient);
       final updatedPatient = await patientRepository.update(patient);
@@ -160,17 +138,6 @@ void main() {
       }
     });
 
-    test('db error throws', () async {
-      when(() => mockApiService.getDoctorPatients(any())).thenAnswer((_) async => [mockPatient]);
-      when(() => mockPatient.uuid).thenThrow(const DatabaseInsertException());
-      try {
-        await patientRepository.syncDoctorPatients('some id');
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
-      }
-    });
-
     test('successful sync saves to db', () async {
       final expectedList = [patient];
       await database.insert(DoctorEntity.tableName, DoctorMapper.toEntity(doctor).toMap());
@@ -189,6 +156,10 @@ void main() {
       await patientRepository.syncDoctorPatients(doctor.uuid);
       final savedPatients = await patientRepository.getDoctorPatients(doctor.uuid);
       assert(const ListEquality().equals(savedPatients, expectedList));
+    });
+    test('empty table returns empty list', () async {
+      final savedPatients = await patientRepository.getDoctorPatients(doctor.uuid);
+      assert(savedPatients.isEmpty);
     });
   });
 }

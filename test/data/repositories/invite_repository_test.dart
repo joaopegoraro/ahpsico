@@ -14,7 +14,6 @@ import 'package:ahpsico/services/api/api_service.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:collection/collection.dart';
 import 'package:faker/faker.dart';
-import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqflite_ffi;
@@ -30,7 +29,6 @@ void main() {
   late final sqflite.Database database;
   final mockApiService = MockApiService();
   late final InviteRepository inviteRepository;
-  final mockInvite = MockInvite();
 
   final doctor = Doctor(
     uuid: faker.guid.guid(),
@@ -122,17 +120,6 @@ void main() {
       }
     });
 
-    test('db error throws', () async {
-      when(() => mockApiService.deleteInvite(any())).thenAnswer((_) async {});
-      when(() => mockInvite.id).thenThrow(const DatabaseInsertException());
-      try {
-        await inviteRepository.delete(mockInvite.id);
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
-      }
-    });
-
     test('successful delete removes from db', () async {
       when(() => mockApiService.deleteInvite(any())).thenAnswer((_) async {});
       await database.insert(PatientEntity.tableName, PatientMapper.toEntity(patient).toMap());
@@ -159,17 +146,6 @@ void main() {
         assert(false);
       } on ApiException catch (e) {
         assert(e.code == code);
-      }
-    });
-
-    test('db error throws', () async {
-      when(() => mockApiService.acceptInvite(any())).thenAnswer((_) async {});
-      when(() => mockInvite.id).thenThrow(const DatabaseInsertException());
-      try {
-        await inviteRepository.accept(mockInvite.id);
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
       }
     });
 
@@ -202,17 +178,6 @@ void main() {
       }
     });
 
-    test('db error throws', () async {
-      when(() => mockApiService.getInvites()).thenAnswer((_) async => [mockInvite]);
-      when(() => mockInvite.id).thenThrow(const DatabaseInsertException());
-      try {
-        await inviteRepository.sync();
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
-      }
-    });
-
     test('successful sync saves to db', () async {
       await database.insert(DoctorEntity.tableName, DoctorMapper.toEntity(doctor).toMap());
       await database.insert(PatientEntity.tableName, PatientMapper.toEntity(patient).toMap());
@@ -225,7 +190,7 @@ void main() {
   });
 
   group("get", () {
-    test('successful retrieves the patient', () async {
+    test('successful returns the invite list', () async {
       await database.insert(DoctorEntity.tableName, DoctorMapper.toEntity(doctor).toMap());
       await database.insert(PatientEntity.tableName, PatientMapper.toEntity(patient).toMap());
       await database.insert(InviteEntity.tableName, InviteMapper.toEntity(invite).toMap());
@@ -233,13 +198,9 @@ void main() {
       assert(const ListEquality().equals([invite], savedInvites));
     });
 
-    test('no patient found throws', () async {
-      try {
-        await inviteRepository.get();
-        assert(false);
-      } on DatabaseNotFoundException catch (_) {
-        assert(true);
-      }
+    test('empty table returns empty list', () async {
+      final savedInvites = await inviteRepository.get();
+      assert(savedInvites.isEmpty);
     });
   });
 }

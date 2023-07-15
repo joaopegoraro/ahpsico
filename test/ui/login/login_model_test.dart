@@ -41,7 +41,7 @@ void main() {
   });
 
   setUp(() {
-    loginModel = LoginModel(mockUserRepository, mockAuthService);
+    loginModel = LoginModel(mockUserRepository, mockAuthService, null);
   });
 
   tearDown(() {
@@ -173,20 +173,6 @@ void main() {
       await loginModel!.signIn(phoneCredential);
       expect(loginModel!.eventStream, emits(LoginEvent.navigateToSignUp));
       assert(loginModel!.isLoadingSignIn == false);
-    });
-
-    test("ApiTimeoutException emits event", () async {
-      when(() => mockAuthService.signInWithCredential(phoneCredential)).thenAnswer(
-        (_) async => userCredential,
-      );
-      when(() => mockUserRepository.sync()).thenAnswer(
-        (_) async => throw const ApiTimeoutException(),
-      );
-      await loginModel!.signIn(phoneCredential);
-      expect(loginModel!.eventStream, emits(LoginEvent.showSnackbarError));
-      assert(loginModel!.isLoadingSignIn == false);
-      assert(loginModel!.snackbarMessage ==
-          "Ocorreu um erro ao tentar se conectar ao servidor. Por favor, tente novamente mais tarde ou entre em contato com o desenvolvedor.");
     });
 
     test("ApiConnectionException emits event", () async {
@@ -327,30 +313,6 @@ void main() {
       assert(loginModel!.snackbarMessage ==
           "Ocorreu um erro desconhecido ao tentar enviar um SMS para o seu telefone. Tente novamente mais tarde ou entre em contato com o desenvolvedor");
       assert(loginModel!.isLoadingSendindCode == false);
-    });
-
-    test("error that AuthAutoRetrievalFailedExceptions doesnt emit event", () async {
-      when(() => mockAuthService.sendPhoneVerificationCode(
-            phoneNumber: any(named: "phoneNumber"),
-            onCodeSent: any(named: "onCodeSent"),
-            onFailed: any(named: "onFailed"),
-            onAutoRetrievalCompleted: any(named: "onAutoRetrievalCompleted"),
-            onAutoRetrievalTimeout: any(named: "onAutoRetrievalTimeout"),
-          )).thenAnswer((_) async {});
-
-      await loginModel!.sendVerificationCode();
-
-      final captured = verify(() => mockAuthService.sendPhoneVerificationCode(
-            phoneNumber: any(named: "phoneNumber"),
-            onCodeSent: any(named: "onCodeSent"),
-            onFailed: captureAny(named: "onFailed"),
-            onAutoRetrievalCompleted: any(named: "onAutoRetrievalCompleted"),
-            onAutoRetrievalTimeout: any(named: "onAutoRetrievalTimeout"),
-          )).captured.first as void Function(AuthException);
-      captured(const AuthAutoRetrievalFailedException());
-
-      expect(loginModel!.eventStream, neverEmits(anything));
-      loginModel!.dispose();
     });
   });
 

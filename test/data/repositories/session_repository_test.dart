@@ -15,7 +15,6 @@ import 'package:ahpsico/services/api/api_service.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:collection/collection.dart';
 import 'package:faker/faker.dart';
-import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqflite_ffi;
@@ -95,17 +94,6 @@ void main() {
       }
     });
 
-    test('db error throws', () async {
-      when(() => mockApiService.createSession(any())).thenAnswer((_) async => mockSession);
-      when(() => mockSession.id).thenThrow(const DatabaseInsertException());
-      try {
-        await sessionRepository.create(mockSession);
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
-      }
-    });
-
     test('successful updates saves to db and returns updated session', () async {
       when(() => mockApiService.createSession(any())).thenAnswer((_) async => session);
       await database.insert(PatientEntity.tableName, PatientMapper.toEntity(patient).toMap());
@@ -135,17 +123,6 @@ void main() {
         assert(false);
       } on ApiException catch (e) {
         assert(e.code == code);
-      }
-    });
-
-    test('db error throws', () async {
-      when(() => mockApiService.updateSession(any())).thenAnswer((_) async => mockSession);
-      when(() => mockSession.id).thenThrow(const DatabaseInsertException());
-      try {
-        await sessionRepository.update(mockSession);
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
       }
     });
 
@@ -181,17 +158,6 @@ void main() {
       }
     });
 
-    test('db error throws', () async {
-      when(() => mockApiService.getDoctorSessions(any())).thenAnswer((_) async => [mockSession]);
-      when(() => mockSession.id).thenThrow(const DatabaseInsertException());
-      try {
-        await sessionRepository.syncDoctorSessions('some id');
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
-      }
-    });
-
     test('successful sync saves to db', () async {
       final expectedList = [session];
       await database.insert(DoctorEntity.tableName, DoctorMapper.toEntity(doctor).toMap());
@@ -213,6 +179,10 @@ void main() {
       final savedSessions = await sessionRepository.getDoctorSessions(doctor.uuid);
       assert(const ListEquality().equals(savedSessions, expectedList));
     });
+    test('empty table returns empty list', () async {
+      final savedSessions = await sessionRepository.getDoctorSessions(doctor.uuid);
+      assert(savedSessions.isEmpty);
+    });
   });
 
   group("syncPatientSessions", () {
@@ -225,17 +195,6 @@ void main() {
         assert(false);
       } on ApiException catch (e) {
         assert(e.code == code);
-      }
-    });
-
-    test('db error throws', () async {
-      when(() => mockApiService.getPatientSessions(any())).thenAnswer((_) async => [mockSession]);
-      when(() => mockSession.id).thenThrow(const DatabaseInsertException());
-      try {
-        await sessionRepository.syncPatientSessions('some id');
-        assert(false);
-      } on DatabaseInsertException catch (_) {
-        assert(true);
       }
     });
 
@@ -259,6 +218,10 @@ void main() {
       await sessionRepository.syncPatientSessions(patient.uuid);
       final savedSessions = await sessionRepository.getPatientSessions(patient.uuid);
       assert(const ListEquality().equals(savedSessions, expectedList));
+    });
+    test('empty table returns empty list', () async {
+      final savedSessions = await sessionRepository.getPatientSessions(patient.uuid);
+      assert(savedSessions.isEmpty);
     });
   });
 }

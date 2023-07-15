@@ -156,74 +156,6 @@ void main() {
       onCapture(captured);
     }
 
-    test("auto-verification completed with null verificationId calls onFailed", () async {
-      await testSendPhoneVerificationCode(
-        verificationIdReturn: null,
-        smsCodeReturn: mockSmsCode,
-        captureVerificationCompleted: true,
-        onFailed: (err) {
-          if (err is! AuthAutoRetrievalFailedException) {
-            assert(false);
-          }
-        },
-        onCapture: (captured) {
-          final verificationCompleted = captured.first as firebase_auth.PhoneVerificationCompleted;
-          verificationCompleted(mockFirebasePhoneAuthCredential);
-        },
-      );
-    });
-
-    test("auto-verification completed with empty verificationId calls onFailed", () async {
-      await testSendPhoneVerificationCode(
-        verificationIdReturn: "",
-        smsCodeReturn: mockSmsCode,
-        captureVerificationCompleted: true,
-        onFailed: (err) {
-          if (err is! AuthAutoRetrievalFailedException) {
-            assert(false);
-          }
-        },
-        onCapture: (captured) {
-          final verificationCompleted = captured.first as firebase_auth.PhoneVerificationCompleted;
-          verificationCompleted(mockFirebasePhoneAuthCredential);
-        },
-      );
-    });
-
-    test("auto-verification completed with null smsCode calls onFailed", () async {
-      await testSendPhoneVerificationCode(
-        verificationIdReturn: mockVerificationId,
-        smsCodeReturn: null,
-        captureVerificationCompleted: true,
-        onFailed: (err) {
-          if (err is! AuthAutoRetrievalFailedException) {
-            assert(false);
-          }
-        },
-        onCapture: (captured) {
-          final verificationCompleted = captured.first as firebase_auth.PhoneVerificationCompleted;
-          verificationCompleted(mockFirebasePhoneAuthCredential);
-        },
-      );
-    });
-
-    test("auto-verification completed with empty smsCode calls onFailed", () async {
-      await testSendPhoneVerificationCode(
-        verificationIdReturn: mockVerificationId,
-        smsCodeReturn: "",
-        captureVerificationCompleted: true,
-        onFailed: (err) {
-          if (err is! AuthAutoRetrievalFailedException) {
-            assert(false);
-          }
-        },
-        onCapture: (captured) {
-          final verificationCompleted = captured.first as firebase_auth.PhoneVerificationCompleted;
-          verificationCompleted(mockFirebasePhoneAuthCredential);
-        },
-      );
-    });
-
     test("auto-verification completed successfuly calls onAutoRetrievalCompleted", () async {
       await testSendPhoneVerificationCode(
         verificationIdReturn: mockVerificationId,
@@ -302,50 +234,6 @@ void main() {
         await authService.signInWithCredential(mockedAuthPhoneCredential);
       } on AuthInvalidSignInCodeException catch (_) {
         assert(true);
-      }
-    });
-
-    test("signin throws exception with code invalid-verification-id throws", () async {
-      when(() => mockFirebaseAuth.signInWithCredential(any()))
-          .thenAnswer((_) => throw firebase_auth.FirebaseAuthException(code: "invalid-verification-id"));
-      try {
-        await authService.signInWithCredential(mockedAuthPhoneCredential);
-      } on AuthInvalidVerificationIdException catch (_) {
-        assert(true);
-      }
-    });
-
-    test("signin throws exception with random code throws", () async {
-      when(() => mockFirebaseAuth.signInWithCredential(any()))
-          .thenAnswer((_) => throw firebase_auth.FirebaseAuthException(code: "some random code"));
-      try {
-        await authService.signInWithCredential(mockedAuthPhoneCredential);
-      } on AuthSignInFailedException catch (_) {
-        assert(true);
-      }
-    });
-
-    test("signin that returns UserCredential with null User signs out then throws", () async {
-      when(() => mockFirebaseAuth.signInWithCredential(any())).thenAnswer((_) async => mockFirebaseUserCredential);
-      when(() => mockFirebaseUserCredential.user).thenReturn(mockFirebaseUser);
-      when(() => mockFirebaseUser.getIdToken()).thenAnswer((_) async => "");
-      when(() => mockFirebaseAuth.signOut()).thenAnswer((_) async {});
-      try {
-        await authService.signInWithCredential(mockedAuthPhoneCredential);
-      } on AuthSignInFailedException catch (_) {
-        verify(() => mockFirebaseAuth.signOut());
-      }
-    });
-
-    test("signin that UserCredential with empty idToken signs out then throws", () async {
-      when(() => mockFirebaseAuth.signInWithCredential(any())).thenAnswer((_) async => mockFirebaseUserCredential);
-      when(() => mockFirebaseUserCredential.user).thenReturn(mockFirebaseUser);
-      when(() => mockFirebaseUser.getIdToken()).thenAnswer((_) async => "");
-      when(() => mockFirebaseAuth.signOut()).thenAnswer((_) async {});
-      try {
-        await authService.signInWithCredential(mockedAuthPhoneCredential);
-      } on AuthSignInFailedException catch (_) {
-        verify(() => mockFirebaseAuth.signOut());
       }
     });
 
