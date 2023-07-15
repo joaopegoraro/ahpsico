@@ -156,7 +156,7 @@ void main() {
     });
 
     test('successful delete removes from db', () async {
-      when(() => mockApiService.deleteAssignment(any())).thenAnswer((_) async {});
+      when(() => mockApiService.deleteAdvice(any())).thenAnswer((_) async {});
       await database.insert(PatientEntity.tableName, PatientMapper.toEntity(patient).toMap());
       await database.insert(DoctorEntity.tableName, DoctorMapper.toEntity(doctor).toMap());
       assert(

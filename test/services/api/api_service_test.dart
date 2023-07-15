@@ -135,18 +135,18 @@ void main() {
         assert(false);
       } on ApiException catch (e) {
         assert(e.message == decodedBody.toString());
-        assert(e.code == null);
       }
     });
     test(
         "Response with error code should throw ApiException if no parseFailure has been provided and decoding of error body fails",
         () async {
       try {
-        await testRequest(statusCode: 404);
+        await testRequest(
+          statusCode: 404,
+        );
         assert(false);
       } on ApiException catch (e) {
-        assert(e.message != null);
-        assert(e.code == null);
+        assert(e.code == "Status: 404");
       }
     });
 

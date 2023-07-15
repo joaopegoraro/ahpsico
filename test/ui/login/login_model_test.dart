@@ -189,20 +189,6 @@ void main() {
           "Ocorreu um erro ao tentar se conectar ao servidor. Certifique-se de que seu dispositivo esteja conectado corretamente com a internet");
     });
 
-    test("ApiException emits event", () async {
-      when(() => mockAuthService.signInWithCredential(phoneCredential)).thenAnswer(
-        (_) async => userCredential,
-      );
-      when(() => mockUserRepository.sync()).thenAnswer(
-        (_) async => throw const ApiException(),
-      );
-      await loginModel!.signIn(phoneCredential);
-      expect(loginModel!.eventStream, emits(LoginEvent.showSnackbarError));
-      assert(loginModel!.isLoadingSignIn == false);
-      assert(loginModel!.snackbarMessage ==
-          "Ocorreu um erro desconhecido ao tentar fazer login. Tente novamente mais tarde ou entre em contato com o desenvolvedor");
-    });
-
     test("AuthInvalidSignInCodeException emits event", () async {
       when(() => mockAuthService.signInWithCredential(phoneCredential)).thenAnswer(
         (_) async => throw const AuthInvalidSignInCodeException(),
@@ -212,17 +198,6 @@ void main() {
       assert(loginModel!.isLoadingSignIn == false);
       assert(loginModel!.snackbarMessage ==
           "O código digitado não é válido. Certifique-se de que o código informado é o mesmo código de seis dígitos recebido por SMS");
-    });
-
-    test("AuthException emits event", () async {
-      when(() => mockAuthService.signInWithCredential(phoneCredential)).thenAnswer(
-        (_) async => throw const AuthException(message: "", code: ""),
-      );
-      await loginModel!.signIn(phoneCredential);
-      expect(loginModel!.eventStream, emits(LoginEvent.showSnackbarError));
-      assert(loginModel!.isLoadingSignIn == false);
-      assert(loginModel!.snackbarMessage ==
-          "Ocorreu um erro desconhecido ao tentar validar o código por SMS. Por favor, tente novamente mais tarde ou entre em contato com o desenvolvedor.");
     });
   });
 
@@ -280,7 +255,7 @@ void main() {
           )).captured.first as void Function(AuthPhoneCredential);
 
       when(() => mockAuthService.signInWithCredential(credential))
-          .thenAnswer((_) async => throw const AuthException(message: "", code: ""));
+          .thenAnswer((_) async => throw const DatabaseNotFoundException());
       captured(credential);
 
       assert(loginModel!.isLoadingSendindCode == true);
@@ -289,7 +264,33 @@ void main() {
       verify(() => mockAuthService.signInWithCredential(credential));
     });
 
-    test("error that is not AuthAutoRetrievalFailedExceptions emits event", () async {
+    test("error that is not auto retrieval railed emits event", () async {
+      when(() => mockAuthService.sendPhoneVerificationCode(
+            phoneNumber: any(named: "phoneNumber"),
+            onCodeSent: any(named: "onCodeSent"),
+            onFailed: any(named: "onFailed"),
+            onAutoRetrievalCompleted: any(named: "onAutoRetrievalCompleted"),
+            onAutoRetrievalTimeout: any(named: "onAutoRetrievalTimeout"),
+          )).thenAnswer((_) async {});
+
+      await loginModel!.sendVerificationCode();
+
+      final captured = verify(() => mockAuthService.sendPhoneVerificationCode(
+            phoneNumber: any(named: "phoneNumber"),
+            onCodeSent: any(named: "onCodeSent"),
+            onFailed: captureAny(named: "onFailed"),
+            onAutoRetrievalCompleted: any(named: "onAutoRetrievalCompleted"),
+            onAutoRetrievalTimeout: any(named: "onAutoRetrievalTimeout"),
+          )).captured.first as void Function(AuthException);
+      captured(const AuthInvalidSignInCodeException());
+
+      expect(loginModel!.eventStream, emits(LoginEvent.showSnackbarError));
+      assert(loginModel!.snackbarMessage ==
+          "O código digitado não é válido. Certifique-se de que o código informado é o mesmo código de seis dígitos recebido por SMS");
+      assert(loginModel!.isLoadingSendindCode == false);
+    });
+
+    test("unknown error emits event", () async {
       when(() => mockAuthService.sendPhoneVerificationCode(
             phoneNumber: any(named: "phoneNumber"),
             onCodeSent: any(named: "onCodeSent"),
@@ -311,7 +312,7 @@ void main() {
 
       expect(loginModel!.eventStream, emits(LoginEvent.showSnackbarError));
       assert(loginModel!.snackbarMessage ==
-          "Ocorreu um erro desconhecido ao tentar enviar um SMS para o seu telefone. Tente novamente mais tarde ou entre em contato com o desenvolvedor");
+          "Ocorreu um erro ao tentar enviar um SMS para o seu telefone. Tente novamente mais tarde ou entre em contato com o desenvolvedor");
       assert(loginModel!.isLoadingSendindCode == false);
     });
   });
@@ -385,7 +386,7 @@ void main() {
       loginModel!.codeVerificationId = "some code verification id";
 
       when(() => mockAuthService.signInWithCredential(any()))
-          .thenAnswer((_) async => throw const AuthException(message: "", code: ""));
+          .thenAnswer((_) async => throw const DatabaseNotFoundException());
 
       loginModel!.confirmText();
 

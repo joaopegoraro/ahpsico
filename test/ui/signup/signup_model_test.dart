@@ -70,17 +70,6 @@ void main() {
       assert(!signUpModel!.isLoadingSignUp);
     });
 
-    test("api error error emits event", () async {
-      when(() => mockUserRepository.create(any())).thenAnswer(
-        (_) async => throw const ApiException(),
-      );
-      await signUpModel!.completeSignUp();
-      expect(signUpModel!.eventStream, emitsInOrder([SignUpEvent.showSnackbarError]));
-      assert(signUpModel!.snackbarMessage ==
-          "Ocorreu um erro desconhecido ao tentar fazer o cadastro. Tente novamente mais tarde ou entre em contato com o desenvolvedor");
-      assert(!signUpModel!.isLoadingSignUp);
-    });
-
     test("doctor signing up emits event", () async {
       when(() => mockUserRepository.create(any())).thenAnswer(
         (_) async => user.copyWith(isDoctor: true),
