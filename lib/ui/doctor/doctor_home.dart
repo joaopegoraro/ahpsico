@@ -7,11 +7,11 @@ import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/components/session_card.dart';
-import 'package:ahpsico/ui/components/topbar.dart';
 import 'package:ahpsico/ui/doctor/doctor_home_model.dart';
 import 'package:ahpsico/ui/doctor/widgets/doctor_fab.dart';
 import 'package:ahpsico/ui/doctor/widgets/doctor_fab_action.dart';
 import 'package:ahpsico/ui/doctor/widgets/home_button.dart';
+import 'package:ahpsico/ui/doctor/widgets/home_topbar.dart';
 import 'package:flutter/material.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
@@ -53,7 +53,7 @@ class DoctorHome extends StatelessWidget {
         builder: (context, model) {
           return NestedScrollView(
             headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-              return [const AhpsicoTopbar(title: "Olá, Andréa")];
+              return [const HomeTopbar(userName: "Andréa")];
             },
             body: ListView(
               children: [
@@ -143,6 +143,28 @@ class DoctorHome extends StatelessWidget {
 
 final List<Session> testSessions = sessions;
 final sessions = <Session>[
+  Session(
+    id: 0,
+    doctor: const Doctor(
+      uuid: "",
+      name: "Andréa Hahmeyer Pegoraro",
+      phoneNumber: "",
+      description: "",
+      crp: "",
+      pixKey: "",
+      paymentDetails: "",
+    ),
+    patient: const Patient(
+      uuid: "",
+      name: "Luiza Mel",
+      phoneNumber: "(49) 98247-7126",
+    ),
+    groupId: 0,
+    groupIndex: 2,
+    status: SessionStatus.concluded,
+    type: SessionType.individual,
+    date: DateTime.now(),
+  ),
   Session(
     id: 0,
     doctor: const Doctor(

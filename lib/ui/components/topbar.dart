@@ -6,9 +6,11 @@ class AhpsicoTopbar extends StatelessWidget implements PreferredSizeWidget {
   const AhpsicoTopbar({
     super.key,
     required this.title,
+    this.onBackPressed,
   });
 
   final String title;
+  final VoidCallback? onBackPressed;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -18,25 +20,12 @@ class AhpsicoTopbar extends StatelessWidget implements PreferredSizeWidget {
     return SliverAppBar(
       backgroundColor: AhpsicoColors.light,
       elevation: 0,
-      leading: Padding(
-        padding: const EdgeInsets.only(left: 16),
-        child: IconButton(
-          onPressed: () {/* TODO */},
-          padding: EdgeInsets.zero,
-          splashRadius: 24,
-          constraints: const BoxConstraints(),
-          icon: CircleAvatar(
-            backgroundColor: AhpsicoColors.violet,
-            radius: 32,
-            child: Text(
-              "A",
-              style: AhpsicoText.title3Style.copyWith(
-                color: AhpsicoColors.light,
-              ),
-            ),
-          ),
-        ),
+      leading: IconButton(
+        onPressed: onBackPressed,
+        padding: EdgeInsets.zero,
+        icon: const Icon(Icons.arrow_back),
       ),
+      centerTitle: true,
       title: Text(
         title,
         style: AhpsicoText.title3Style.copyWith(
