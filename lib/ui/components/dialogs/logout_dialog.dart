@@ -3,39 +3,31 @@ import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class SignUpConfirmationDialog extends StatelessWidget {
-  const SignUpConfirmationDialog({
+class LogoutDialog extends StatelessWidget {
+  const LogoutDialog({
     super.key,
-    required this.name,
-    required this.isDoctor,
-    required this.onConfirm,
+    required this.onLogout,
   });
 
-  final String name;
-  final bool isDoctor;
-  final VoidCallback onConfirm;
-
-  String get accountType => isDoctor ? "Psicólogo" : "Paciente";
+  final VoidCallback onLogout;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text("Aviso"),
-      content: Text(
-        "$name, tem certeza que deseja criar uma conta de $accountType? Não será possível mudar sua conta no futuro",
-      ),
+      content: const Text("Tem certeza que deseja efetuar logout? Você irá voltar para tela de login"),
       actions: [
         TextButton(
-          onPressed: onConfirm,
+          onPressed: onLogout,
           child: Text(
-            'Sim, sou um $accountType',
+            'Sim, desejo fazer logout',
             style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
           ),
         ),
         TextButton(
           onPressed: context.pop,
           child: Text(
-            'Não, acho que cliquei sem querer...',
+            'Não, desejo continuar usando o aplicativo',
             style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
           ),
         ),

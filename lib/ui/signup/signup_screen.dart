@@ -54,8 +54,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         showDialog(
           context: context,
           builder: (context) => SignUpCancelationDialog(
-            cancelSignUp: model.cancelSignUp,
-            abortCancelation: context.pop,
+            onConfirm: model.cancelSignUp,
           ),
         );
       case SignUpEvent.openConfirmationDialog:
@@ -68,7 +67,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               context.pop();
               model.completeSignUp();
             },
-            onCancel: context.pop,
           ),
         );
     }

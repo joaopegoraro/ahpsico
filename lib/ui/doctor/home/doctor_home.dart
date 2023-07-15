@@ -2,14 +2,15 @@ import 'package:ahpsico/ui/advices/advices_screen.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
+import 'package:ahpsico/ui/components/dialogs/logout_dialog.dart';
 import 'package:ahpsico/ui/components/session_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/doctor/detail/doctor_detail.dart';
 import 'package:ahpsico/ui/doctor/home/doctor_home_model.dart';
 import 'package:ahpsico/ui/doctor/widgets/doctor_fab.dart';
 import 'package:ahpsico/ui/doctor/widgets/doctor_fab_action.dart';
-import 'package:ahpsico/ui/doctor/widgets/home_button.dart';
-import 'package:ahpsico/ui/doctor/widgets/home_topbar.dart';
+import 'package:ahpsico/ui/components/home_button.dart';
+import 'package:ahpsico/ui/components/home_topbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:ahpsico/ui/patient/list/patient_list.dart';
 import 'package:ahpsico/ui/schedule/schedule_screen.dart';
@@ -38,8 +39,13 @@ class DoctorHome extends StatelessWidget {
       case DoctorHomeEvent.openInvitePatientBottomSheet:
       case DoctorHomeEvent.openSendAdviceBottomSheet:
       case DoctorHomeEvent.openSendAdviceToAllBottomSheet:
-      case DoctorHomeEvent.openLogoutConfirmationDialog:
-      // TODO
+      case DoctorHomeEvent.openLogoutDialog:
+        showDialog(
+          context: context,
+          builder: (context) => LogoutDialog(
+            onLogout: () => model.logout(showMessage: true),
+          ),
+        );
     }
   }
 
@@ -52,7 +58,7 @@ class DoctorHome extends StatelessWidget {
       builder: (context, model) {
         return Scaffold(
             backgroundColor: AhpsicoColors.light,
-            floatingActionButton: model.isFetchingScreenData
+            floatingActionButton: model.isLoading
                 ? null
                 : DoctorFab(
                     distance: 112,
@@ -73,7 +79,7 @@ class DoctorHome extends StatelessWidget {
                   ),
             body: Builder(
               builder: (context) {
-                if (model.isFetchingScreenData) {
+                if (model.isLoading) {
                   return const Center(
                     child: CircularProgressIndicator(
                       color: AhpsicoColors.violet,
@@ -87,9 +93,7 @@ class DoctorHome extends StatelessWidget {
                       HomeTopbar(
                         userName: model.user!.firstName,
                         goToProfile: () => context.push(DoctorDetail.route),
-                        logout: () {
-                          // TODO: Open logout dialog
-                        },
+                        logout: model.openLogoutDialog,
                       )
                     ];
                   },

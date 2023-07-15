@@ -1,16 +1,15 @@
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class SignUpCancelationDialog extends StatelessWidget {
   const SignUpCancelationDialog({
     super.key,
-    required this.cancelSignUp,
-    required this.abortCancelation,
+    required this.onConfirm,
   });
 
-  final VoidCallback cancelSignUp;
-  final VoidCallback abortCancelation;
+  final VoidCallback onConfirm;
 
   @override
   Widget build(BuildContext context) {
@@ -19,14 +18,14 @@ class SignUpCancelationDialog extends StatelessWidget {
       content: const Text("Tem certeza que deseja cancelar o seu cadastro? Você irá voltar para tela de login"),
       actions: [
         TextButton(
-          onPressed: cancelSignUp,
+          onPressed: onConfirm,
           child: Text(
             'Sim, desejo cancelar meu cadastro',
             style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
           ),
         ),
         TextButton(
-          onPressed: abortCancelation,
+          onPressed: context.pop,
           child: Text(
             'Não, desejo continuar meu cadastro',
             style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
