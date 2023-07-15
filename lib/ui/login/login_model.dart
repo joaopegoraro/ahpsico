@@ -59,6 +59,9 @@ class LoginModel extends ViewModel<LoginEvent> {
 
   /* Fields */
 
+  bool _isLoadingAutoSignIn = false;
+  bool get isLoadingAutoSignIn => _isLoadingAutoSignIn;
+
   bool _isLoadingSignIn = false;
   bool get isLoadingSignIn => _isLoadingSignIn;
 
@@ -234,10 +237,14 @@ class LoginModel extends ViewModel<LoginEvent> {
   }
 
   Future<void> autoSignIn() async {
+    updateUi(() => _isLoadingAutoSignIn = true);
+
     final token = await _authService.getUserToken();
 
     final isUserAuthenticated = token?.idToken.isNotEmpty == true;
-    if (!isUserAuthenticated) return;
+    if (!isUserAuthenticated) {
+      return updateUi(() => _isLoadingAutoSignIn = false);
+    }
 
     try {
       final user = await _userRepository.get();
@@ -249,5 +256,7 @@ class LoginModel extends ViewModel<LoginEvent> {
     } on DatabaseNotFoundException catch (_) {
       emitEvent(LoginEvent.navigateToSignUp);
     }
+
+    updateUi(() => _isLoadingAutoSignIn = false);
   }
 }

@@ -13,6 +13,8 @@ class User {
   final String phoneNumber;
   final bool isDoctor;
 
+  String get firstName => name.split(" ").first;
+
   User copyWith({
     String? uid,
     String? name,

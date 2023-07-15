@@ -1,11 +1,10 @@
 import 'package:ahpsico/data/database/ahpsico_database.dart';
 import 'package:ahpsico/data/database/entities/doctor_entity.dart';
 import 'package:ahpsico/data/database/entities/invite_entity.dart';
-import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/database/mappers/invite_mapper.dart';
 import 'package:ahpsico/models/invite.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/utils/extensions.dart';
+import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
@@ -14,8 +13,13 @@ abstract interface class InviteRepository {
   /// to the local database;
   ///
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote creating;
-  /// - [DatabaseInsertException] when something goes wrong when inserting the new [Invite];
+  /// - [ApiPatientNotRegisteredException] when there is not patient registered
+  /// with the phone number that was passed;
+  /// - [ApiPatientAlreadyWithDoctorException] when the patient you are trying to
+  /// invite already is your patient;
+  /// - [ApiInviteAlreadySentException] when this invite was already sent to the patient;
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   ///
   /// returns:
   /// - the created [Invite];
@@ -25,14 +29,11 @@ abstract interface class InviteRepository {
   /// to the local database;
   ///
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote fethcing;
-  /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
+  /// - [ApiInvitesNotFoundException] when there are no invites tied to this account
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<void> sync();
 
-  /// throws:
-  /// - [DatabaseMappingException] when something goes wrong when converting the
-  /// database data to a [Invite] model;
-  ///
   /// returns:
   /// - the [Invite] list;
   Future<List<Invite>> get();
@@ -40,29 +41,22 @@ abstract interface class InviteRepository {
   /// Deletes the [Invite] with the provided [id];
   ///
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote deleting;
-  /// - [DatabaseNotFoundException] when there is no [Invite] to delete with
-  /// the provided [id];
-  /// from the database;
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<void> delete(int id);
 
   /// Accept the [Invite] with the provided [id], then deletes it locally;
   ///
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote accepting;
-  /// - [DatabaseNotFoundException] when there is no [Invite] to delete with
-  /// the provided [id];
-  /// from the database;
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<void> accept(int id);
 
   /// Clears the table;
-  ///
-  /// throws:
-  /// - [DatabaseInsertException] when something goes wrong when deleting the data;
   Future<void> clear();
 }
 
-final inviteRepositoryProvider = Provider((ref) async {
+final inviteRepositoryProvider = Provider<InviteRepository>((ref) {
   final apiService = ref.watch(apiServiceProvider);
   final database = ref.watch(ahpsicoDatabaseProvider);
   return InviteRepositoryImpl(apiService: apiService, database: database);
@@ -81,90 +75,67 @@ final class InviteRepositoryImpl implements InviteRepository {
   @override
   Future<Invite> create(String phoneNumber) async {
     final createdInvite = await _api.createInvite(phoneNumber);
-    try {
-      await _db.insert(
-        InviteEntity.tableName,
-        InviteMapper.toEntity(createdInvite).toMap(),
-        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-      );
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
-    }
+    await _db.insert(
+      InviteEntity.tableName,
+      InviteMapper.toEntity(createdInvite).toMap(),
+      conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
+    );
     return createdInvite;
   }
 
   @override
   Future<void> sync() async {
     final invites = await _api.getInvites();
-    try {
-      final batch = _db.batch();
-      batch.delete(InviteEntity.tableName);
-      for (final invite in invites) {
-        batch.insert(
-          InviteEntity.tableName,
-          InviteMapper.toEntity(invite).toMap(),
-          conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-        );
-      }
-      await batch.commit(noResult: true);
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
+    final batch = _db.batch();
+    batch.delete(InviteEntity.tableName);
+    for (final invite in invites) {
+      batch.insert(
+        InviteEntity.tableName,
+        InviteMapper.toEntity(invite).toMap(),
+        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
+      );
     }
+    await batch.commit(noResult: true);
   }
 
   @override
   Future<List<Invite>> get() async {
     final invitesMap = await _db.query(InviteEntity.tableName);
 
-    if (invitesMap.isEmpty) {
-      throw const DatabaseNotFoundException(message: "There were no invites found tied to this account");
-    }
-    try {
-      return Future.wait(
-        invitesMap.map((inviteMap) async {
-          final entity = InviteEntity.fromMap(inviteMap);
-          final doctorsMap = await _db.query(
-            DoctorEntity.tableName,
-            where: "${DoctorEntity.uuidColumn} = ?",
-            whereArgs: [entity.doctorId],
-          );
-          final doctorEntity = DoctorEntity.fromMap(doctorsMap.first);
-          return InviteMapper.toInvite(entity, doctorEntity: doctorEntity);
-        }).toList(),
-      );
-    } on TypeError catch (e, stackTrace) {
-      DatabaseMappingException(message: e.toString()).throwWithStackTrace(stackTrace);
-    }
+    return Future.wait(
+      invitesMap.map((inviteMap) async {
+        final entity = InviteEntity.fromMap(inviteMap);
+        final doctorsMap = await _db.query(
+          DoctorEntity.tableName,
+          where: "${DoctorEntity.uuidColumn} = ?",
+          whereArgs: [entity.doctorId],
+        );
+        final doctorEntity = DoctorEntity.fromMap(doctorsMap.first);
+        return InviteMapper.toInvite(entity, doctorEntity: doctorEntity);
+      }).toList(),
+    );
   }
 
   @override
   Future<void> accept(int id) async {
     await _api.acceptInvite(id);
 
-    try {
-      await _db.delete(
-        InviteEntity.tableName,
-        where: "${InviteEntity.idColumn} = ?",
-        whereArgs: [id],
-      );
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseNotFoundException(message: e.toString()).throwWithStackTrace(stackTrace);
-    }
+    await _db.delete(
+      InviteEntity.tableName,
+      where: "${InviteEntity.idColumn} = ?",
+      whereArgs: [id],
+    );
   }
 
   @override
   Future<void> delete(int id) async {
     await _api.deleteInvite(id);
 
-    try {
-      await _db.delete(
-        InviteEntity.tableName,
-        where: "${InviteEntity.idColumn} = ?",
-        whereArgs: [id],
-      );
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseNotFoundException(message: e.toString()).throwWithStackTrace(stackTrace);
-    }
+    await _db.delete(
+      InviteEntity.tableName,
+      where: "${InviteEntity.idColumn} = ?",
+      whereArgs: [id],
+    );
   }
 
   @override

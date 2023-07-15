@@ -13,30 +13,6 @@ class AuthException implements Exception {
   }
 }
 
-class AuthSignInFailedException extends AuthException {
-  const AuthSignInFailedException({String? message})
-      : super(
-          message: "There was a problem trying to sign in: $message",
-          code: "auth_sign_in_failed",
-        );
-}
-
-class AuthAutoRetrievalFailedException extends AuthException {
-  const AuthAutoRetrievalFailedException({String? message})
-      : super(
-          message: "There was a problem trying to automatically retrieve the SMS code: $message",
-          code: "auth_auto_retrieval_failed",
-        );
-}
-
-class AuthInvalidVerificationIdException extends AuthException {
-  const AuthInvalidVerificationIdException({String? message})
-      : super(
-          message: "The supplied verification ID isn't valid: $message",
-          code: "auth_invalid_sign_in_verification_id",
-        );
-}
-
 class AuthInvalidSignInCodeException extends AuthException {
   const AuthInvalidSignInCodeException({String? message})
       : super(

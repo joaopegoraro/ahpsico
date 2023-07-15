@@ -4,18 +4,21 @@ import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/database/mappers/user_mapper.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/api_service.dart';
+import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class UserRepository {
   /// throws:
-  /// - [ApiException] when something goes wrong with [ApiService.login];
+  /// - [ApiUserNotRegisteredException] when the user trying to login is
+  /// not yet registered.
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   /// the fetched [User];
   Future<void> sync();
 
   /// throws:
   /// - [DatabaseNotFoundException] when there are no users to retrieve;
-  /// database data to a [User] model;
   ///
   /// returns:
   /// - the [User] tied to this account;
@@ -24,7 +27,9 @@ abstract interface class UserRepository {
   /// Creates remotely an [User] and then saves it to the local database;
   ///
   /// throws:
-  /// - [ApiException] when something goes wrong with the [ApiService.signUp];
+  /// - [ApiUserAlreadyRegisteredException] when the user trying to sign up is
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   ///
   /// returns:
   /// - the created [User];

@@ -3,7 +3,12 @@ import 'package:ahpsico/ui/components/topbar.dart';
 import 'package:flutter/material.dart';
 
 class HomeTopbar extends StatelessWidget {
-  const HomeTopbar({super.key, required this.userName, this.goToProfile, this.logout});
+  const HomeTopbar({
+    super.key,
+    required this.userName,
+    required this.goToProfile,
+    required this.logout,
+  });
 
   final String userName;
   final VoidCallback? goToProfile;

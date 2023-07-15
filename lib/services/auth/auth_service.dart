@@ -2,7 +2,6 @@ import 'package:ahpsico/services/auth/credentials.dart';
 import 'package:ahpsico/services/auth/exceptions.dart';
 import 'package:ahpsico/services/auth/token.dart';
 import 'package:ahpsico/services/auth/auth_user.dart';
-import 'package:ahpsico/utils/extensions.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,8 +19,6 @@ abstract interface class AuthService {
 
   /// throws [AuthException] :
   /// - [AuthInvalidSignInCodeException] when the provided sms code is not valid;
-  /// - [AuthInvalidVerificationIdException] when the provided verification id is not valid;
-  /// - [AuthSignInFailedException] when something unexpected happeneded when trying to sign in
   Future<AuthUserCredential> signInWithCredential(AuthPhoneCredential phoneCredential);
 
   /// Signs out the current user.
@@ -61,18 +58,14 @@ final class AuthServiceImpl implements AuthService {
       verificationCompleted: (firebasePhoneAuthCredential) {
         final verificationId = firebasePhoneAuthCredential.verificationId;
         final smsCode = firebasePhoneAuthCredential.smsCode;
-        if (verificationId == null || verificationId.isEmpty) {
-          return onFailed(const AuthAutoRetrievalFailedException());
+        if (smsCode?.isNotEmpty == true && verificationId?.isNotEmpty == true) {
+          final phoneCredential = AuthPhoneCredential(
+            phoneNumber: phoneNumber,
+            verificationId: verificationId!,
+            smsCode: smsCode!,
+          );
+          onAutoRetrievalCompleted(phoneCredential);
         }
-        if (smsCode == null || smsCode.isEmpty) {
-          return onFailed(const AuthAutoRetrievalFailedException());
-        }
-        final phoneCredential = AuthPhoneCredential(
-          phoneNumber: phoneNumber,
-          verificationId: verificationId,
-          smsCode: smsCode,
-        );
-        onAutoRetrievalCompleted(phoneCredential);
       },
       verificationFailed: (error) {
         final authException = AuthException(message: error.message, code: error.code);
@@ -95,28 +88,15 @@ final class AuthServiceImpl implements AuthService {
     firebase_auth.UserCredential firebaseUserCredential;
     try {
       firebaseUserCredential = await _firebaseAuth.signInWithCredential(firebasePhoneCredential);
-    } on firebase_auth.FirebaseAuthException catch (err, stackTrace) {
-      switch (err.code) {
-        case "invalid-verification-code":
-          throw AuthInvalidSignInCodeException(message: err.message);
-        case "invalid-verification-id":
-          throw AuthInvalidVerificationIdException(message: err.message);
-        default:
-          AuthSignInFailedException(message: err.message).throwWithStackTrace(stackTrace);
+    } on firebase_auth.FirebaseAuthException catch (err) {
+      if (err.code == "invalid-verification-code") {
+        throw AuthInvalidSignInCodeException(message: err.message);
       }
+      rethrow;
     }
 
-    final firebaseUser = firebaseUserCredential.user;
-    if (firebaseUser == null) {
-      await _firebaseAuth.signOut();
-      throw const AuthSignInFailedException(message: "FirebaseUserCredential returned a null user");
-    }
-
+    final firebaseUser = firebaseUserCredential.user!;
     final idToken = await firebaseUser.getIdToken();
-    if (idToken.isEmpty) {
-      await _firebaseAuth.signOut();
-      throw const AuthSignInFailedException(message: "FirebaseUser returned an empty id token");
-    }
     final token = AuthToken(idToken);
 
     final user = AuthUser(

@@ -2,11 +2,10 @@ import 'package:ahpsico/data/database/ahpsico_database.dart';
 import 'package:ahpsico/data/database/entities/session_entity.dart';
 import 'package:ahpsico/data/database/entities/doctor_entity.dart';
 import 'package:ahpsico/data/database/entities/patient_entity.dart';
-import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/database/mappers/session_mapper.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/utils/extensions.dart';
+import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
@@ -14,28 +13,21 @@ abstract interface class SessionRepository {
   /// Creates remotely an [Session] and then saves it to the local database;
   ///
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote creating;
-  /// - [DatabaseInsertException] when something goes wrong when inserting
-  /// the new [Session];
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   ///
   /// returns:
   /// - the created [Session];
   Future<Session> create(Session session);
 
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote updating;
-  /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   ///
   /// returns:
   /// - the updated [Session];
   Future<Session> update(Session session);
 
-  /// throws:
-  /// - [DatabaseNotFoundException] when something goes wrong when trying to retrieve the
-  /// [Session] list;
-  /// - [DatabaseMappingException] when something goes wrong when converting the
-  /// database data to a list of [Session] models;
-  ///
   /// returns:
   /// - the [Session] list of the [Patient] with [patientId];
   Future<List<Session>> getPatientSessions(
@@ -47,19 +39,13 @@ abstract interface class SessionRepository {
   /// and saves it in the local database;
   ///
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote fethcing;
-  /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<void> syncPatientSessions(
     String patientId, {
     bool? upcoming,
   });
 
-  /// throws:
-  /// - [DatabaseNotFoundException] when something goes wrong when trying to retrieve the
-  /// [Session] list;
-  /// - [DatabaseMappingException] when something goes wrong when converting the
-  /// database data to a list of [Session] models;
-  ///
   /// returns:
   /// - the [Session] list of the [Doctor] with [doctorId];
   Future<List<Session>> getDoctorSessions(
@@ -71,21 +57,18 @@ abstract interface class SessionRepository {
   /// and saves it in the local database;
   ///
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote fethcing;
-  /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<void> syncDoctorSessions(
     String doctorId, {
     DateTime? date,
   });
 
   /// Clears the table;
-  ///
-  /// throws:
-  /// - [DatabaseInsertException] when something goes wrong when deleting the data;
   Future<void> clear();
 }
 
-final sessionRepositoryProvider = Provider((ref) {
+final sessionRepositoryProvider = Provider<SessionRepository>((ref) {
   final apiService = ref.watch(apiServiceProvider);
   final database = ref.watch(ahpsicoDatabaseProvider);
   return SessionRepositoryImpl(apiService: apiService, database: database);
@@ -104,33 +87,25 @@ final class SessionRepositoryImpl implements SessionRepository {
   @override
   Future<Session> create(Session session) async {
     final createdSession = await _api.createSession(session);
-    try {
-      await _db.insert(
-        SessionEntity.tableName,
-        SessionMapper.toEntity(createdSession).toMap(),
-        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-      );
-      return createdSession;
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
-    }
+    await _db.insert(
+      SessionEntity.tableName,
+      SessionMapper.toEntity(createdSession).toMap(),
+      conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
+    );
+    return createdSession;
   }
 
   @override
   Future<Session> update(Session session) async {
     final updatedSession = await _api.updateSession(session);
 
-    try {
-      await _db.insert(
-        SessionEntity.tableName,
-        SessionMapper.toEntity(updatedSession).toMap(),
-        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-      );
+    await _db.insert(
+      SessionEntity.tableName,
+      SessionMapper.toEntity(updatedSession).toMap(),
+      conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
+    );
 
-      return updatedSession;
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
-    }
+    return updatedSession;
   }
 
   @override
@@ -138,45 +113,39 @@ final class SessionRepositoryImpl implements SessionRepository {
     String patientId, {
     bool upcoming = false,
   }) async {
-    try {
-      // substract one hour so ongoing sessions also count as upcoming
-      final now = DateTime.now().subtract(const Duration(hours: 1)).millisecondsSinceEpoch;
-      final sessionsMap = await _db.query(
-        SessionEntity.tableName,
-        where: "${SessionEntity.patientIdColumn} = ?${upcoming ? " AND ${SessionEntity.dateColumn} >= ?" : ""}",
-        whereArgs: [patientId, if (upcoming) now],
+    // substract one hour so ongoing sessions also count as upcoming
+    final now = DateTime.now().subtract(const Duration(hours: 1)).millisecondsSinceEpoch;
+    final sessionsMap = await _db.query(
+      SessionEntity.tableName,
+      where: "${SessionEntity.patientIdColumn} = ?${upcoming ? " AND ${SessionEntity.dateColumn} >= ?" : ""}",
+      whereArgs: [patientId, if (upcoming) now],
+    );
+
+    final sessions = sessionsMap.map((sessionMap) async {
+      final entity = SessionEntity.fromMap(sessionMap);
+
+      final doctorsMap = await _db.query(
+        DoctorEntity.tableName,
+        where: "${DoctorEntity.uuidColumn} = ?",
+        whereArgs: [entity.doctorId],
       );
+      final doctorEntity = DoctorEntity.fromMap(doctorsMap.first);
 
-      final sessions = sessionsMap.map((sessionMap) async {
-        final entity = SessionEntity.fromMap(sessionMap);
+      final patientsMap = await _db.query(
+        PatientEntity.tableName,
+        where: "${PatientEntity.uuidColumn} = ?",
+        whereArgs: [patientId],
+      );
+      final patientEntity = PatientEntity.fromMap(patientsMap.first);
 
-        final doctorsMap = await _db.query(
-          DoctorEntity.tableName,
-          where: "${DoctorEntity.uuidColumn} = ?",
-          whereArgs: [entity.doctorId],
-        );
-        final doctorEntity = DoctorEntity.fromMap(doctorsMap.first);
+      return SessionMapper.toSession(
+        entity,
+        doctorEntity: doctorEntity,
+        patientEntity: patientEntity,
+      );
+    });
 
-        final patientsMap = await _db.query(
-          PatientEntity.tableName,
-          where: "${PatientEntity.uuidColumn} = ?",
-          whereArgs: [patientId],
-        );
-        final patientEntity = PatientEntity.fromMap(patientsMap.first);
-
-        return SessionMapper.toSession(
-          entity,
-          doctorEntity: doctorEntity,
-          patientEntity: patientEntity,
-        );
-      });
-
-      return Future.wait(sessions.toList());
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseNotFoundException(message: e.toString()).throwWithStackTrace(stackTrace);
-    } on TypeError catch (e, stackTrace) {
-      DatabaseMappingException(message: e.toString()).throwWithStackTrace(stackTrace);
-    }
+    return Future.wait(sessions.toList());
   }
 
   @override
@@ -187,26 +156,22 @@ final class SessionRepositoryImpl implements SessionRepository {
     // substract one hour so ongoing sessions also count as upcoming
     final now = DateTime.now().subtract(const Duration(hours: 1)).millisecondsSinceEpoch;
     final sessions = await _api.getPatientSessions(patientId, upcoming: upcoming);
-    try {
-      final batch = _db.batch();
+    final batch = _db.batch();
 
-      batch.delete(
+    batch.delete(
+      SessionEntity.tableName,
+      where: "${SessionEntity.patientIdColumn} = ?${upcoming == true ? " AND ${SessionEntity.dateColumn} >= ?" : ""}",
+      whereArgs: [patientId, if (upcoming == true) now],
+    );
+
+    for (final session in sessions) {
+      batch.insert(
         SessionEntity.tableName,
-        where: "${SessionEntity.patientIdColumn} = ?${upcoming == true ? " AND ${SessionEntity.dateColumn} >= ?" : ""}",
-        whereArgs: [patientId, if (upcoming == true) now],
+        SessionMapper.toEntity(session).toMap(),
+        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
       );
-
-      for (final session in sessions) {
-        batch.insert(
-          SessionEntity.tableName,
-          SessionMapper.toEntity(session).toMap(),
-          conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-        );
-      }
-      await batch.commit(noResult: true);
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
     }
+    await batch.commit(noResult: true);
   }
 
   @override
@@ -214,56 +179,50 @@ final class SessionRepositoryImpl implements SessionRepository {
     String doctorId, {
     DateTime? date,
   }) async {
-    try {
-      final today = DateTime.now();
-      final startOfToday = DateTime(today.year, today.month, today.day);
+    final today = DateTime.now();
+    final startOfToday = DateTime(today.year, today.month, today.day);
 
-      final tomorrow = today.add(const Duration(days: 1));
-      final startOfTomorrow = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final startOfTomorrow = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
 
-      final sessionsMap = await _db.query(
-        SessionEntity.tableName,
-        where: "${SessionEntity.doctorIdColumn} = ?"
-            "${date == null ? "" : " AND ${SessionEntity.dateColumn} >= ? AND ${SessionEntity.dateColumn} <= ?"}",
-        whereArgs: [
-          doctorId,
-          if (date != null) ...[
-            startOfToday.millisecondsSinceEpoch,
-            startOfTomorrow.millisecondsSinceEpoch,
-          ]
-        ],
+    final sessionsMap = await _db.query(
+      SessionEntity.tableName,
+      where: "${SessionEntity.doctorIdColumn} = ?"
+          "${date == null ? "" : " AND ${SessionEntity.dateColumn} >= ? AND ${SessionEntity.dateColumn} <= ?"}",
+      whereArgs: [
+        doctorId,
+        if (date != null) ...[
+          startOfToday.millisecondsSinceEpoch,
+          startOfTomorrow.millisecondsSinceEpoch,
+        ]
+      ],
+    );
+
+    final sessions = sessionsMap.map((sessionMap) async {
+      final entity = SessionEntity.fromMap(sessionMap);
+
+      final doctorsMap = await _db.query(
+        DoctorEntity.tableName,
+        where: "${DoctorEntity.uuidColumn} = ?",
+        whereArgs: [doctorId],
       );
+      final doctorEntity = DoctorEntity.fromMap(doctorsMap.first);
 
-      final sessions = sessionsMap.map((sessionMap) async {
-        final entity = SessionEntity.fromMap(sessionMap);
+      final patientsMap = await _db.query(
+        PatientEntity.tableName,
+        where: "${PatientEntity.uuidColumn} = ?",
+        whereArgs: [entity.patientId],
+      );
+      final patientEntity = PatientEntity.fromMap(patientsMap.first);
 
-        final doctorsMap = await _db.query(
-          DoctorEntity.tableName,
-          where: "${DoctorEntity.uuidColumn} = ?",
-          whereArgs: [doctorId],
-        );
-        final doctorEntity = DoctorEntity.fromMap(doctorsMap.first);
+      return SessionMapper.toSession(
+        entity,
+        doctorEntity: doctorEntity,
+        patientEntity: patientEntity,
+      );
+    });
 
-        final patientsMap = await _db.query(
-          PatientEntity.tableName,
-          where: "${PatientEntity.uuidColumn} = ?",
-          whereArgs: [entity.patientId],
-        );
-        final patientEntity = PatientEntity.fromMap(patientsMap.first);
-
-        return SessionMapper.toSession(
-          entity,
-          doctorEntity: doctorEntity,
-          patientEntity: patientEntity,
-        );
-      });
-
-      return Future.wait(sessions.toList());
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseNotFoundException(message: e.toString()).throwWithStackTrace(stackTrace);
-    } on TypeError catch (e, stackTrace) {
-      DatabaseMappingException(message: e.toString()).throwWithStackTrace(stackTrace);
-    }
+    return Future.wait(sessions.toList());
   }
 
   @override
@@ -272,39 +231,35 @@ final class SessionRepositoryImpl implements SessionRepository {
     DateTime? date,
   }) async {
     final sessions = await _api.getDoctorSessions(doctorId, date: date);
-    try {
-      final batch = _db.batch();
+    final batch = _db.batch();
 
-      final today = DateTime.now();
-      final startOfToday = DateTime(today.year, today.month, today.day);
+    final today = DateTime.now();
+    final startOfToday = DateTime(today.year, today.month, today.day);
 
-      final tomorrow = today.add(const Duration(days: 1));
-      final startOfTomorrow = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final startOfTomorrow = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
 
-      batch.delete(
+    batch.delete(
+      SessionEntity.tableName,
+      where: "${SessionEntity.doctorIdColumn} = ?"
+          "${date == null ? "" : " AND ${SessionEntity.dateColumn} >= ? AND ${SessionEntity.dateColumn} <= ?"}",
+      whereArgs: [
+        doctorId,
+        if (date != null) ...[
+          startOfToday.millisecondsSinceEpoch,
+          startOfTomorrow.millisecondsSinceEpoch,
+        ]
+      ],
+    );
+
+    for (final session in sessions) {
+      batch.insert(
         SessionEntity.tableName,
-        where: "${SessionEntity.doctorIdColumn} = ?"
-            "${date == null ? "" : " AND ${SessionEntity.dateColumn} >= ? AND ${SessionEntity.dateColumn} <= ?"}",
-        whereArgs: [
-          doctorId,
-          if (date != null) ...[
-            startOfToday.millisecondsSinceEpoch,
-            startOfTomorrow.millisecondsSinceEpoch,
-          ]
-        ],
+        SessionMapper.toEntity(session).toMap(),
+        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
       );
-
-      for (final session in sessions) {
-        batch.insert(
-          SessionEntity.tableName,
-          SessionMapper.toEntity(session).toMap(),
-          conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-        );
-      }
-      await batch.commit(noResult: true);
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
     }
+    await batch.commit(noResult: true);
   }
 
   @override

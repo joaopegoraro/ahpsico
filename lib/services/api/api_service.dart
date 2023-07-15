@@ -18,17 +18,12 @@ import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
-/// All service methods can throw [ApiException] :
-/// - base [ApiException] when the response returns with an error status;
-/// - [ApiTimeoutException] when the request times out;
-/// - [ApiConnectionException] when the request suffers any connection problems;
-/// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-/// - [ApiBadRequestException] when the response returns a status of 400;
-/// - [ApiEncodeRequestException] when there is a problem in encoding the request body;
-/// - [ApiDecodeResponseException] when there is a problem in decoding the response body;
 abstract interface class ApiService {
-  /// throws [ApiUserNotRegisteredException] when the user trying to login is
+  /// throws:
+  /// - [ApiUserNotRegisteredException] when the user trying to login is
   /// not yet registered.
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   ///
   /// The login credential is the [AuthToken] that is passed
   /// in the headers.
@@ -36,7 +31,10 @@ abstract interface class ApiService {
   /// Returns the user data
   Future<User> login();
 
-  /// throws [ApiUserAlreadyRegisteredException] when the user trying to sign up is
+  /// throws:
+  /// - [ApiUserAlreadyRegisteredException] when the user trying to sign up is
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   /// already registered.
 
   /// Returns the user data
@@ -48,6 +46,8 @@ abstract interface class ApiService {
   /// - [ApiPatientAlreadyWithDoctorException] when the patient you are trying to
   /// invite already is your patient;
   /// - [ApiInviteAlreadySentException] when this invite was already sent to the patient;
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   ///
   /// returns:
   /// - The created [Invite]
@@ -55,59 +55,127 @@ abstract interface class ApiService {
 
   /// throws:
   /// - [ApiInvitesNotFoundException] when there are no invites tied to this account
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<List<Invite>> getInvites();
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<void> deleteInvite(int id);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<void> acceptInvite(int id);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<Doctor> getDoctor(String uuid);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<Doctor> updateDoctor(Doctor doctor);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<List<Patient>> getDoctorPatients(String doctorId);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<List<Session>> getDoctorSessions(
     String doctorId, {
     DateTime? date,
   });
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<List<Advice>> getDoctorAdvices(String doctorId);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<Patient> getPatient(String uuid);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<Patient> updatePatient(Patient patient);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<List<Doctor>> getPatientDoctors(String patientId);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<List<Session>> getPatientSessions(
     String patientId, {
     bool? upcoming,
   });
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<List<Assignment>> getPatientAssignments(
     String patientId, {
     bool? pending,
   });
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<List<Advice>> getPatientAdvices(String patientId);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<Session> getSession(int id);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<Session> createSession(Session session);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<Session> updateSession(Session session);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<Assignment> createAssignment(Assignment assignment);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<Assignment> updateAssignment(Assignment assignment);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<void> deleteAssignment(int id);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<Advice> createAdvice(Advice advice);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<Advice> updateAdvice(Advice advice);
 
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<void> deleteAdvice(int id);
 }
 
@@ -490,14 +558,9 @@ class ApiServiceImpl implements ApiService {
     );
   }
 
-  /// throws [ApiException] :
-  /// - base [ApiException] when the response returns with an error status;
-  /// - [ApiTimeoutException] when the request times out;
+  /// throws:
   /// - [ApiConnectionException] when the request suffers any connection problems;
   /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  /// - [ApiBadRequestException] when the response returns a status of 400;
-  /// - [ApiEncodeRequestException] when there is a problem in encoding the request body;
-  /// - [ApiDecodeResponseException] when there is a problem in decoding the response body;
   @visibleForTesting
   Future<T> request<T>({
     required String method,
@@ -516,24 +579,15 @@ class ApiServiceImpl implements ApiService {
       );
 
       switch (response.statusCode) {
-        case 400:
-          final errorBody = json.decode(response.data) as Map<String, dynamic>;
-          throw ApiBadRequestException(message: errorBody.toString());
         case 401:
         case 403:
           throw const ApiUnauthorizedException();
       }
 
       if (response.statusCode == null || !(response.statusCode! >= 200 && response.statusCode! < 300)) {
-        try {
-          parseFailure?.call(response);
-          final errorBody = json.decode(response.data) as Map<String, dynamic>;
-          throw ApiException(message: errorBody.toString());
-        } on FormatException catch (e, stackTrace) {
-          ApiException(message: e.message).throwWithStackTrace(stackTrace);
-        } on TypeError catch (e, stackTrace) {
-          ApiException(message: e.toString()).throwWithStackTrace(stackTrace);
-        }
+        parseFailure?.call(response);
+        final errorBody = json.decode(response.data) as Map<String, dynamic>;
+        throw ApiException(message: errorBody.toString());
       }
 
       return parseSuccess(response);
@@ -542,18 +596,11 @@ class ApiServiceImpl implements ApiService {
         case DioExceptionType.connectionTimeout:
         case DioExceptionType.sendTimeout:
         case DioExceptionType.receiveTimeout:
-          ApiTimeoutException(message: e.message).throwWithStackTrace(stackTrace);
         case DioExceptionType.connectionError:
           ApiConnectionException(message: e.message).throwWithStackTrace(stackTrace);
         default:
           ApiException(message: e.message).throwWithStackTrace(stackTrace);
       }
-    } on JsonUnsupportedObjectError catch (e, stackTrace) {
-      const ApiEncodeRequestException().throwWithStackTrace(stackTrace);
-    } on FormatException catch (e, stackTrace) {
-      ApiDecodeResponseException(message: e.message).throwWithStackTrace(stackTrace);
-    } on TypeError catch (e, stackTrace) {
-      ApiDecodeResponseException(message: e.toString()).throwWithStackTrace(stackTrace);
     }
   }
 }

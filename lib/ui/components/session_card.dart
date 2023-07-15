@@ -11,9 +11,11 @@ class SessionCard extends StatelessWidget {
   const SessionCard({
     super.key,
     required this.session,
+    this.onTap,
   });
 
   final Session session;
+  final VoidCallback? onTap;
 
   String get sessionStatus => switch (session.status) {
         SessionStatus.canceled => "Cancelada",
@@ -32,11 +34,12 @@ class SessionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: AhpsicoColors.light80,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(4)),
       ),
       child: InkWell(
-        onTap: () {/* TODO */},
+        onTap: onTap,
         borderRadius: const BorderRadius.all(Radius.circular(4)),
         child: Padding(
           padding: const EdgeInsets.all(8.0),

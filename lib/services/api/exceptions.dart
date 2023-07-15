@@ -21,43 +21,11 @@ class ApiUnauthorizedException extends ApiException {
         );
 }
 
-class ApiTimeoutException extends ApiException {
-  const ApiTimeoutException({String? message})
-      : super(
-          message: "The request suffered timeout: $message",
-          code: "api_timeout",
-        );
-}
-
 class ApiConnectionException extends ApiException {
   const ApiConnectionException({String? message})
       : super(
           message: "The request suffered a connection problem: $message",
           code: "api_connection_failure",
-        );
-}
-
-class ApiBadRequestException extends ApiException {
-  const ApiBadRequestException({String? message})
-      : super(
-          message: "The response reported bad request: $message",
-          code: "api_bad_request",
-        );
-}
-
-class ApiEncodeRequestException extends ApiException {
-  const ApiEncodeRequestException({String? message})
-      : super(
-          message: "There was a problem trying to encode the request body: $message",
-          code: "api_request_encode_error",
-        );
-}
-
-class ApiDecodeResponseException extends ApiException {
-  const ApiDecodeResponseException({String? message})
-      : super(
-          message: "There was a problem trying to decode the response body: $message",
-          code: "api_response_decode_error",
         );
 }
 

@@ -6,7 +6,7 @@ import 'package:ahpsico/data/database/mappers/patient_mapper.dart';
 import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/utils/extensions.dart';
+import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
@@ -15,33 +15,25 @@ abstract interface class PatientRepository {
   /// database;
   ///
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote fethcing;
-  /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<void> sync(String uuid);
 
   /// throws:
   /// - [DatabaseNotFoundException] when no [Patient] was found with the provided [uuid];
-  /// - [DatabaseMappingException] when something goes wrong when converting the
-  /// database data to a [Patient] model;
   ///
   /// returns:
   /// - the [Patient] with the requested [uuid];
   Future<Patient> get(String uuid);
 
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote updating;
-  /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   ///
   /// returns:
   /// - the updated [Patient];
   Future<Patient> update(Patient patient);
 
-  /// throws:
-  /// - [DatabaseNotFoundException] when something goes wrong when trying to retrieve the
-  /// [Patient] list;
-  /// - [DatabaseMappingException] when something goes wrong when converting the
-  /// database data to a list of [Patient] models;
-  ///
   /// returns:
   /// - the [Patient] list of the [Doctor] with [doctorId];
   Future<List<Patient>> getDoctorPatients(String doctorId);
@@ -50,14 +42,11 @@ abstract interface class PatientRepository {
   /// and saves it in the local database;
   ///
   /// throws:
-  /// - [ApiException] when something goes wrong with the remote fethcing;
-  /// - [DatabaseInsertException] when something goes wrong when inserting the fetched data;
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<void> syncDoctorPatients(String doctorId);
 
   /// Clears the table;
-  ///
-  /// throws:
-  /// - [DatabaseInsertException] when something goes wrong when deleting the data;
   Future<void> clear();
 }
 
@@ -80,15 +69,11 @@ final class PatientRepositoryImpl implements PatientRepository {
   @override
   Future<void> sync(String uuid) async {
     final patient = await _api.getPatient(uuid);
-    try {
-      await _db.insert(
-        PatientEntity.tableName,
-        PatientMapper.toEntity(patient).toMap(),
-        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-      );
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
-    }
+    await _db.insert(
+      PatientEntity.tableName,
+      PatientMapper.toEntity(patient).toMap(),
+      conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
+    );
   }
 
   @override
@@ -103,88 +88,70 @@ final class PatientRepositoryImpl implements PatientRepository {
       throw DatabaseNotFoundException(message: "Patient with id $uuid not found");
     }
 
-    try {
-      final patientEntity = PatientEntity.fromMap(patientMap.first);
-      final patient = PatientMapper.toPatient(patientEntity);
-      return patient;
-    } on TypeError catch (e, stackTrace) {
-      DatabaseMappingException(message: e.toString()).throwWithStackTrace(stackTrace);
-    }
+    final patientEntity = PatientEntity.fromMap(patientMap.first);
+    final patient = PatientMapper.toPatient(patientEntity);
+    return patient;
   }
 
   @override
   Future<Patient> update(Patient patient) async {
     final updatedPatient = await _api.updatePatient(patient);
 
-    try {
-      await _db.insert(
-        PatientEntity.tableName,
-        PatientMapper.toEntity(updatedPatient).toMap(),
-        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-      );
+    await _db.insert(
+      PatientEntity.tableName,
+      PatientMapper.toEntity(updatedPatient).toMap(),
+      conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
+    );
 
-      return updatedPatient;
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
-    }
+    return updatedPatient;
   }
 
   @override
   Future<List<Patient>> getDoctorPatients(String doctorId) async {
-    try {
-      final patientsMap = await _db.rawQuery(
-        """
+    final patientsMap = await _db.rawQuery(
+      """
         SELECT d.* FROM ${PatientEntity.tableName} d  
           LEFT JOIN ${PatientWithDoctor.tableName} pd ON pd.${PatientWithDoctor.patientIdColumn} = d.${PatientEntity.uuidColumn}  
           WHERE pd.${PatientWithDoctor.doctorIdColumn} = ?
         """,
-        [doctorId],
-      );
+      [doctorId],
+    );
 
-      final patients = patientsMap.map((e) {
-        final entity = PatientEntity.fromMap(e);
-        return PatientMapper.toPatient(entity);
-      });
-      return patients.toList();
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseNotFoundException(message: e.toString()).throwWithStackTrace(stackTrace);
-    } on TypeError catch (e, stackTrace) {
-      DatabaseMappingException(message: e.toString()).throwWithStackTrace(stackTrace);
-    }
+    final patients = patientsMap.map((e) {
+      final entity = PatientEntity.fromMap(e);
+      return PatientMapper.toPatient(entity);
+    });
+    return patients.toList();
   }
 
   @override
   Future<void> syncDoctorPatients(String doctorId) async {
     final patients = await _api.getDoctorPatients(doctorId);
-    try {
-      final batch = _db.batch();
+    final batch = _db.batch();
 
-      batch.rawDelete(
-        """
+    batch.rawDelete(
+      """
         DELETE FROM ${PatientEntity.tableName} WHERE ${PatientEntity.uuidColumn} in (
           SELECT ${PatientEntity.uuidColumn} FROM ${PatientEntity.tableName} d  
             LEFT JOIN ${PatientWithDoctor.tableName} pd ON pd.${PatientWithDoctor.patientIdColumn} = d.${PatientEntity.uuidColumn}  
             WHERE pd.${PatientWithDoctor.doctorIdColumn} = ?)
         """,
-        [doctorId],
-      );
+      [doctorId],
+    );
 
-      for (final patient in patients) {
-        batch.insert(
-          PatientEntity.tableName,
-          PatientMapper.toEntity(patient).toMap(),
-          conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-        );
-        batch.insert(
-          PatientWithDoctor.tableName,
-          PatientWithDoctor(patientId: patient.uuid, doctorId: doctorId).toMap(),
-          conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-        );
-      }
-      await batch.commit(noResult: true);
-    } on sqflite.DatabaseException catch (e, stackTrace) {
-      DatabaseInsertException(message: e.toString()).throwWithStackTrace(stackTrace);
+    for (final patient in patients) {
+      batch.insert(
+        PatientEntity.tableName,
+        PatientMapper.toEntity(patient).toMap(),
+        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
+      );
+      batch.insert(
+        PatientWithDoctor.tableName,
+        PatientWithDoctor(patientId: patient.uuid, doctorId: doctorId).toMap(),
+        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
+      );
     }
+    await batch.commit(noResult: true);
   }
 
   @override
