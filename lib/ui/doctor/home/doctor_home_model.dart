@@ -1,14 +1,11 @@
-import 'dart:math';
-
 import 'package:ahpsico/data/database/exceptions.dart';
-import 'package:ahpsico/data/repositories/advice_repository.dart';
-import 'package:ahpsico/data/repositories/invite_repository.dart';
 import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
+import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum DoctorHomeEvent {
@@ -25,33 +22,26 @@ final doctorHomeModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final sessionRepository = ref.watch(sessionRepositoryProvider);
-  final inviteRepository = ref.watch(inviteRepositoryProvider);
-  final adviceRepository = ref.watch(adviceRepositoryProvider);
   return DoctorHomeModel(
     authService,
     userRepository,
     sessionRepository,
-    inviteRepository,
-    adviceRepository,
   );
 });
 
-class DoctorHomeModel extends ViewModel<DoctorHomeEvent> {
+class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
   DoctorHomeModel(
-    this._authService,
-    this._userRepository,
+    super.authService,
+    super.userRepository,
     this._sessionRepository,
-    this._inviteRepository,
-    this._adviceRepository,
-  );
+  ) : super(
+          errorEvent: DoctorHomeEvent.showSnackbarError,
+          messageEvent: DoctorHomeEvent.showSnackbarMessage,
+          navigateToLoginEvent: DoctorHomeEvent.navigateToLoginScreen,
+        );
 
   /* Services */
-
-  final AuthService _authService;
-  final UserRepository _userRepository;
   final SessionRepository _sessionRepository;
-  final InviteRepository _inviteRepository;
-  final AdviceRepository _adviceRepository;
 
   /* Fields */
 
@@ -70,6 +60,14 @@ class DoctorHomeModel extends ViewModel<DoctorHomeEvent> {
     emitEvent(DoctorHomeEvent.openLogoutDialog);
   }
 
+  void openInvitePatientSheet() {
+    emitEvent(DoctorHomeEvent.openInvitePatientBottomSheet);
+  }
+
+  void openSendAdviceSheet() {
+    emitEvent(DoctorHomeEvent.openSendAdviceBottomSheet);
+  }
+
   /* Calls */
 
   Future<void> fetchScreenData() async {
@@ -79,41 +77,32 @@ class DoctorHomeModel extends ViewModel<DoctorHomeEvent> {
     updateUi(() => _isLoading = false);
   }
 
-  Future<void> logout({required bool showMessage}) async {
-    await _userRepository.clear();
-    await _authService.signOut();
-    if (showMessage) {
-      showSnackbar(
-        "Logout bem sucedido!",
-        DoctorHomeEvent.showSnackbarMessage,
-      );
-    }
-    emitEvent(DoctorHomeEvent.navigateToLoginScreen);
-  }
-
   Future<void> _getTodaySessions() async {
+    final userUid = _user!.uid;
+    final now = DateTime.now();
     try {
-      final userUid = _user!.uid;
-      final now = DateTime.now();
       await _sessionRepository.syncDoctorSessions(userUid, date: now);
-      _sessions = await _sessionRepository.getDoctorSessions(userUid, date: now);
+    } on ApiUnauthorizedException catch (_) {
+      logout(showError: true);
     } on ApiConnectionException catch (_) {
-      showSnackbar(
-        "Ocorreu um erro ao tentar se conectar ao servidor. Certifique-se de que seu dispositivo esteja conectado corretamente com a internet",
-        DoctorHomeEvent.showSnackbarError,
-      );
+      showConnectionError();
     }
+    _sessions = await _sessionRepository.getDoctorSessions(userUid, date: now);
   }
 
   Future<void> _getUserData() async {
     try {
-      _user = await _userRepository.get();
+      await userRepository.sync();
+    } on ApiUnauthorizedException catch (_) {
+      logout(showError: true);
+    } on ApiConnectionException catch (_) {
+      showConnectionError();
+    }
+
+    try {
+      _user = await userRepository.get();
     } on DatabaseNotFoundException catch (_) {
-      showSnackbar(
-        "Sua sessão expirou!",
-        DoctorHomeEvent.showSnackbarError,
-      );
-      await logout(showMessage: false);
+      await logout(showError: true);
     }
   }
 }

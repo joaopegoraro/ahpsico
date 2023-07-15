@@ -13,7 +13,7 @@ abstract interface class InviteRepository {
   /// to the local database;
   ///
   /// throws:
-  /// - [ApiPatientNotRegisteredException] when there is not patient registered
+  /// - [ApiPatientNotRegisteredException] when there is no patient registered
   /// with the phone number that was passed;
   /// - [ApiPatientAlreadyWithDoctorException] when the patient you are trying to
   /// invite already is your patient;

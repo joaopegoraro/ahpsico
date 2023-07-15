@@ -8,7 +8,7 @@ import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/services/auth/credentials.dart';
 import 'package:ahpsico/services/auth/exceptions.dart';
 import 'package:ahpsico/services/logger/logging_service.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:ahpsico/utils/mask_formatters.dart';
 import 'package:meta/meta.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
@@ -44,15 +44,6 @@ class LoginModel extends ViewModel<LoginEvent> {
   final LoggingService? _loggingService;
 
   /* Utils */
-
-  @visibleForTesting
-  static const phoneMaskPattern = '(##) #####-####';
-
-  final _phoneMaskFormatter = MaskTextInputFormatter(
-    mask: phoneMaskPattern,
-    filter: {"#": RegExp(r'[0-9]')},
-    type: MaskAutoCompletionType.eager,
-  );
 
   static const timerDuration = Duration(minutes: 2);
 
@@ -150,14 +141,14 @@ class LoginModel extends ViewModel<LoginEvent> {
 
   @visibleForTesting
   String maskPhone(String phoneNumber) {
-    return _phoneMaskFormatter.maskText(phoneNumber);
+    return MaskFormatters.phoneMaskFormatter.maskText(phoneNumber);
   }
 
   /* Calls */
 
   Future<void> sendVerificationCode() async {
     updateUi(() => _isLoadingSendingCode = true);
-    final unmaskedPhone = "+55${_phoneMaskFormatter.unmaskText(phoneNumber)}";
+    final unmaskedPhone = "+55${MaskFormatters.phoneMaskFormatter.unmaskText(phoneNumber)}";
 
     await _authService.sendPhoneVerificationCode(
       phoneNumber: unmaskedPhone,

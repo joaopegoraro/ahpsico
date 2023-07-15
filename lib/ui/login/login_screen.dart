@@ -2,6 +2,7 @@ import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/components/input_field.dart';
+import 'package:ahpsico/ui/components/phone_input_field.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/doctor/home/doctor_home.dart';
 import 'package:ahpsico/ui/login/login_model.dart';
@@ -130,18 +131,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                             borderWidth: _codeController.text.isEmpty ? null : 2.0,
                             canRequestFocus: false,
                           )
-                        : AhpsicoInputField(
+                        : PhoneInputField(
                             controller: _phoneController,
-                            textAlign: TextAlign.center,
-                            hint: "Telefone",
+                            isPhoneValid: model.isPhoneValid,
                             readOnly: true,
-                            inputType: TextInputType.phone,
-                            errorText: _phoneController.text.isNotEmpty && !model.isPhoneValid
-                                ? "Por favor, digite um número de telefone válido"
-                                : null,
-                            borderColor: model.isPhoneValid ? AhpsicoColors.green : null,
-                            borderWidth: _phoneController.text.isEmpty ? null : 2.0,
-                            canRequestFocus: false,
                           ),
                     if (model.hasCodeBeenSent) ...[
                       AhpsicoSpacing.verticalSpaceRegular,
