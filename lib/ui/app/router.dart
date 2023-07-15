@@ -1,8 +1,17 @@
+import 'package:ahpsico/models/doctor.dart';
+import 'package:ahpsico/models/patient.dart';
+import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/ui/advices/advices_screen.dart';
-import 'package:ahpsico/ui/doctor/doctor_home.dart';
+import 'package:ahpsico/ui/doctor/detail/doctor_detail.dart';
+import 'package:ahpsico/ui/doctor/home/doctor_home.dart';
+import 'package:ahpsico/ui/doctor/list/doctor_list.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
-import 'package:ahpsico/ui/patient/patient_home.dart';
+import 'package:ahpsico/ui/patient/detail/patient_detail.dart';
+import 'package:ahpsico/ui/patient/home/patient_home.dart';
+import 'package:ahpsico/ui/patient/list/patient_list.dart';
 import 'package:ahpsico/ui/schedule/schedule_screen.dart';
+import 'package:ahpsico/ui/session/detail/session_detail.dart';
+import 'package:ahpsico/ui/session/list/session_list.dart';
 import 'package:ahpsico/ui/signup/signup_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -16,6 +25,9 @@ final class AhpsicoRouter {
         path: '/',
         builder: (context, state) => const LoginScreen(),
       ),
+
+      // Login and SignUp
+
       GoRoute(
         path: LoginScreen.route,
         builder: (context, state) => const LoginScreen(),
@@ -24,21 +36,69 @@ final class AhpsicoRouter {
         path: SignUpScreen.route,
         builder: (context, state) => const SignUpScreen(),
       ),
+
+      // Doctors
+
       GoRoute(
         path: DoctorHome.route,
         builder: (context, state) => const DoctorHome(),
       ),
       GoRoute(
+        path: DoctorList.route,
+        builder: (context, state) => const DoctorList(),
+      ),
+      GoRoute(
+        path: DoctorDetail.route,
+        builder: (context, state) {
+          final doctor = state.extra as Doctor?;
+          return DoctorDetail(doctor);
+        },
+      ),
+
+      // Patients
+
+      GoRoute(
         path: PatientHome.route,
         builder: (context, state) => const PatientHome(),
       ),
       GoRoute(
+        path: PatientList.route,
+        builder: (context, state) => const PatientList(),
+      ),
+      GoRoute(
+        path: PatientDetail.route,
+        builder: (context, state) {
+          final patient = state.extra as Patient?;
+          return PatientDetail(patient);
+        },
+      ),
+
+      // Advices
+
+      GoRoute(
         path: AdvicesScreen.route,
         builder: (context, state) => const AdvicesScreen(),
       ),
+
+      // Schedule
+
       GoRoute(
         path: ScheduleScreen.route,
         builder: (context, state) => const ScheduleScreen(),
+      ),
+
+      // Sessions
+
+      GoRoute(
+        path: SessionList.route,
+        builder: (context, state) => const SessionList(),
+      ),
+      GoRoute(
+        path: SessionDetail.route,
+        builder: (context, state) {
+          final session = state.extra as Session;
+          return SessionDetail(session);
+        },
       ),
     ],
   );

@@ -1,22 +1,19 @@
-import 'package:ahpsico/models/doctor.dart';
-import 'package:ahpsico/models/patient.dart';
-import 'package:ahpsico/models/session/session.dart';
-import 'package:ahpsico/models/session/session_status.dart';
-import 'package:ahpsico/models/session/session_type.dart';
 import 'package:ahpsico/ui/advices/advices_screen.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/components/session_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
-import 'package:ahpsico/ui/doctor/doctor_home_model.dart';
+import 'package:ahpsico/ui/doctor/detail/doctor_detail.dart';
+import 'package:ahpsico/ui/doctor/home/doctor_home_model.dart';
 import 'package:ahpsico/ui/doctor/widgets/doctor_fab.dart';
 import 'package:ahpsico/ui/doctor/widgets/doctor_fab_action.dart';
 import 'package:ahpsico/ui/doctor/widgets/home_button.dart';
 import 'package:ahpsico/ui/doctor/widgets/home_topbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
-import 'package:ahpsico/ui/patient/patient_home.dart';
+import 'package:ahpsico/ui/patient/list/patient_list.dart';
 import 'package:ahpsico/ui/schedule/schedule_screen.dart';
+import 'package:ahpsico/ui/session/detail/session_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
@@ -38,14 +35,6 @@ class DoctorHome extends StatelessWidget {
         AhpsicoSnackbar.showError(context, model.snackbarMessage);
       case DoctorHomeEvent.navigateToLoginScreen:
         context.go(LoginScreen.route);
-      case DoctorHomeEvent.navigateToDoctorProfileScreen:
-        context.push(DoctorHome.route);
-      case DoctorHomeEvent.navigateToPatientScreen:
-        context.push(PatientHome.route);
-      case DoctorHomeEvent.navigateToSentAdvicesScreen:
-        context.push(AdvicesScreen.route);
-      case DoctorHomeEvent.navigateToScheduleScreen:
-        context.push(ScheduleScreen.route);
       case DoctorHomeEvent.openInvitePatientBottomSheet:
       case DoctorHomeEvent.openSendAdviceBottomSheet:
       case DoctorHomeEvent.openSendAdviceToAllBottomSheet:
@@ -97,9 +86,7 @@ class DoctorHome extends StatelessWidget {
                     return [
                       HomeTopbar(
                         userName: model.user!.firstName,
-                        goToProfile: () {
-                          // TODO: Open doctor profile screen
-                        },
+                        goToProfile: () => context.push(DoctorDetail.route),
                         logout: () {
                           // TODO: Open logout dialog
                         },
@@ -131,7 +118,7 @@ class DoctorHome extends StatelessWidget {
                             enableFlex: true,
                             color: AhpsicoColors.violet,
                             icon: Icons.groups,
-                            onPressed: () {/* TODO: Abrir tela de pacientes */},
+                            onPressed: () => context.push(PatientList.route),
                           ),
                           AhpsicoSpacing.horizontalSpaceSmall,
                           HomeButton(
@@ -139,13 +126,13 @@ class DoctorHome extends StatelessWidget {
                             enableFlex: true,
                             color: AhpsicoColors.green,
                             icon: Icons.tips_and_updates,
-                            onPressed: () {/* TODO: Abrir tela de dicas enviadas */},
+                            onPressed: () => context.push(AdvicesScreen.route),
                           ),
                         ],
                       ),
                       AhpsicoSpacing.verticalSpaceMedium,
                       TextButton(
-                        onPressed: () {/* TODO: Abrir tela de agenda */},
+                        onPressed: () => context.push(ScheduleScreen.route),
                         style: const ButtonStyle(
                           shape: MaterialStatePropertyAll(RoundedRectangleBorder(
                             borderRadius: BorderRadius.all(Radius.circular(28)),
@@ -175,7 +162,10 @@ class DoctorHome extends StatelessWidget {
                           ),
                         ),
                       ...model.sessions.map((session) {
-                        return SessionCard(session: session);
+                        return SessionCard(
+                          session: session,
+                          onTap: () => context.push(SessionDetail.route, extra: session),
+                        );
                       }),
                       AhpsicoSpacing.verticalSpaceMedium,
                     ].map((item) {
@@ -192,94 +182,3 @@ class DoctorHome extends StatelessWidget {
     );
   }
 }
-
-final sessions = <Session>[
-  Session(
-    id: 0,
-    doctor: const Doctor(
-      uuid: "",
-      name: "Andréa Hahmeyer Pegoraro",
-      phoneNumber: "",
-      description: "",
-      crp: "",
-      pixKey: "",
-      paymentDetails: "",
-    ),
-    patient: const Patient(
-      uuid: "",
-      name: "Luiza Mel",
-      phoneNumber: "(49) 98247-7126",
-    ),
-    groupId: 0,
-    groupIndex: 2,
-    status: SessionStatus.concluded,
-    type: SessionType.individual,
-    date: DateTime.now(),
-  ),
-  Session(
-    id: 0,
-    doctor: const Doctor(
-      uuid: "",
-      name: "Andréa Hahmeyer Pegoraro",
-      phoneNumber: "",
-      description: "",
-      crp: "",
-      pixKey: "",
-      paymentDetails: "",
-    ),
-    patient: const Patient(
-      uuid: "",
-      name: "Júlia Ferreira",
-      phoneNumber: "(49) 98876-5587",
-    ),
-    groupId: 0,
-    groupIndex: 2,
-    status: SessionStatus.confirmed,
-    type: SessionType.monthly,
-    date: DateTime.now(),
-  ),
-  Session(
-    id: 1,
-    doctor: const Doctor(
-      uuid: "",
-      name: "Andréa Hahmeyer Pegoraro",
-      phoneNumber: "",
-      description: "",
-      crp: "",
-      pixKey: "",
-      paymentDetails: "",
-    ),
-    patient: const Patient(
-      uuid: "",
-      name: "Larrisa Gomes",
-      phoneNumber: "(47) 99521-2197",
-    ),
-    groupId: 0,
-    groupIndex: 0,
-    status: SessionStatus.notConfirmed,
-    type: SessionType.individual,
-    date: DateTime.now(),
-  ),
-  Session(
-    id: 2,
-    doctor: const Doctor(
-      uuid: "",
-      name: "Andréa Hahmeyer Pegoraro",
-      phoneNumber: "",
-      description: "",
-      crp: "",
-      pixKey: "",
-      paymentDetails: "",
-    ),
-    patient: const Patient(
-      uuid: "",
-      name: "Raul Silva",
-      phoneNumber: "(49) 99183-8071",
-    ),
-    groupId: 0,
-    groupIndex: 0,
-    status: SessionStatus.canceled,
-    type: SessionType.individual,
-    date: DateTime.now(),
-  ),
-];

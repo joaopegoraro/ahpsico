@@ -11,7 +11,7 @@ class SessionCard extends StatelessWidget {
   const SessionCard({
     super.key,
     required this.session,
-    this.onTap,
+    required this.onTap,
   });
 
   final Session session;
