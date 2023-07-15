@@ -1,5 +1,5 @@
 import 'package:ahpsico/ui/app/theme/colors.dart';
-import 'package:ahpsico/ui/app/theme/text.dart';
+import 'package:ahpsico/ui/components/topbar.dart';
 import 'package:flutter/material.dart';
 
 class HomeTopbar extends StatelessWidget {
@@ -11,15 +11,8 @@ class HomeTopbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliverAppBar(
-      backgroundColor: AhpsicoColors.violet,
-      toolbarHeight: 80,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(30),
-          bottomRight: Radius.circular(30),
-        ),
-      ),
+    return Topbar(
+      title: "Olá, $userName",
       actions: [
         Padding(
           padding: const EdgeInsets.only(right: 16.0),
@@ -41,12 +34,6 @@ class HomeTopbar extends StatelessWidget {
           ),
         ),
       ],
-      title: Text(
-        "Olá, $userName",
-        style: AhpsicoText.title2Style.copyWith(
-          color: AhpsicoColors.light80,
-        ),
-      ),
     );
   }
 }
