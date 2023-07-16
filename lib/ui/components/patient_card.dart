@@ -12,11 +12,13 @@ class PatientCard extends StatelessWidget {
     required this.patient,
     required this.onTap,
     this.isSelected = false,
+    this.showSelected,
     this.onLongPress,
   });
 
   final Patient patient;
   final bool isSelected;
+  final bool? showSelected;
   final void Function(Patient)? onTap;
   final void Function(Patient)? onLongPress;
 
@@ -32,7 +34,7 @@ class PatientCard extends StatelessWidget {
         onLongPress: onLongPress == null ? null : () => onLongPress!(patient),
         borderRadius: const BorderRadius.all(Radius.circular(4)),
         child: Padding(
-          padding: isSelected
+          padding: showSelected ?? isSelected
               ? const EdgeInsets.only(
                   right: 8,
                   top: 8,
@@ -43,7 +45,7 @@ class PatientCard extends StatelessWidget {
             children: [
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
-                child: isSelected
+                child: showSelected ?? isSelected
                     ? Row(children: [
                         Checkbox(
                           value: isSelected,

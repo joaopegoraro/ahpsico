@@ -42,6 +42,8 @@ class PatientList extends StatelessWidget {
         AhpsicoSnackbar.showError(context, model.snackbarMessage);
       case PatientListEvent.navigateToLogin:
         context.go(LoginScreen.route);
+      case PatientListEvent.openSendMessageSheet:
+      // TODO
     }
   }
 
@@ -53,6 +55,17 @@ class PatientList extends StatelessWidget {
       return "$lenght ${lenght > 1 ? "selecionados" : "selecionado"}";
     }
     return "Seus pacientes";
+  }
+
+  bool shouldPop(PatientListModel model) {
+    if (selectModeByDefault || allSelectedByDefault) {
+      return true;
+    }
+    if (model.isSelectModeOn) {
+      model.clearSelection();
+      return false;
+    }
+    return true;
   }
 
   @override
@@ -83,13 +96,7 @@ class PatientList extends StatelessWidget {
             );
           }
           return WillPopScope(
-            onWillPop: () async {
-              if (model.isSelectModeOn) {
-                model.clearSelection();
-                return false;
-              }
-              return true;
-            },
+            onWillPop: () async => shouldPop(model),
             child: Stack(
               children: [
                 NestedScrollView(
@@ -98,11 +105,20 @@ class PatientList extends StatelessWidget {
                       Topbar(
                         title: getTitle(model),
                         onBackPressed: () {
-                          if (model.isSelectModeOn) {
-                            return model.clearSelection();
-                          }
-                          context.pop();
+                          if (shouldPop(model)) context.pop();
                         },
+                        actions: [
+                          if (model.isSelectModeOn)
+                            IconButton(
+                              onPressed: () {
+                                if (model.areAllPatientsSelected) {
+                                  return model.clearSelection();
+                                }
+                                model.selectAllPatients();
+                              },
+                              icon: Icon(model.areAllPatientsSelected ? Icons.inbox : Icons.all_inbox),
+                            ),
+                        ],
                       )
                     ];
                   },
@@ -113,6 +129,7 @@ class PatientList extends StatelessWidget {
                         child: PatientCard(
                           patient: patient,
                           isSelected: model.selectedPatientIds.contains(patient.uuid),
+                          showSelected: selectModeByDefault || allSelectedByDefault || model.isSelectModeOn,
                           onLongPress: model.selectPatient,
                           onTap: (patient) {
                             if (model.isSelectModeOn) {
@@ -133,9 +150,7 @@ class PatientList extends StatelessWidget {
                       child: FloatingActionButton.extended(
                         backgroundColor: AhpsicoColors.violet,
                         foregroundColor: AhpsicoColors.light80,
-                        onPressed: () {
-                          // TODO
-                        },
+                        onPressed: model.openSendMessageSheet,
                         icon: const Icon(Icons.send),
                         label: const Text("ENVIAR MENSAGEM"),
                       ),

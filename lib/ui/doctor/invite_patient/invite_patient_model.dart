@@ -9,6 +9,7 @@ import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 enum InvitePatientEvent {
   openPatientNotRegisteredDialog,
   showSnackbarError,
+  showSnackbarMessage,
   navigateToLoginScreen,
 }
 
@@ -76,6 +77,10 @@ class InvitePatientModel extends BaseViewModel<InvitePatientEvent> {
 
     try {
       await _inviteRepository.create(phoneNumber);
+      showSnackbar(
+        "Convite enviado com sucesso!",
+        InvitePatientEvent.showSnackbarMessage,
+      );
     } on ApiPatientNotRegisteredException catch (_) {
       emitEvent(InvitePatientEvent.openPatientNotRegisteredDialog);
     } on ApiPatientAlreadyWithDoctorException catch (_) {

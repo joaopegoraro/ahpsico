@@ -9,6 +9,7 @@ import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum PatientListEvent {
+  openSendMessageSheet,
   showSnackbarError,
   navigateToLogin,
 }
@@ -48,8 +49,10 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
 
   bool _selectMode = false;
 
-  List<String> _selectedPatientIds = [];
+  final List<String> _selectedPatientIds = [];
   List<String> get selectedPatientIds => _selectedPatientIds;
+
+  bool get areAllPatientsSelected => selectedPatientIds.length == patients.length;
 
   bool get isSelectModeOn => _selectMode || selectedPatientIds.isNotEmpty;
 
@@ -78,9 +81,18 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
 
   void clearSelection() {
     updateUi(() {
-      _selectMode = false;
       _selectedPatientIds.clear();
     });
+  }
+
+  void openSendMessageSheet() {
+    if (_selectedPatientIds.isEmpty) {
+      return showSnackbar(
+        "Você precisa selecionar pelo menos um paciente para poder enviar uma mensagem",
+        PatientListEvent.showSnackbarError,
+      );
+    }
+    emitEvent(PatientListEvent.openSendMessageSheet);
   }
 
   /* Calls */

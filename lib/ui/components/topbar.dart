@@ -37,6 +37,7 @@ class Topbar extends StatelessWidget implements PreferredSizeWidget {
       actions: actions,
       title: Text(
         title,
+        maxLines: 2,
         style: AhpsicoText.title2Style.copyWith(
           color: AhpsicoColors.light80,
         ),

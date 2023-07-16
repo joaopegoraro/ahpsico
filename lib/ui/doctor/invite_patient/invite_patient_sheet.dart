@@ -43,6 +43,8 @@ class _InvitePatientSheetState extends State<InvitePatientSheet> {
         context.go(LoginScreen.route);
       case InvitePatientEvent.showSnackbarError:
         AhpsicoSnackbar.showError(context, model.snackbarMessage);
+      case InvitePatientEvent.showSnackbarMessage:
+        AhpsicoSnackbar.showSuccess(context, model.snackbarMessage);
       case InvitePatientEvent.openPatientNotRegisteredDialog:
         showDialog(
           context: context,
