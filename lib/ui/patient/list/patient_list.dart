@@ -13,15 +13,23 @@ import 'package:mvvm_riverpod/viewmodel_builder.dart';
 class PatientList extends StatelessWidget {
   const PatientList({
     super.key,
-    required this.selectMode,
+    required this.selectModeByDefault,
+    required this.allSelectedByDefault,
   });
 
   static const route = "/patients";
 
-  final bool selectMode;
+  final bool selectModeByDefault;
+  final bool allSelectedByDefault;
 
-  static Map<String, dynamic> buildArgs({bool selectMode = false}) {
-    return {"selectMode": selectMode};
+  static Map<String, dynamic> buildArgs({
+    bool selectMode = false,
+    bool allSelected = false,
+  }) {
+    return {
+      "selectMode": selectMode,
+      "allSelected": allSelected,
+    };
   }
 
   void _listenToEvents(
@@ -38,7 +46,13 @@ class PatientList extends StatelessWidget {
   }
 
   String getTitle(PatientListModel model) {
-    return "";
+    if (model.isSelectModeOn) {
+      final lenght = model.selectedPatientIds.length;
+      if (lenght == 0) return "Nenhum selecionado";
+      if (lenght == model.patients.length) return "Todos selecionados";
+      return "$lenght ${lenght > 1 ? "selecionados" : "selecionado"}";
+    }
+    return "Seus pacientes";
   }
 
   @override
@@ -49,9 +63,16 @@ class PatientList extends StatelessWidget {
         provider: patientListModelProvider,
         onEventEmitted: _listenToEvents,
         onCreate: (model) {
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) => model.fetchScreenData(),
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (selectModeByDefault) {
+              model.enableSelectModeByDefault();
+            }
+            model.fetchScreenData().whenComplete(() {
+              if (allSelectedByDefault) {
+                model.selectAllPatients();
+              }
+            });
+          });
         },
         builder: (context, model) {
           if (model.isLoading || model.user == null) {
@@ -63,8 +84,8 @@ class PatientList extends StatelessWidget {
           }
           return WillPopScope(
             onWillPop: () async {
-              if (selectMode) {
-                context.pop(model.selectedPatientIds);
+              if (model.isSelectModeOn) {
+                model.clearSelection();
                 return false;
               }
               return true;
@@ -77,8 +98,8 @@ class PatientList extends StatelessWidget {
                       Topbar(
                         title: getTitle(model),
                         onBackPressed: () {
-                          if (selectMode) {
-                            return context.pop(model.selectedPatientIds);
+                          if (model.isSelectModeOn) {
+                            return model.clearSelection();
                           }
                           context.pop();
                         },
@@ -91,8 +112,10 @@ class PatientList extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: PatientCard(
                           patient: patient,
+                          isSelected: model.selectedPatientIds.contains(patient.uuid),
+                          onLongPress: model.selectPatient,
                           onTap: (patient) {
-                            if (selectMode) {
+                            if (model.isSelectModeOn) {
                               return model.selectPatient(patient);
                             }
                             context.push(PatientDetail.route, extra: patient);
@@ -102,6 +125,22 @@ class PatientList extends StatelessWidget {
                     }),
                   ),
                 ),
+                if (!model.isLoading && model.isSelectModeOn)
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: FloatingActionButton.extended(
+                        backgroundColor: AhpsicoColors.violet,
+                        foregroundColor: AhpsicoColors.light80,
+                        onPressed: () {
+                          // TODO
+                        },
+                        icon: const Icon(Icons.send),
+                        label: const Text("ENVIAR MENSAGEM"),
+                      ),
+                    ),
+                  ),
               ],
             ),
           );

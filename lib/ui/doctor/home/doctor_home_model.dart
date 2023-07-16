@@ -9,8 +9,6 @@ import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum DoctorHomeEvent {
   openInvitePatientBottomSheet,
-  openSendAdviceBottomSheet,
-  openSendAdviceToAllBottomSheet,
   openLogoutDialog,
   navigateToLoginScreen,
   showSnackbarMessage,
@@ -58,10 +56,6 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
 
   void openInvitePatientSheet() {
     emitEvent(DoctorHomeEvent.openInvitePatientBottomSheet);
-  }
-
-  void openSendAdviceSheet() {
-    emitEvent(DoctorHomeEvent.openSendAdviceBottomSheet);
   }
 
   /* Calls */

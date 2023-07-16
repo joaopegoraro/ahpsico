@@ -46,10 +46,6 @@ class DoctorHome extends StatelessWidget {
           showDragHandle: true,
           builder: (context) => const InvitePatientSheet(),
         );
-      case DoctorHomeEvent.openSendAdviceBottomSheet:
-      // TODO
-      case DoctorHomeEvent.openSendAdviceToAllBottomSheet:
-      // TODO
       case DoctorHomeEvent.openLogoutDialog:
         showDialog(
           context: context,
@@ -194,11 +190,20 @@ class DoctorHome extends StatelessWidget {
                           icon: const Icon(Icons.person_add),
                         ),
                         DoctorFabAction(
-                          onPressed: () {/* TODO: Abrir bottomsheet de enviar dicas */},
+                          onPressed: () => context.push(
+                            PatientList.route,
+                            extra: PatientList.buildArgs(
+                              selectMode: true,
+                              allSelected: true,
+                            ),
+                          ),
                           icon: const Icon(Icons.tips_and_updates),
                         ),
                         DoctorFabAction(
-                          onPressed: model.openSendAdviceSheet,
+                          onPressed: () => context.push(
+                            PatientList.route,
+                            extra: PatientList.buildArgs(selectMode: true),
+                          ),
                           icon: const Icon(Icons.outgoing_mail),
                         ),
                       ],

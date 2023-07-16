@@ -46,10 +46,18 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
   List<Patient> _patients = [];
   List<Patient> get patients => _patients;
 
+  bool _selectMode = false;
+
   List<String> _selectedPatientIds = [];
   List<String> get selectedPatientIds => _selectedPatientIds;
 
+  bool get isSelectModeOn => _selectMode || selectedPatientIds.isNotEmpty;
+
   /* Methods */
+
+  void enableSelectModeByDefault() {
+    updateUi(() => _selectMode = true);
+  }
 
   void selectPatient(Patient patient) {
     updateUi(() {
@@ -69,7 +77,10 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
   }
 
   void clearSelection() {
-    updateUi(() => _selectedPatientIds.clear());
+    updateUi(() {
+      _selectMode = false;
+      _selectedPatientIds.clear();
+    });
   }
 
   /* Calls */
@@ -107,22 +118,22 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
 
 const _mockpatients = <Patient>[
   Patient(
-    uuid: "some uid",
+    uuid: "some uid1",
     name: "Mário Garcia",
     phoneNumber: "99999999999",
   ),
   Patient(
-    uuid: "some uid",
+    uuid: "some uid2",
     name: "Júlia Rosa",
     phoneNumber: "99999999999",
   ),
   Patient(
-    uuid: "some uid",
+    uuid: "some uid3",
     name: "Carol Silva",
     phoneNumber: "99999999999",
   ),
   Patient(
-    uuid: "some uid",
+    uuid: "some uid4",
     name: "Gabriela Pereira",
     phoneNumber: "99999999999",
   ),

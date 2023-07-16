@@ -11,10 +11,14 @@ class PatientCard extends StatelessWidget {
     super.key,
     required this.patient,
     required this.onTap,
+    this.isSelected = false,
+    this.onLongPress,
   });
 
   final Patient patient;
+  final bool isSelected;
   final void Function(Patient)? onTap;
+  final void Function(Patient)? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -25,11 +29,31 @@ class PatientCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: onTap == null ? null : () => onTap!(patient),
+        onLongPress: onLongPress == null ? null : () => onLongPress!(patient),
         borderRadius: const BorderRadius.all(Radius.circular(4)),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: isSelected
+              ? const EdgeInsets.only(
+                  right: 8,
+                  top: 8,
+                  bottom: 8,
+                )
+              : const EdgeInsets.all(8.0),
           child: Row(
             children: [
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: isSelected
+                    ? Row(children: [
+                        Checkbox(
+                          value: isSelected,
+                          activeColor: AhpsicoColors.violet,
+                          onChanged: (_) {},
+                        ),
+                        AhpsicoSpacing.horizontalSpaceSmall,
+                      ])
+                    : const SizedBox.shrink(),
+              ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
