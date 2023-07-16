@@ -50,7 +50,7 @@ abstract interface class DoctorRepository {
   Future<void> clear();
 }
 
-final doctorRepositoryProvider = Provider((ref) async {
+final doctorRepositoryProvider = Provider<DoctorRepository>((ref) {
   final apiService = ref.watch(apiServiceProvider);
   final database = ref.watch(ahpsicoDatabaseProvider);
   return DoctorRepositoryImpl(apiService: apiService, database: database);

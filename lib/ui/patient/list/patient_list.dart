@@ -5,6 +5,7 @@ import 'package:ahpsico/ui/components/topbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:ahpsico/ui/patient/detail/patient_detail.dart';
 import 'package:ahpsico/ui/patient/list/patient_list_model.dart';
+import 'package:ahpsico/ui/patient/send_message/send_message_sheet.dart';
 import 'package:ahpsico/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -43,7 +44,16 @@ class PatientList extends StatelessWidget {
       case PatientListEvent.navigateToLogin:
         context.go(LoginScreen.route);
       case PatientListEvent.openSendMessageSheet:
-      // TODO
+        showModalBottomSheet(
+          context: context,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+          ),
+          showDragHandle: true,
+          builder: (context) => SendMessageSheet(
+            patientIds: model.selectedPatientIds,
+          ),
+        );
     }
   }
 
@@ -59,7 +69,9 @@ class PatientList extends StatelessWidget {
 
   bool shouldPop(PatientListModel model) {
     if (selectModeByDefault || allSelectedByDefault) {
-      return true;
+      final isEmpty = model.selectedPatientIds.isEmpty;
+      model.clearSelection();
+      return isEmpty;
     }
     if (model.isSelectModeOn) {
       model.clearSelection();
@@ -109,14 +121,26 @@ class PatientList extends StatelessWidget {
                         },
                         actions: [
                           if (model.isSelectModeOn)
-                            IconButton(
-                              onPressed: () {
-                                if (model.areAllPatientsSelected) {
-                                  return model.clearSelection();
-                                }
-                                model.selectAllPatients();
-                              },
-                              icon: Icon(model.areAllPatientsSelected ? Icons.inbox : Icons.all_inbox),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 16.0),
+                              child: PopupMenuButton(
+                                child: const Icon(
+                                  Icons.more_vert,
+                                  color: AhpsicoColors.light80,
+                                ),
+                                itemBuilder: (context) => [
+                                  if (model.areAllPatientsSelected)
+                                    PopupMenuItem(
+                                      onTap: model.clearSelection,
+                                      child: const Text('Limpar seleção'),
+                                    ),
+                                  if (!model.areAllPatientsSelected)
+                                    PopupMenuItem(
+                                      onTap: model.selectAllPatients,
+                                      child: const Text('Selecionar todos'),
+                                    ),
+                                ],
+                              ),
                             ),
                         ],
                       )

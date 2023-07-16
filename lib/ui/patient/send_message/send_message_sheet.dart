@@ -2,23 +2,25 @@ import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/components/button.dart';
-import 'package:ahpsico/ui/components/phone_input_field.dart';
+import 'package:ahpsico/ui/components/input_field.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
-import 'package:ahpsico/ui/doctor/invite_patient/invite_patient_dialog.dart';
-import 'package:ahpsico/ui/doctor/invite_patient/invite_patient_model.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
+import 'package:ahpsico/ui/patient/send_message/send_message_dialog.dart';
+import 'package:ahpsico/ui/patient/send_message/send_message_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
-class InvitePatientSheet extends StatefulWidget {
-  const InvitePatientSheet({super.key});
+class SendMessageSheet extends StatefulWidget {
+  const SendMessageSheet({super.key, required this.patientIds});
+
+  final List<String> patientIds;
 
   @override
-  State<InvitePatientSheet> createState() => _InvitePatientSheetState();
+  State<SendMessageSheet> createState() => _SendMessageSheetState();
 }
 
-class _InvitePatientSheetState extends State<InvitePatientSheet> {
+class _SendMessageSheetState extends State<SendMessageSheet> {
   late final TextEditingController _controller;
 
   @override
@@ -35,22 +37,24 @@ class _InvitePatientSheetState extends State<InvitePatientSheet> {
 
   void _listenToEvents(
     BuildContext context,
-    InvitePatientModel model,
-    InvitePatientEvent event,
+    SendMessageModel model,
+    SendMessageEvent event,
   ) {
     switch (event) {
-      case InvitePatientEvent.navigateToLoginScreen:
+      case SendMessageEvent.navigateToLoginScreen:
         context.go(LoginScreen.route);
-      case InvitePatientEvent.showSnackbarError:
+      case SendMessageEvent.showSnackbarError:
         AhpsicoSnackbar.showError(context, model.snackbarMessage);
-      case InvitePatientEvent.showSnackbarMessage:
+      case SendMessageEvent.showSnackbarMessage:
         AhpsicoSnackbar.showSuccess(context, model.snackbarMessage);
-      case InvitePatientEvent.closeSheet:
+      case SendMessageEvent.closeSheet:
         context.pop();
-      case InvitePatientEvent.openPatientNotRegisteredDialog:
+      case SendMessageEvent.openConfirmationDialog:
         showDialog(
           context: context,
-          builder: (context) => const InvitePatientDialog(),
+          builder: (context) => SendMessageDialog(
+            onConfirm: () => model.sendMessage(widget.patientIds),
+          ),
         );
     }
   }
@@ -60,7 +64,7 @@ class _InvitePatientSheetState extends State<InvitePatientSheet> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: ViewModelBuilder(
-        provider: invitePatientModelProvider,
+        provider: sendMessageModelProvider,
         onEventEmitted: _listenToEvents,
         builder: (context, model) {
           return SingleChildScrollView(
@@ -68,21 +72,21 @@ class _InvitePatientSheetState extends State<InvitePatientSheet> {
             child: Column(
               children: [
                 Text(
-                  "Digite o número de telefone do paciente",
+                  "Digite a mensagem que será enviada para os pacientes selecionados",
                   style: AhpsicoText.title3Style.copyWith(color: AhpsicoColors.dark75),
                 ),
                 AhpsicoSpacing.verticalSpaceRegular,
-                PhoneInputField(
-                  onChanged: model.updatePhone,
+                AhpsicoInputField(
                   textAlign: TextAlign.start,
+                  onChanged: model.updateMessage,
+                  hint: "Digite a mensagem",
                   controller: _controller,
-                  isPhoneValid: model.isPhoneValid,
                 ),
                 AhpsicoSpacing.verticalSpaceRegular,
                 AhpsicoButton(
-                  "ENVIAR CONVITE PARA TERAPIA",
+                  "ENVIAR MENSAGEM",
                   width: double.infinity,
-                  onPressed: model.invitePatient,
+                  onPressed: model.openConfirmationDialog,
                   isLoading: model.isLoading,
                 ),
               ],

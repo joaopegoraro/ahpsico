@@ -10,6 +10,7 @@ enum InvitePatientEvent {
   openPatientNotRegisteredDialog,
   showSnackbarError,
   showSnackbarMessage,
+  closeSheet,
   navigateToLoginScreen,
 }
 
@@ -81,6 +82,7 @@ class InvitePatientModel extends BaseViewModel<InvitePatientEvent> {
         "Convite enviado com sucesso!",
         InvitePatientEvent.showSnackbarMessage,
       );
+      emitEvent(InvitePatientEvent.closeSheet);
     } on ApiPatientNotRegisteredException catch (_) {
       emitEvent(InvitePatientEvent.openPatientNotRegisteredDialog);
     } on ApiPatientAlreadyWithDoctorException catch (_) {

@@ -49,8 +49,8 @@ class PatientCard extends StatelessWidget {
                     ? Row(children: [
                         Checkbox(
                           value: isSelected,
-                          activeColor: AhpsicoColors.violet,
-                          onChanged: (_) {},
+                          fillColor: const MaterialStatePropertyAll(AhpsicoColors.violet),
+                          onChanged: null,
                         ),
                         AhpsicoSpacing.horizontalSpaceSmall,
                       ])
