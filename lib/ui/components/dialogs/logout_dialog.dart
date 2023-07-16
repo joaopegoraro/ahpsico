@@ -1,7 +1,5 @@
-import 'package:ahpsico/ui/app/theme/colors.dart';
-import 'package:ahpsico/ui/app/theme/text.dart';
+import 'package:ahpsico/ui/components/dialogs/ahpsico_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class LogoutDialog extends StatelessWidget {
   const LogoutDialog({
@@ -13,27 +11,11 @@ class LogoutDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text("Aviso"),
-      content: const Text("Tem certeza que deseja efetuar logout? Você irá voltar para tela de login"),
-      actions: [
-        TextButton(
-          onPressed: onLogout,
-          child: Text(
-            'Sim, desejo fazer logout',
-            textAlign: TextAlign.end,
-            style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
-          ),
-        ),
-        TextButton(
-          onPressed: context.pop,
-          child: Text(
-            'Não, desejo continuar usando o aplicativo',
-            textAlign: TextAlign.end,
-            style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
-          ),
-        ),
-      ],
+    return AhpsicoDialog(
+      content: "Tem certeza que deseja efetuar logout? Você irá voltar para tela de login",
+      firstButtonText: "Sim, desejo fazer logout",
+      onTapFirstButton: onLogout,
+      secondButtonText: "Não, desejo continuar usando o aplicativo",
     );
   }
 }

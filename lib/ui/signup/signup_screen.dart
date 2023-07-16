@@ -2,13 +2,12 @@ import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/components/button.dart';
+import 'package:ahpsico/ui/components/dialogs/ahpsico_dialog.dart';
 import 'package:ahpsico/ui/components/input_field.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/doctor/home/doctor_home.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:ahpsico/ui/patient/home/patient_home.dart';
-import 'package:ahpsico/ui/signup/dialogs/signup_cancelation_dialog.dart';
-import 'package:ahpsico/ui/signup/dialogs/signup_confirmation_dialog.dart';
 import 'package:ahpsico/ui/signup/signup_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -51,24 +50,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
       case SignUpEvent.navigateToLogin:
         context.go(LoginScreen.route);
       case SignUpEvent.openCancelationDialog:
-        showDialog(
+        AhpsicoDialog.show(
           context: context,
-          builder: (context) => SignUpCancelationDialog(
-            onConfirm: model.cancelSignUp,
-          ),
+          content: "Tem certeza que deseja cancelar o seu cadastro? Você irá voltar para tela de login",
+          firstButtonText: "Sim, desejo cancelar meu cadastro",
+          secondButtonText: "Não, desejo continuar meu cadastro",
+          onTapFirstButton: model.cancelSignUp,
         );
       case SignUpEvent.openConfirmationDialog:
-        showDialog(
-          context: context,
-          builder: (context) => SignUpConfirmationDialog(
-            name: model.name,
-            isDoctor: model.isDoctor,
-            onConfirm: () {
+        final accountType = model.isDoctor ? "Psicólogo" : "Paciente";
+        AhpsicoDialog.show(
+            context: context,
+            content: "${model.name}, tem certeza que deseja criar uma conta "
+                "de $accountType? Não será possível mudar sua conta no futuro",
+            firstButtonText: "Sim, sou um $accountType",
+            secondButtonText: "Não, acho que cliquei sem querer...",
+            onTapFirstButton: () {
               context.pop();
               model.completeSignUp();
-            },
-          ),
-        );
+            });
     }
   }
 

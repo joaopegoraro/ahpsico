@@ -3,10 +3,10 @@ import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/components/bottomsheet.dart';
 import 'package:ahpsico/ui/components/button.dart';
+import 'package:ahpsico/ui/components/dialogs/ahpsico_dialog.dart';
 import 'package:ahpsico/ui/components/input_field.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
-import 'package:ahpsico/ui/patient/send_message/send_message_dialog.dart';
 import 'package:ahpsico/ui/patient/send_message/send_message_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -51,11 +51,12 @@ class _SendMessageSheetState extends State<SendMessageSheet> {
       case SendMessageEvent.closeSheet:
         context.pop();
       case SendMessageEvent.openConfirmationDialog:
-        showDialog(
+        AhpsicoDialog.show(
           context: context,
-          builder: (context) => SendMessageDialog(
-            onConfirm: () => model.sendMessage(widget.patientIds),
-          ),
+          content: "Tem certeza que deseja enviar essa mensagem para os pacientes selecionados?",
+          firstButtonText: "Sim, tenho certeza",
+          secondButtonText: "Não, cancelar",
+          onTapFirstButton: () => model.sendMessage(widget.patientIds),
         );
     }
   }
