@@ -1,4 +1,5 @@
 import 'package:ahpsico/ui/app/theme/colors.dart';
+import 'package:ahpsico/ui/components/bottomsheet.dart';
 import 'package:ahpsico/ui/components/patient_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/components/topbar.dart';
@@ -45,12 +46,8 @@ class PatientList extends StatelessWidget {
       case PatientListEvent.navigateToLogin:
         context.go(LoginScreen.route);
       case PatientListEvent.openSendMessageSheet:
-        showModalBottomSheet(
+        AhpsicoSheet.show(
           context: context,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20)),
-          ),
-          showDragHandle: true,
           builder: (context) => SendMessageSheet(
             patientIds: model.selectedPatientIds,
           ),

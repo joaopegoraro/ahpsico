@@ -2,6 +2,7 @@ import 'package:ahpsico/ui/advices/advices_screen.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
+import 'package:ahpsico/ui/components/bottomsheet.dart';
 import 'package:ahpsico/ui/components/dialogs/logout_dialog.dart';
 import 'package:ahpsico/ui/components/session_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
@@ -38,12 +39,8 @@ class DoctorHome extends StatelessWidget {
       case DoctorHomeEvent.navigateToLoginScreen:
         context.go(LoginScreen.route);
       case DoctorHomeEvent.openInvitePatientBottomSheet:
-        showModalBottomSheet(
+        AhpsicoSheet.show(
           context: context,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20)),
-          ),
-          showDragHandle: true,
           builder: (context) => const InvitePatientSheet(),
         );
       case DoctorHomeEvent.openLogoutDialog:

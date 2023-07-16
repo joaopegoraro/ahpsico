@@ -14,11 +14,13 @@ class AhpsicoInputField extends StatelessWidget {
     this.errorColor,
     this.borderColor,
     this.textAlign,
+    this.isDense,
     this.errorBorderColor,
     this.borderWidth,
     this.onChanged,
     this.inputType,
     this.maxLenght,
+    this.minLines,
     this.maxLines,
     this.canRequestFocus = true,
     this.expands = false,
@@ -38,9 +40,11 @@ class AhpsicoInputField extends StatelessWidget {
   final double? borderWidth;
   final TextInputType? inputType;
   final int? maxLenght;
+  final int? minLines;
   final int? maxLines;
   final TextAlign? textAlign;
   final bool expands;
+  final bool? isDense;
   final ValueChanged<String>? onChanged;
 
   @override
@@ -53,6 +57,7 @@ class AhpsicoInputField extends StatelessWidget {
       keyboardType: inputType,
       canRequestFocus: canRequestFocus,
       maxLength: maxLenght,
+      minLines: minLines,
       maxLines: maxLines,
       onChanged: onChanged,
       style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.dark75),
@@ -61,6 +66,7 @@ class AhpsicoInputField extends StatelessWidget {
       decoration: InputDecoration(
         enabled: enabled,
         errorText: errorText,
+        isDense: isDense,
         errorStyle: AhpsicoText.smallStyle.copyWith(
           color: errorColor ?? AhpsicoColors.red,
         ),

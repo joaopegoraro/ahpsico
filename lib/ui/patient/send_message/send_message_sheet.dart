@@ -1,6 +1,7 @@
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
+import 'package:ahpsico/ui/components/bottomsheet.dart';
 import 'package:ahpsico/ui/components/button.dart';
 import 'package:ahpsico/ui/components/input_field.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
@@ -61,36 +62,33 @@ class _SendMessageSheetState extends State<SendMessageSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: ViewModelBuilder(
+    return AhpsicoSheet(
+      content: ViewModelBuilder(
         provider: sendMessageModelProvider,
         onEventEmitted: _listenToEvents,
         builder: (context, model) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Text(
-                  "Digite a mensagem que será enviada para os pacientes selecionados",
-                  style: AhpsicoText.title3Style.copyWith(color: AhpsicoColors.dark75),
-                ),
-                AhpsicoSpacing.verticalSpaceRegular,
-                AhpsicoInputField(
-                  textAlign: TextAlign.start,
-                  onChanged: model.updateMessage,
-                  hint: "Digite a mensagem",
-                  controller: _controller,
-                ),
-                AhpsicoSpacing.verticalSpaceRegular,
-                AhpsicoButton(
-                  "ENVIAR MENSAGEM",
-                  width: double.infinity,
-                  onPressed: model.openConfirmationDialog,
-                  isLoading: model.isLoading,
-                ),
-              ],
-            ),
+          return Column(
+            children: [
+              Text(
+                "Digite a mensagem que será enviada para os pacientes selecionados",
+                style: AhpsicoText.title3Style.copyWith(color: AhpsicoColors.dark75),
+              ),
+              AhpsicoSpacing.verticalSpaceRegular,
+              AhpsicoInputField(
+                minLines: 3,
+                textAlign: TextAlign.start,
+                onChanged: model.updateMessage,
+                hint: "Digite a mensagem",
+                controller: _controller,
+              ),
+              AhpsicoSpacing.verticalSpaceRegular,
+              AhpsicoButton(
+                "ENVIAR MENSAGEM",
+                width: double.infinity,
+                onPressed: model.openConfirmationDialog,
+                isLoading: model.isLoading,
+              ),
+            ],
           );
         },
       ),

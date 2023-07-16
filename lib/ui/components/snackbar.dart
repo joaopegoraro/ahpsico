@@ -19,6 +19,7 @@ class AhpsicoSnackbar extends SnackBar {
       text: text,
       backgroundColor: AhpsicoColors.green,
     );
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
@@ -27,6 +28,7 @@ class AhpsicoSnackbar extends SnackBar {
       text: text,
       backgroundColor: AhpsicoColors.red,
     );
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
@@ -35,6 +37,7 @@ class AhpsicoSnackbar extends SnackBar {
       text: text,
       backgroundColor: AhpsicoColors.yellow,
     );
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

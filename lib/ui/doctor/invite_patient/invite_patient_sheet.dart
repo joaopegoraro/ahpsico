@@ -58,14 +58,15 @@ class _InvitePatientSheetState extends State<InvitePatientSheet> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      primary: false,
       body: ViewModelBuilder(
         provider: invitePatientModelProvider,
         onEventEmitted: _listenToEvents,
         builder: (context, model) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   "Digite o número de telefone do paciente",
@@ -85,6 +86,7 @@ class _InvitePatientSheetState extends State<InvitePatientSheet> {
                   onPressed: model.invitePatient,
                   isLoading: model.isLoading,
                 ),
+                AhpsicoSpacing.verticalSpaceLarge,
               ],
             ),
           );
