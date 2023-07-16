@@ -1,4 +1,3 @@
-import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/repositories/patient_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/patient.dart';
@@ -10,6 +9,7 @@ import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum PatientListEvent {
   openSendMessageSheet,
+  openSearchBar,
   showSnackbarError,
   navigateToLogin,
 }
@@ -93,6 +93,10 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
       );
     }
     emitEvent(PatientListEvent.openSendMessageSheet);
+  }
+
+  void openSearchBar() {
+    emitEvent(PatientListEvent.openSearchBar);
   }
 
   /* Calls */

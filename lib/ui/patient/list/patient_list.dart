@@ -5,6 +5,7 @@ import 'package:ahpsico/ui/components/topbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:ahpsico/ui/patient/detail/patient_detail.dart';
 import 'package:ahpsico/ui/patient/list/patient_list_model.dart';
+import 'package:ahpsico/ui/patient/list/patient_search_delegate.dart';
 import 'package:ahpsico/ui/patient/send_message/send_message_sheet.dart';
 import 'package:ahpsico/utils/extensions.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +55,15 @@ class PatientList extends StatelessWidget {
             patientIds: model.selectedPatientIds,
           ),
         );
+      case PatientListEvent.openSearchBar:
+        showSearch(
+          context: context,
+          delegate: PatientSearchDelegate(model.patients),
+        ).then((patient) {
+          if (patient != null) {
+            context.push(PatientDetail.route, extra: patient);
+          }
+        });
     }
   }
 
@@ -120,28 +130,33 @@ class PatientList extends StatelessWidget {
                           if (shouldPop(model)) context.pop();
                         },
                         actions: [
-                          if (model.isSelectModeOn)
-                            Padding(
-                              padding: const EdgeInsets.only(right: 16.0),
-                              child: PopupMenuButton(
-                                child: const Icon(
-                                  Icons.more_vert,
-                                  color: AhpsicoColors.light80,
-                                ),
-                                itemBuilder: (context) => [
-                                  if (model.areAllPatientsSelected)
-                                    PopupMenuItem(
-                                      onTap: model.clearSelection,
-                                      child: const Text('Limpar seleção'),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 16.0),
+                            child: model.isSelectModeOn
+                                ? PopupMenuButton(
+                                    child: const Icon(
+                                      Icons.more_vert,
+                                      color: AhpsicoColors.light80,
                                     ),
-                                  if (!model.areAllPatientsSelected)
-                                    PopupMenuItem(
-                                      onTap: model.selectAllPatients,
-                                      child: const Text('Selecionar todos'),
-                                    ),
-                                ],
-                              ),
-                            ),
+                                    itemBuilder: (context) => [
+                                      if (model.areAllPatientsSelected)
+                                        PopupMenuItem(
+                                          onTap: model.clearSelection,
+                                          child: const Text('Limpar seleção'),
+                                        ),
+                                      if (!model.areAllPatientsSelected)
+                                        PopupMenuItem(
+                                          onTap: model.selectAllPatients,
+                                          child: const Text('Selecionar todos'),
+                                        ),
+                                    ],
+                                  )
+                                : IconButton(
+                                    onPressed: model.openSearchBar,
+                                    color: AhpsicoColors.light80,
+                                    icon: const Icon(Icons.search),
+                                  ),
+                          ),
                         ],
                       )
                     ];

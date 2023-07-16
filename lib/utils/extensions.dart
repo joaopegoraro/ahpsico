@@ -22,3 +22,14 @@ extension ObjectsExtensions on Object {
 extension IterableExtension<E> on Iterable<E> {
   List<T> mapToList<T>(T Function(E e) toElement) => map(toElement).toList();
 }
+
+extension StringExtension on String {
+  static const diacritics = 'ÀÁÂÃÄÅàáâãäåÒÓÔÕÕÖØòóôõöøÈÉÊËĚèéêëěðČÇçčÐĎďÌÍÎÏìíîïĽľÙÚÛÜŮùúûüůŇÑñňŘřŠšŤťŸÝÿýŽž';
+  static const nonDiacritics = 'AAAAAAaaaaaaOOOOOOOooooooEEEEEeeeeeeCCccDDdIIIIiiiiLlUUUUUuuuuuNNnnRrSsTtYYyyZz';
+
+  String get withoutDiacriticalMarks => splitMapJoin(
+        '',
+        onNonMatch: (char) =>
+            char.isNotEmpty && diacritics.contains(char) ? nonDiacritics[diacritics.indexOf(char)] : char,
+      );
+}
