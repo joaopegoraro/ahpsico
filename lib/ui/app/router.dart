@@ -64,8 +64,8 @@ final class AhpsicoRouter {
       GoRoute(
         path: PatientList.route,
         builder: (context, state) {
-          final args = state.extra as Map<String, dynamic>;
-          final bool selectMode = args['selectMode'] ?? false;
+          final args = state.extra as Map<String, dynamic>?;
+          final bool selectMode = args?['selectMode'] ?? false;
           return PatientList(selectMode: selectMode);
         },
       ),

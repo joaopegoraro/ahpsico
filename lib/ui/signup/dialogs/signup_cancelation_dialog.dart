@@ -21,6 +21,7 @@ class SignUpCancelationDialog extends StatelessWidget {
           onPressed: onConfirm,
           child: Text(
             'Sim, desejo cancelar meu cadastro',
+            textAlign: TextAlign.end,
             style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
           ),
         ),
@@ -28,6 +29,7 @@ class SignUpCancelationDialog extends StatelessWidget {
           onPressed: context.pop,
           child: Text(
             'Não, desejo continuar meu cadastro',
+            textAlign: TextAlign.end,
             style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
           ),
         ),

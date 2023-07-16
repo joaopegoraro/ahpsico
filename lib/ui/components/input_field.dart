@@ -21,6 +21,7 @@ class AhpsicoInputField extends StatelessWidget {
     this.maxLenght,
     this.maxLines,
     this.canRequestFocus = true,
+    this.expands = false,
     this.inputFormatters,
   });
 
@@ -39,6 +40,7 @@ class AhpsicoInputField extends StatelessWidget {
   final int? maxLenght;
   final int? maxLines;
   final TextAlign? textAlign;
+  final bool expands;
   final ValueChanged<String>? onChanged;
 
   @override
@@ -47,6 +49,7 @@ class AhpsicoInputField extends StatelessWidget {
       controller: controller,
       readOnly: readOnly,
       inputFormatters: inputFormatters,
+      expands: expands,
       keyboardType: inputType,
       canRequestFocus: canRequestFocus,
       maxLength: maxLenght,

@@ -166,7 +166,10 @@ class DoctorHome extends StatelessWidget {
                     ...model.sessions.map((session) {
                       return SessionCard(
                         session: session,
-                        onTap: () => context.push(SessionDetail.route, extra: session),
+                        onTap: (session) => context.push(
+                          SessionDetail.route,
+                          extra: session,
+                        ),
                       );
                     }),
                     AhpsicoSpacing.verticalSpaceMedium,

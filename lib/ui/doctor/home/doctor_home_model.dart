@@ -1,4 +1,3 @@
-import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/session/session.dart';
@@ -48,9 +47,6 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  User? _user;
-  User? get user => _user;
-
   List<Session> _sessions = [];
   List<Session> get sessions => _sessions;
 
@@ -74,7 +70,7 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
     updateUi(() => _isLoading = true);
 
     // TODO REMOVE THIS LINE
-    _user = const User(
+    user = const User(
       uid: "some uid",
       name: "Andréa Hahmeyer Pegoraro",
       phoneNumber: "",
@@ -82,13 +78,13 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
     );
     return updateUi(() => _isLoading = false);
 
-    await _getUserData();
+    await getUserData(sync: true);
     await _getTodaySessions();
     updateUi(() => _isLoading = false);
   }
 
   Future<void> _getTodaySessions() async {
-    final userUid = _user!.uid;
+    final userUid = user!.uid;
     final now = DateTime.now();
     try {
       await _sessionRepository.syncDoctorSessions(userUid, date: now);
@@ -98,21 +94,5 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
       showConnectionError();
     }
     _sessions = await _sessionRepository.getDoctorSessions(userUid, date: now);
-  }
-
-  Future<void> _getUserData() async {
-    try {
-      await userRepository.sync();
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
-    }
-
-    try {
-      _user = await userRepository.get();
-    } on DatabaseNotFoundException catch (_) {
-      await logout(showError: true);
-    }
   }
 }

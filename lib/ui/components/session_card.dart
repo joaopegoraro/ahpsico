@@ -15,7 +15,7 @@ class SessionCard extends StatelessWidget {
   });
 
   final Session session;
-  final VoidCallback? onTap;
+  final void Function(Session)? onTap;
 
   String get sessionStatus => switch (session.status) {
         SessionStatus.canceled => "Cancelada",
@@ -39,7 +39,7 @@ class SessionCard extends StatelessWidget {
         borderRadius: BorderRadius.all(Radius.circular(4)),
       ),
       child: InkWell(
-        onTap: onTap,
+        onTap: onTap == null ? null : () => onTap!(session),
         borderRadius: const BorderRadius.all(Radius.circular(4)),
         child: Padding(
           padding: const EdgeInsets.all(8.0),

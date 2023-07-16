@@ -18,3 +18,7 @@ extension ObjectsExtensions on Object {
     return Error.throwWithStackTrace(this, stackTrace);
   }
 }
+
+extension IterableExtension<E> on Iterable<E> {
+  List<T> mapToList<T>(T Function(E e) toElement) => map(toElement).toList();
+}
