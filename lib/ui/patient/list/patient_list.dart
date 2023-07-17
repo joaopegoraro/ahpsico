@@ -1,4 +1,5 @@
 import 'package:ahpsico/ui/app/theme/colors.dart';
+import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/components/bottomsheet.dart';
 import 'package:ahpsico/ui/components/patient_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
@@ -11,7 +12,6 @@ import 'package:ahpsico/ui/patient/send_message/send_message_sheet.dart';
 import 'package:ahpsico/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mvvm_riverpod/viewmodel_builder.dart';
 
 class PatientList extends StatelessWidget {
   const PatientList({
@@ -35,7 +35,7 @@ class PatientList extends StatelessWidget {
     };
   }
 
-  void _listenToEvents(
+  void _onEventEmmited(
     BuildContext context,
     PatientListModel model,
     PatientListEvent event,
@@ -89,114 +89,97 @@ class PatientList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AhpsicoColors.light,
-      body: ViewModelBuilder(
-        provider: patientListModelProvider,
-        onEventEmitted: _listenToEvents,
-        onCreate: (model) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (selectModeByDefault) {
-              model.enableSelectModeByDefault();
-            }
-            model.fetchScreenData().whenComplete(() {
-              if (allSelectedByDefault) {
-                model.selectAllPatients();
-              }
-            });
-          });
-        },
-        builder: (context, model) {
-          if (model.isLoading || model.user == null) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: AhpsicoColors.violet,
+    return BaseScreen(
+      provider: patientListModelProvider,
+      onEventEmitted: _onEventEmmited,
+      onWillPop: (model) async => shouldPop(model),
+      shouldShowLoading: (context, model) {
+        return model.isLoading || model.user == null;
+      },
+      onCreate: (model) {
+        if (selectModeByDefault) {
+          model.enableSelectModeByDefault();
+        }
+        model.fetchScreenData().whenComplete(() {
+          if (allSelectedByDefault) {
+            model.selectAllPatients();
+          }
+        });
+      },
+      fabBuilder: (context, model) {
+        if (model.isLoading || model.isSelectModeOn) return null;
+        return Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: FloatingActionButton.extended(
+              backgroundColor: AhpsicoColors.violet,
+              foregroundColor: AhpsicoColors.light80,
+              onPressed: model.openSendMessageSheet,
+              icon: const Icon(Icons.send),
+              label: const Text("ENVIAR MENSAGEM"),
+            ),
+          ),
+        );
+      },
+      topbarBuilder: (context, model) {
+        return Topbar(
+          title: getTitle(model),
+          onBackPressed: () {
+            if (shouldPop(model)) context.pop();
+          },
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: model.isSelectModeOn
+                  ? PopupMenuButton(
+                      child: const Icon(
+                        Icons.more_vert,
+                        color: AhpsicoColors.light80,
+                      ),
+                      itemBuilder: (context) => [
+                        if (model.areAllPatientsSelected)
+                          PopupMenuItem(
+                            onTap: model.clearSelection,
+                            child: const Text('Limpar seleção'),
+                          ),
+                        if (!model.areAllPatientsSelected)
+                          PopupMenuItem(
+                            onTap: model.selectAllPatients,
+                            child: const Text('Selecionar todos'),
+                          ),
+                      ],
+                    )
+                  : IconButton(
+                      onPressed: model.openSearchBar,
+                      color: AhpsicoColors.light80,
+                      icon: const Icon(Icons.search),
+                    ),
+            ),
+          ],
+        );
+      },
+      bodyBuilder: (context, model) {
+        return ListView(
+          children: model.patients.mapToList((patient) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: PatientCard(
+                patient: patient,
+                isSelected: model.selectedPatientIds.contains(patient.uuid),
+                showSelected: selectModeByDefault || allSelectedByDefault || model.isSelectModeOn,
+                onLongPress: model.selectPatient,
+                onTap: (patient) {
+                  if (model.isSelectModeOn) {
+                    return model.selectPatient(patient);
+                  }
+                  context.push(PatientDetail.route, extra: patient);
+                },
               ),
             );
-          }
-          return WillPopScope(
-            onWillPop: () async => shouldPop(model),
-            child: Stack(
-              children: [
-                NestedScrollView(
-                  headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-                    return [
-                      Topbar(
-                        title: getTitle(model),
-                        onBackPressed: () {
-                          if (shouldPop(model)) context.pop();
-                        },
-                        actions: [
-                          Padding(
-                            padding: const EdgeInsets.only(right: 16.0),
-                            child: model.isSelectModeOn
-                                ? PopupMenuButton(
-                                    child: const Icon(
-                                      Icons.more_vert,
-                                      color: AhpsicoColors.light80,
-                                    ),
-                                    itemBuilder: (context) => [
-                                      if (model.areAllPatientsSelected)
-                                        PopupMenuItem(
-                                          onTap: model.clearSelection,
-                                          child: const Text('Limpar seleção'),
-                                        ),
-                                      if (!model.areAllPatientsSelected)
-                                        PopupMenuItem(
-                                          onTap: model.selectAllPatients,
-                                          child: const Text('Selecionar todos'),
-                                        ),
-                                    ],
-                                  )
-                                : IconButton(
-                                    onPressed: model.openSearchBar,
-                                    color: AhpsicoColors.light80,
-                                    icon: const Icon(Icons.search),
-                                  ),
-                          ),
-                        ],
-                      )
-                    ];
-                  },
-                  body: ListView(
-                    children: model.patients.mapToList((patient) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: PatientCard(
-                          patient: patient,
-                          isSelected: model.selectedPatientIds.contains(patient.uuid),
-                          showSelected: selectModeByDefault || allSelectedByDefault || model.isSelectModeOn,
-                          onLongPress: model.selectPatient,
-                          onTap: (patient) {
-                            if (model.isSelectModeOn) {
-                              return model.selectPatient(patient);
-                            }
-                            context.push(PatientDetail.route, extra: patient);
-                          },
-                        ),
-                      );
-                    }),
-                  ),
-                ),
-                if (!model.isLoading && model.isSelectModeOn)
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: FloatingActionButton.extended(
-                        backgroundColor: AhpsicoColors.violet,
-                        foregroundColor: AhpsicoColors.light80,
-                        onPressed: model.openSendMessageSheet,
-                        icon: const Icon(Icons.send),
-                        label: const Text("ENVIAR MENSAGEM"),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          );
-        },
-      ),
+          }),
+        );
+      },
     );
   }
 }
