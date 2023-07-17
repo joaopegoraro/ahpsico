@@ -4,6 +4,7 @@ import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/assignments/detail/assignment_detail_model.dart';
+import 'package:ahpsico/ui/assignments/list/assignments_list.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/components/home_button.dart';
 import 'package:ahpsico/ui/components/session_card.dart';
@@ -11,7 +12,6 @@ import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/components/topbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:ahpsico/ui/session/detail/session_detail.dart';
-import 'package:ahpsico/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -35,6 +35,18 @@ class AssignmentDetail extends StatelessWidget {
         AhpsicoSnackbar.showError(context, model.snackbarMessage);
       case AssignmentDetailEvent.navigateToLogin:
         context.go(LoginScreen.route);
+      case AssignmentDetailEvent.cancelAssignment:
+        model.cancelAssignment(assignment).then((updatedAssignment) {
+          context.go(AssignmentDetail.route, extra: updatedAssignment);
+        });
+      case AssignmentDetailEvent.concludeAssignment:
+        model.concludeAssignment(assignment).then((updatedAssignment) {
+          context.go(AssignmentDetail.route, extra: updatedAssignment);
+        });
+      case AssignmentDetailEvent.deleteAssignment:
+        model.deleteAssignment(assignment).then((updatedAssignment) {
+          context.go(AssignmentsList.route);
+        });
     }
   }
 
@@ -62,18 +74,7 @@ class AssignmentDetail extends StatelessWidget {
         return model.isLoading || model.user == null;
       },
       topbarBuilder: (context, model) {
-        return Topbar(
-          title: "Tarefa",
-          actions: [
-            if (model.user!.isDoctor)
-              IconButton(
-                onPressed: () {
-                  // TODO
-                },
-                icon: const Icon(Icons.edit),
-              ),
-          ],
-        );
+        return const Topbar(title: "Tarefa");
       },
       bodyBuilder: (context, model) {
         return CustomScrollView(
@@ -145,9 +146,7 @@ class AssignmentDetail extends StatelessWidget {
                         HomeButton(
                           text: "CONCLUIR TAREFA",
                           enableFlex: true,
-                          onPressed: () {
-                            // TODO
-                          },
+                          onPressed: model.emitConcludeAssignmentEvent,
                           color: AhpsicoColors.green,
                           icon: Icons.check,
                         ),
@@ -155,9 +154,7 @@ class AssignmentDetail extends StatelessWidget {
                         HomeButton(
                           text: "CANCELAR TAREFA",
                           enableFlex: true,
-                          onPressed: () {
-                            // TODO
-                          },
+                          onPressed: model.emitCancelAssignmentEvent,
                           color: AhpsicoColors.red,
                           icon: Icons.cancel,
                         ),
@@ -167,9 +164,7 @@ class AssignmentDetail extends StatelessWidget {
                       AhpsicoSpacing.verticalSpaceSmall,
                       HomeButton(
                         text: "EXCLUIR TAREFA",
-                        onPressed: () {
-                          // TODO
-                        },
+                        onPressed: model.emitDeleteAssignmentEvent,
                         color: AhpsicoColors.red,
                         icon: Icons.delete,
                       ),

@@ -1,5 +1,7 @@
 import 'package:ahpsico/data/repositories/assignment_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
+import 'package:ahpsico/models/assignment/assignment.dart';
+import 'package:ahpsico/models/assignment/assignment_status.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/app/app.dart';
@@ -7,6 +9,9 @@ import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum AssignmentDetailEvent {
+  concludeAssignment,
+  cancelAssignment,
+  deleteAssignment,
   showSnackbarError,
   navigateToLogin,
 }
@@ -41,15 +46,73 @@ class AssignmentDetailModel extends BaseViewModel<AssignmentDetailEvent> {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  /* Method */
+
+  void emitCancelAssignmentEvent() {
+    emitEvent(AssignmentDetailEvent.cancelAssignment);
+  }
+
+  void emitConcludeAssignmentEvent() {
+    emitEvent(AssignmentDetailEvent.concludeAssignment);
+  }
+
+  void emitDeleteAssignmentEvent() {
+    emitEvent(AssignmentDetailEvent.deleteAssignment);
+  }
+
   /* Calls */
 
   Future<void> fetchScreenData() async {
     updateUi(() => _isLoading = true);
     // TODO REMOTE THIS BLOCK
-    user = mockUser.copyWith(isDoctor: false);
+    user = mockUser.copyWith(isDoctor: true);
     return updateUi(() => _isLoading = false);
     // TODO REMOVING BLOCK ENDS HERE
     await getUserData();
+    updateUi(() => _isLoading = false);
+  }
+
+  Future<Assignment?> concludeAssignment(Assignment assignment) async {
+    updateUi(() => _isLoading = true);
+    Assignment? newAssignment;
+    try {
+      newAssignment = await _assignmentRepository.update(
+        assignment.copyWith(status: AssignmentStatus.done),
+      );
+    } on ApiUnauthorizedException catch (_) {
+      logout(showError: true);
+    } on ApiConnectionException catch (_) {
+      showConnectionError();
+    }
+    updateUi(() => _isLoading = false);
+    return newAssignment;
+  }
+
+  Future<Assignment?> cancelAssignment(Assignment assignment) async {
+    updateUi(() => _isLoading = true);
+    Assignment? newAssignment;
+    try {
+      newAssignment = await _assignmentRepository.update(
+        assignment.copyWith(status: AssignmentStatus.missed),
+      );
+    } on ApiUnauthorizedException catch (_) {
+      logout(showError: true);
+    } on ApiConnectionException catch (_) {
+      showConnectionError();
+    }
+    updateUi(() => _isLoading = false);
+    return newAssignment;
+  }
+
+  Future<void> deleteAssignment(Assignment assignment) async {
+    updateUi(() => _isLoading = true);
+    try {
+      await _assignmentRepository.delete(assignment.id);
+    } on ApiUnauthorizedException catch (_) {
+      logout(showError: true);
+    } on ApiConnectionException catch (_) {
+      showConnectionError();
+    }
     updateUi(() => _isLoading = false);
   }
 }
