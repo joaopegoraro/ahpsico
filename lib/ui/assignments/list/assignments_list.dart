@@ -14,7 +14,7 @@ class AssignmentsList extends StatelessWidget {
 
   static const route = "/assignments";
 
-  void _onEventEmmited(
+  void _onEventEmitted(
     BuildContext context,
     AssignmentListModel model,
     AssignmentListEvent event,
@@ -31,7 +31,7 @@ class AssignmentsList extends StatelessWidget {
   Widget build(BuildContext context) {
     return BaseScreen(
       provider: assignmentListModelProvider,
-      onEventEmitted: _onEventEmmited,
+      onEventEmitted: _onEventEmitted,
       shouldShowLoading: (context, model) {
         return model.isLoading || model.user == null;
       },

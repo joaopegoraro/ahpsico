@@ -17,6 +17,7 @@ class AhpsicoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       title: 'Ahpsico',
       theme: AhpsicoTheme.themeData,
       routerConfig: AhpsicoRouter.router,
@@ -96,8 +97,19 @@ final mockAssignments = <Assignment>[
   ),
   Assignment(
     id: 2,
-    title: "Para próxima sessão",
-    description: "Tente praticar o método de respiração quando sentir vontade de comer demais",
+    title: "Para próxima sessão, não esquecer de entregar!",
+    description: "Tente praticar o método de respiração quando sentir vontade de comer demais"
+        "Tente praticar o método de respiração quando sentir vontade de comer demais"
+        "Tente praticar o método de respiração quando sentir vontade de comer demais"
+        "Tente praticar o método de respiração quando sentir vontade de comer demais"
+        "Tente praticar o método de respiração quando sentir vontade de comer demais"
+        "Tente praticar o método de respiração quando sentir vontade de comer demais"
+        "Tente praticar o método de respiração quando sentir vontade de comer demais"
+        "Tente praticar o método de respiração quando sentir vontade de comer demais"
+        "Tente praticar o método de respiração quando sentir vontade de comer demais"
+        "Tente praticar o método de respiração quando sentir vontade de comer demais"
+        "Tente praticar o método de respiração quando sentir vontade de comer demais"
+        "Tente praticar o método de respiração quando sentir vontade de comer demais",
     doctor: mockDoctor,
     patientId: mockPatient.uuid,
     status: AssignmentStatus.pending,

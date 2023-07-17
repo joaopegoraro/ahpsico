@@ -110,15 +110,12 @@ class PatientList extends StatelessWidget {
         if (model.isLoading || model.isSelectModeOn) return null;
         return Align(
           alignment: Alignment.bottomRight,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: FloatingActionButton.extended(
-              backgroundColor: AhpsicoColors.violet,
-              foregroundColor: AhpsicoColors.light80,
-              onPressed: model.openSendMessageSheet,
-              icon: const Icon(Icons.send),
-              label: const Text("ENVIAR MENSAGEM"),
-            ),
+          child: FloatingActionButton.extended(
+            backgroundColor: AhpsicoColors.violet,
+            foregroundColor: AhpsicoColors.light80,
+            onPressed: model.openSendMessageSheet,
+            icon: const Icon(Icons.send),
+            label: const Text("ENVIAR MENSAGEM"),
           ),
         );
       },

@@ -42,7 +42,7 @@ class Session {
       // "Segunda-feira"
       return DateFormat('EEEE').format(date).split('-').first;
     }
-    return DateFormat.MMMd(Platform.localeName).format(date); // "25 de maio"
+    return DateFormat.MMMMEEEEd(Platform.localeName).format(date); // "sábado, 25 de maio"
   }
 
   String get dateTime {
