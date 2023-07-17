@@ -171,10 +171,6 @@ class PatientHome extends StatelessWidget {
                     return AdviceCard(
                       advice: advice,
                       isUserDoctor: false,
-                      onTap: (advice) => context.push(
-                        AdviceDetail.route,
-                        extra: advice,
-                      ),
                     );
                   }),
                 ],

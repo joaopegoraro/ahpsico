@@ -81,19 +81,6 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
 
   Future<void> fetchScreenData() async {
     updateUi(() => _isLoading = true);
-
-    // TODO REMOVE THIS LINE
-    user = const User(
-      uid: "some uid",
-      name: "Marcos Aurélio",
-      phoneNumber: "",
-      isDoctor: false,
-    );
-    _advices = mockAdvices;
-    _assignments = mockAssignments;
-    _sessions = mockSessions;
-    return updateUi(() => _isLoading = false);
-
     await getUserData(sync: true);
     await _getUpcomingSessions();
     await _getPendingAssignments();
@@ -176,6 +163,13 @@ final mockAdvices = <Advice>[
   Advice(
     id: 3,
     message: "Não espere dos outros o que não esperaria de você mesmo",
+    doctor: mockDoctor,
+    patientIds: [mockPatient.uuid],
+  ),
+  Advice(
+    id: 4,
+    message:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
     doctor: mockDoctor,
     patientIds: [mockPatient.uuid],
   ),

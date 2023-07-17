@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class AdvicesList extends StatelessWidget {
-  const AdvicesList({super.key});
+class AdvicesScreen extends StatelessWidget {
+  const AdvicesScreen({super.key});
 
   static const route = "/advices";
 

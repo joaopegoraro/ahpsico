@@ -1,4 +1,4 @@
-import 'package:ahpsico/ui/advices/list/advices_list.dart';
+import 'package:ahpsico/ui/advices/advices_screen.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
@@ -117,11 +117,11 @@ class DoctorHome extends StatelessWidget {
                         ),
                         AhpsicoSpacing.horizontalSpaceSmall,
                         HomeButton(
-                          text: "VER DICAS ENVIADAS",
+                          text: "VER MENSAGENS ENVIADAS",
                           enableFlex: true,
                           color: AhpsicoColors.green,
                           icon: Icons.tips_and_updates,
-                          onPressed: () => context.push(AdvicesListScreen.route),
+                          onPressed: () => context.push(AdvicesScreen.route),
                         ),
                       ],
                     ),

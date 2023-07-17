@@ -77,6 +77,7 @@ class _SendMessageSheetState extends State<SendMessageSheet> {
               AhpsicoSpacing.verticalSpaceRegular,
               AhpsicoInputField(
                 minLines: 3,
+                maxLenght: 200,
                 textAlign: TextAlign.start,
                 onChanged: model.updateMessage,
                 hint: "Digite a mensagem",
