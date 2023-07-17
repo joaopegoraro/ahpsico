@@ -8,6 +8,7 @@ import 'package:ahpsico/services/auth/credentials.dart';
 import 'package:ahpsico/services/auth/exceptions.dart';
 import 'package:ahpsico/services/auth/token.dart';
 import 'package:ahpsico/ui/login/login_model.dart';
+import 'package:ahpsico/utils/mask_formatters.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -26,7 +27,7 @@ void main() {
   final user = User(
     uid: faker.guid.guid(),
     name: faker.person.name(),
-    phoneNumber: faker.phoneNumber.random.fromPattern([LoginModel.phoneMaskPattern]),
+    phoneNumber: faker.phoneNumber.random.fromPattern([MaskFormatters.phoneMaskPattern]),
     isDoctor: false,
   );
 

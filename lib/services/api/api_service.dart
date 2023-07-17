@@ -602,9 +602,8 @@ class ApiServiceImpl implements ApiService {
         case DioExceptionType.sendTimeout:
         case DioExceptionType.receiveTimeout:
         case DioExceptionType.connectionError:
-          ApiConnectionException(message: e.message).throwWithStackTrace(stackTrace);
         default:
-          rethrow;
+          ApiConnectionException(message: e.message).throwWithStackTrace(stackTrace);
       }
     }
   }

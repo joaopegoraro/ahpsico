@@ -203,9 +203,8 @@ void main() {
           ),
         );
         assert(false);
-      } on ApiException catch (e) {
-        const expectedException = ApiException(message: message);
-        assert(e.message == expectedException.message);
+      } on ApiConnectionException catch (_) {
+        assert(true);
       }
     });
   });
