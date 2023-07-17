@@ -1,36 +1,33 @@
-import 'package:ahpsico/models/session/session.dart';
-import 'package:ahpsico/models/session/session_status.dart';
-import 'package:ahpsico/models/session/session_type.dart';
+import 'package:ahpsico/models/assignment/assignment.dart';
+import 'package:ahpsico/models/assignment/assignment_status.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:flutter/material.dart';
 
 @immutable
-class SessionCard extends StatelessWidget {
-  const SessionCard({
+class AssignmentCard extends StatelessWidget {
+  const AssignmentCard({
     super.key,
-    required this.session,
+    required this.assignment,
     required this.onTap,
     required this.isUserDoctor,
   });
 
-  final Session session;
-  final void Function(Session)? onTap;
+  final Assignment assignment;
+  final void Function(Assignment)? onTap;
   final bool isUserDoctor;
 
-  String get sessionStatus => switch (session.status) {
-        SessionStatus.canceled => "Cancelada",
-        SessionStatus.concluded => "Concluída",
-        SessionStatus.confirmed => "Confirmada",
-        SessionStatus.notConfirmed => "Não confirmada",
+  String get assignmentStatus => switch (assignment.status) {
+        AssignmentStatus.done => "Concluída",
+        AssignmentStatus.missed => "Não concluída",
+        AssignmentStatus.pending => "Pendente",
       };
 
-  Color get statusColor => switch (session.status) {
-        SessionStatus.canceled => AhpsicoColors.red,
-        SessionStatus.concluded => AhpsicoColors.violet,
-        SessionStatus.confirmed => AhpsicoColors.green,
-        SessionStatus.notConfirmed => AhpsicoColors.yellow
+  Color get statusColor => switch (assignment.status) {
+        AssignmentStatus.done => AhpsicoColors.green,
+        AssignmentStatus.missed => AhpsicoColors.red,
+        AssignmentStatus.pending => AhpsicoColors.yellow,
       };
 
   @override
@@ -41,7 +38,7 @@ class SessionCard extends StatelessWidget {
         borderRadius: BorderRadius.all(Radius.circular(4)),
       ),
       child: InkWell(
-        onTap: onTap == null ? null : () => onTap!(session),
+        onTap: onTap == null ? null : () => onTap!(assignment),
         borderRadius: const BorderRadius.all(Radius.circular(4)),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -52,7 +49,7 @@ class SessionCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isUserDoctor ? session.patient.name : session.doctor.name,
+                      assignment.title,
                       style: AhpsicoText.regular1Style.copyWith(
                         color: AhpsicoColors.dark75,
                         fontWeight: FontWeight.w600,
@@ -63,7 +60,7 @@ class SessionCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          "Situação",
+                          "Status",
                           style: AhpsicoText.smallStyle.copyWith(color: AhpsicoColors.light20),
                         ),
                         AhpsicoSpacing.horizontalSpaceSmall,
@@ -74,24 +71,24 @@ class SessionCard extends StatelessWidget {
                             color: statusColor,
                           ),
                           child: Text(
-                            sessionStatus,
+                            assignmentStatus,
                             style: AhpsicoText.smallStyle.copyWith(color: AhpsicoColors.light80),
                           ),
                         ),
                       ],
                     ),
-                    if (session.type == SessionType.monthly) ...[
+                    AhpsicoSpacing.verticalSpaceSmall,
+                    Text(
+                      "Para sessão de ${assignment.deliverySession.readableDate}",
+                      style: AhpsicoText.regular3Style.copyWith(color: AhpsicoColors.dark50),
+                    ),
+                    if (!isUserDoctor) ...[
                       AhpsicoSpacing.verticalSpaceSmall,
                       Text(
-                        "Sessão ${session.groupIndex} de 4",
+                        "Enviado por ${assignment.doctor.name}",
                         style: AhpsicoText.regular3Style.copyWith(color: AhpsicoColors.dark50),
                       ),
                     ],
-                    AhpsicoSpacing.verticalSpaceSmall,
-                    Text(
-                      "${session.readableDate}, às ${session.dateTime}",
-                      style: AhpsicoText.regular3Style.copyWith(color: AhpsicoColors.dark50),
-                    ),
                   ],
                 ),
               ),

@@ -57,7 +57,7 @@ abstract interface class AssignmentRepository {
   Future<void> clear();
 }
 
-final assignmentRepositoryProvider = Provider((ref) {
+final assignmentRepositoryProvider = Provider<AssignmentRepository>((ref) {
   final apiService = ref.watch(apiServiceProvider);
   final database = ref.watch(ahpsicoDatabaseProvider);
   return AssignmentRepositoryImpl(apiService: apiService, database: database);

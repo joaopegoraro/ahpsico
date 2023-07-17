@@ -1,7 +1,6 @@
 import 'package:ahpsico/data/repositories/patient_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/patient.dart';
-import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
@@ -103,17 +102,6 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
 
   Future<void> fetchScreenData() async {
     updateUi(() => _isLoading = true);
-
-    // TODO REMOVE THIS LINE
-    user = const User(
-      uid: "some uid",
-      name: "Andréa Hahmeyer Pegoraro",
-      phoneNumber: "",
-      isDoctor: true,
-    );
-    _patients = _mockpatients;
-    return updateUi(() => _isLoading = false);
-
     await getUserData();
     await _fetchPatients();
     updateUi(() => _isLoading = false);
@@ -131,26 +119,3 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
     _patients = await _patientRepository.getDoctorPatients(user!.uid);
   }
 }
-
-const _mockpatients = <Patient>[
-  Patient(
-    uuid: "some uid1",
-    name: "Mário Garcia",
-    phoneNumber: "99999999999",
-  ),
-  Patient(
-    uuid: "some uid2",
-    name: "Júlia Rosa",
-    phoneNumber: "99999999999",
-  ),
-  Patient(
-    uuid: "some uid3",
-    name: "Carol Silva",
-    phoneNumber: "99999999999",
-  ),
-  Patient(
-    uuid: "some uid4",
-    name: "Gabriela Pereira",
-    phoneNumber: "99999999999",
-  ),
-];

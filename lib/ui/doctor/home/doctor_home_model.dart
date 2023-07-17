@@ -1,7 +1,6 @@
 import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/session/session.dart';
-import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
@@ -62,16 +61,6 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
 
   Future<void> fetchScreenData() async {
     updateUi(() => _isLoading = true);
-
-    // TODO REMOVE THIS LINE
-    user = const User(
-      uid: "some uid",
-      name: "Andréa Hahmeyer Pegoraro",
-      phoneNumber: "",
-      isDoctor: true,
-    );
-    return updateUi(() => _isLoading = false);
-
     await getUserData(sync: true);
     await _getTodaySessions();
     updateUi(() => _isLoading = false);

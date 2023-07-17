@@ -5,7 +5,7 @@ import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/session/session.dart';
 
 class Assignment {
-  Assignment({
+  const Assignment({
     required this.id,
     required this.title,
     required this.description,

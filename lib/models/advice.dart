@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:ahpsico/models/doctor.dart';
 
 class Advice {
-  Advice({
+  const Advice({
     required this.id,
     required this.message,
     required this.doctor,
