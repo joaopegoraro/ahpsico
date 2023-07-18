@@ -87,12 +87,6 @@ class DoctorDetailModel extends BaseViewModel<DoctorDetailEvent> {
 
   Future<void> fetchScreenData({required Doctor? doctor}) async {
     updateUi(() => _isLoading = true);
-    // TODO REMOVE THIS BLOCK
-    user = mockUser;
-    _doctor = mockDoctor;
-    return updateUi(() => _isLoading = false);
-    // TODO END OF BLOCK
-
     await getUserData(sync: true);
     if (doctor != null) {
       _doctor = doctor;

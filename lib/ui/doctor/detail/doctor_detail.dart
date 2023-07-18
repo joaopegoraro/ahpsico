@@ -41,7 +41,7 @@ class DoctorDetail extends StatelessWidget {
         AhpsicoSheet.show(
           context: context,
           builder: (context) {
-            return const EditDoctorSheet();
+            return EditDoctorSheet(doctor: model.doctor!);
           },
         ).then((shouldRefresh) {
           if (shouldRefresh == true) {
