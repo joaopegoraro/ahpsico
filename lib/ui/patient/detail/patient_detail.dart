@@ -68,7 +68,7 @@ class PatientDetail extends StatelessWidget {
         return FloatingActionButton.extended(
           backgroundColor: AhpsicoColors.green,
           label: Text(
-            "Falar pelo WhatsApp",
+            "FALAR PELO WHATSAPP",
             style: AhpsicoText.smallStyle.copyWith(
               color: AhpsicoColors.light80,
             ),

@@ -40,7 +40,7 @@ const mockDoctor = Doctor(
   description: "Psicólogo de família com mais de 10 anos de experiência",
   crp: "983928392-232",
   pixKey: 'marcos@gmail.com',
-  paymentDetails: "Não informado",
+  paymentDetails: "088553-2 Itaú - Andréa Hahmeyer Pegoraro",
 );
 
 const mockPatient = Patient(

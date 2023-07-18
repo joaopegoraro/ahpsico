@@ -3,6 +3,7 @@ import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/ui/advices/list/advices_list.dart';
+import 'package:ahpsico/ui/app/app.dart';
 import 'package:ahpsico/ui/assignments/detail/assignment_detail.dart';
 import 'package:ahpsico/ui/assignments/list/assignments_list.dart';
 import 'package:ahpsico/ui/doctor/detail/doctor_detail.dart';
@@ -22,7 +23,7 @@ final class AhpsicoRouter {
   AhpsicoRouter._();
 
   static final router = GoRouter(
-    initialLocation: PatientHome.route,
+    initialLocation: DoctorDetail.route,
     routes: [
       GoRoute(
         path: '/',
@@ -52,6 +53,8 @@ final class AhpsicoRouter {
       GoRoute(
         path: DoctorDetail.route,
         builder: (context, state) {
+          // TODO REMOVER
+          return const DoctorDetail(mockDoctor);
           final doctor = state.extra as Doctor?;
           return DoctorDetail(doctor);
         },
