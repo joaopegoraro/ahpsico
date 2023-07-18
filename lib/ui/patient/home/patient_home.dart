@@ -17,6 +17,7 @@ import 'package:ahpsico/ui/patient/home/patient_home_model.dart';
 import 'package:ahpsico/ui/schedule/schedule_screen.dart';
 import 'package:ahpsico/ui/session/detail/session_detail.dart';
 import 'package:ahpsico/ui/session/list/session_list.dart';
+import 'package:ahpsico/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -64,7 +65,9 @@ class PatientHome extends StatelessWidget {
       topbarBuilder: (context, model) {
         return HomeTopbar(
           userName: model.user!.firstName,
-          goToProfile: () => context.push(PatientDetail.route),
+          goToProfile: () {
+            // TODO
+          },
           logout: model.openLogoutDialog,
         );
       },
@@ -101,7 +104,7 @@ class PatientHome extends StatelessWidget {
                   text: "VER TAREFAS",
                   enableFlex: true,
                   color: AhpsicoColors.green,
-                  icon: Icons.tips_and_updates,
+                  icon: Icons.home_work,
                   onPressed: () => context.push(AssignmentsList.route),
                 ),
               ],
@@ -159,6 +162,7 @@ class PatientHome extends StatelessWidget {
               ...model.advices.map((advice) {
                 return AdviceCard(
                   advice: advice,
+                  showTitle: true,
                   isUserDoctor: false,
                 );
               }),
@@ -184,12 +188,12 @@ class PatientHome extends StatelessWidget {
               }),
             ],
             AhpsicoSpacing.verticalSpaceLarge,
-          ].map((item) {
+          ].mapToList((item) {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: item,
             );
-          }).toList(),
+          }),
         );
       },
     );

@@ -46,22 +46,22 @@ class AssignmentListModel extends BaseViewModel<AssignmentListEvent> {
 
   /* Calls */
 
-  Future<void> fetchScreenData() async {
+  Future<void> fetchScreenData({String? patientUuid}) async {
     updateUi(() => _isLoading = true);
     await getUserData();
-    await _fetchAssignments();
+    await _fetchAssignments(patientUuid: patientUuid);
     updateUi(() => _isLoading = false);
   }
 
-  Future<void> _fetchAssignments() async {
+  Future<void> _fetchAssignments({String? patientUuid}) async {
     try {
-      await _assignmentRepository.syncPatientAssignments(user!.uid);
+      await _assignmentRepository.syncPatientAssignments(patientUuid ?? user!.uid);
     } on ApiUnauthorizedException catch (_) {
       logout(showError: true);
     } on ApiConnectionException catch (_) {
       showConnectionError();
     }
 
-    _assignments = await _assignmentRepository.getPatientAssignments(user!.uid);
+    _assignments = await _assignmentRepository.getPatientAssignments(patientUuid ?? user!.uid);
   }
 }

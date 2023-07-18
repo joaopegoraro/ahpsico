@@ -16,6 +16,8 @@ class HomeButton extends StatelessWidget {
     this.enableFlex = false,
     this.flex = 1,
     this.flexFit = FlexFit.tight,
+    this.width,
+    this.height,
   });
 
   final String text;
@@ -29,39 +31,46 @@ class HomeButton extends StatelessWidget {
   final int flex;
   final FlexFit flexFit;
 
+  final double? width;
+  final double? height;
+
   @override
   Widget build(BuildContext context) {
     return [
-      ElevatedButton(
-        onPressed: onPressed,
-        style: ButtonStyle(
-            padding: const MaterialStatePropertyAll(EdgeInsets.all(16)),
-            backgroundColor: MaterialStatePropertyAll(color),
-            shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(28)),
-            ))),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: iconBackgroundColor,
-                borderRadius: const BorderRadius.all(Radius.circular(16)),
+      SizedBox(
+        width: width,
+        height: height,
+        child: ElevatedButton(
+          onPressed: onPressed,
+          style: ButtonStyle(
+              padding: const MaterialStatePropertyAll(EdgeInsets.all(16)),
+              backgroundColor: MaterialStatePropertyAll(color),
+              shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(28)),
+              ))),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: iconBackgroundColor,
+                  borderRadius: const BorderRadius.all(Radius.circular(16)),
+                ),
+                child: Icon(
+                  icon,
+                  color: iconForegroundColor ?? color,
+                ),
               ),
-              child: Icon(
-                icon,
-                color: iconForegroundColor ?? color,
+              AhpsicoSpacing.horizontalSpaceSmall,
+              Flexible(
+                child: Text(
+                  text,
+                  style: AhpsicoText.regular2Style.copyWith(color: textColor),
+                  maxLines: 3,
+                ),
               ),
-            ),
-            AhpsicoSpacing.horizontalSpaceSmall,
-            Flexible(
-              child: Text(
-                text,
-                style: AhpsicoText.regular2Style.copyWith(color: textColor),
-                maxLines: 3,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       )
     ].map((button) {

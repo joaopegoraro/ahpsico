@@ -11,6 +11,8 @@ class Patient {
   final String name;
   final String phoneNumber;
 
+  String get firstName => name.split(" ").first;
+
   Patient copyWith({
     String? uuid,
     String? name,

@@ -107,7 +107,7 @@ class PatientList extends StatelessWidget {
         });
       },
       fabBuilder: (context, model) {
-        if (model.isLoading || model.isSelectModeOn) return null;
+        if (model.isLoading || !model.isSelectModeOn) return null;
         return Align(
           alignment: Alignment.bottomRight,
           child: FloatingActionButton.extended(

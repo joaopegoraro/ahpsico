@@ -74,23 +74,31 @@ class AdviceListModel extends BaseViewModel<AdviceListEvent> {
 
   /* Calls */
 
-  Future<void> fetchScreenData() async {
+  Future<void> fetchScreenData({String? patientUuid}) async {
     updateUi(() => _isLoading = true);
     await getUserData();
     await _fetchAdvices();
     updateUi(() => _isLoading = false);
   }
 
-  Future<void> _fetchAdvices() async {
+  Future<void> _fetchAdvices({String? patientUuid}) async {
     try {
-      await _adviceRepository.syncDoctorAdvices(user!.uid);
+      if (patientUuid != null) {
+        await _adviceRepository.syncPatientAdvices(patientUuid);
+      } else {
+        await _adviceRepository.syncDoctorAdvices(user!.uid);
+      }
     } on ApiUnauthorizedException catch (_) {
       logout(showError: true);
     } on ApiConnectionException catch (_) {
       showConnectionError();
     }
 
-    _advices = await _adviceRepository.getDoctorAdvices(user!.uid);
+    if (patientUuid != null) {
+      _advices = await _adviceRepository.getPatientAdvices(patientUuid);
+    } else {
+      _advices = await _adviceRepository.getDoctorAdvices(user!.uid);
+    }
   }
 
   Future<void> deleteSelectedAdvices() async {

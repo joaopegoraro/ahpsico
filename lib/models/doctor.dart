@@ -19,6 +19,8 @@ class Doctor {
   final String pixKey;
   final String paymentDetails;
 
+  String get firstName => name.split(" ").first;
+
   Doctor copyWith({
     String? uuid,
     String? name,

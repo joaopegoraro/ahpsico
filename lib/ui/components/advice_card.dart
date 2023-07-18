@@ -11,6 +11,7 @@ class AdviceCard extends StatefulWidget {
     super.key,
     required this.advice,
     required this.isUserDoctor,
+    required this.showTitle,
     this.selectModeOn = false,
     this.isSelected = false,
     this.onTap,
@@ -21,6 +22,7 @@ class AdviceCard extends StatefulWidget {
   final bool isUserDoctor;
   final bool selectModeOn;
   final bool isSelected;
+  final bool showTitle;
   final void Function(Advice)? onTap;
   final void Function(Advice)? onLongPress;
 
@@ -76,24 +78,25 @@ class _AdviceCardState extends State<AdviceCard> {
                   children: [
                     Row(
                       children: [
-                        Expanded(
-                          child: Text(
-                            widget.isUserDoctor
-                                ? "Enviado para ${widget.advice.patientIds.length} paciente(s)"
-                                : widget.advice.doctor.name,
-                            style: AhpsicoText.regular1Style.copyWith(
-                              color: AhpsicoColors.dark75,
-                              fontWeight: FontWeight.w600,
+                        if (widget.showTitle)
+                          Expanded(
+                            child: Text(
+                              widget.isUserDoctor
+                                  ? "Enviado para ${widget.advice.patientIds.length} paciente(s)"
+                                  : widget.advice.doctor.name,
+                              style: AhpsicoText.regular1Style.copyWith(
+                                color: AhpsicoColors.dark75,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                        ),
+                        if (!widget.showTitle && messageIsTooBig) const Spacer(),
                         if (messageIsTooBig)
                           Icon(
                             isExpanded ? Icons.expand_less : Icons.expand_more,
                           ),
                       ],
                     ),
-                    AhpsicoSpacing.verticalSpaceSmall,
                     Text(
                       !messageIsTooBig || isExpanded
                           ? widget.advice.message

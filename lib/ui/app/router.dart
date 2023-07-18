@@ -22,7 +22,7 @@ final class AhpsicoRouter {
   AhpsicoRouter._();
 
   static final router = GoRouter(
-    initialLocation: AdvicesList.route,
+    initialLocation: PatientList.route,
     routes: [
       GoRoute(
         path: '/',
@@ -79,7 +79,7 @@ final class AhpsicoRouter {
       GoRoute(
         path: PatientDetail.route,
         builder: (context, state) {
-          final patient = state.extra as Patient?;
+          final patient = state.extra as Patient;
           return PatientDetail(patient);
         },
       ),
@@ -88,7 +88,10 @@ final class AhpsicoRouter {
 
       GoRoute(
         path: AdvicesList.route,
-        builder: (context, state) => const AdvicesList(),
+        builder: (context, state) {
+          final patient = state.extra as Patient?;
+          return AdvicesList(patient: patient);
+        },
       ),
 
       // Schedule
@@ -102,7 +105,10 @@ final class AhpsicoRouter {
 
       GoRoute(
         path: SessionList.route,
-        builder: (context, state) => const SessionList(),
+        builder: (context, state) {
+          final patient = state.extra as Patient?;
+          return SessionList(patient: patient);
+        },
       ),
       GoRoute(
         path: SessionDetail.route,
@@ -116,7 +122,10 @@ final class AhpsicoRouter {
 
       GoRoute(
         path: AssignmentsList.route,
-        builder: (context, state) => const AssignmentsList(),
+        builder: (context, state) {
+          final patient = state.extra as Patient?;
+          return AssignmentsList(patient: patient);
+        },
       ),
       GoRoute(
         path: AssignmentDetail.route,

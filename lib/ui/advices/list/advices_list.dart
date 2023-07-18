@@ -1,3 +1,4 @@
+import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/ui/advices/list/advices_list_model.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
@@ -10,9 +11,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class AdvicesList extends StatelessWidget {
-  const AdvicesList({super.key});
+  const AdvicesList({super.key, required this.patient});
 
   static const route = "/advices";
+
+  final Patient? patient;
 
   void _onEventEmitted(
     BuildContext context,
@@ -92,6 +95,7 @@ class AdvicesList extends StatelessWidget {
                 advice: advice,
                 isUserDoctor: true,
                 selectModeOn: model.isSelectModeOn,
+                showTitle: patient == null,
                 isSelected: model.selectedAdvicesIds.contains(advice.id),
                 onLongPress: model.selectAdvice,
                 onTap: model.isSelectModeOn ? model.selectAdvice : null,
