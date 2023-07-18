@@ -22,7 +22,7 @@ final class AhpsicoRouter {
   AhpsicoRouter._();
 
   static final router = GoRouter(
-    initialLocation: DoctorDetail.route,
+    initialLocation: SessionList.route,
     routes: [
       GoRoute(
         path: '/',
@@ -67,8 +67,8 @@ final class AhpsicoRouter {
         path: PatientList.route,
         builder: (context, state) {
           final args = state.extra as Map<String, dynamic>?;
-          final bool selectMode = args?['selectMode'] ?? false;
-          final bool allSelected = args?['allSelected'] ?? false;
+          final bool selectMode = args?[PatientList.selectModeArgsKey] ?? false;
+          final bool allSelected = args?[PatientList.allSelectedArgsKey] ?? false;
           return PatientList(
             selectModeByDefault: selectMode,
             allSelectedByDefault: allSelected,
@@ -105,8 +105,13 @@ final class AhpsicoRouter {
       GoRoute(
         path: SessionList.route,
         builder: (context, state) {
-          final patient = state.extra as Patient?;
-          return SessionList(patient: patient);
+          final args = state.extra as Map<String, dynamic>?;
+          final Patient? patient = args?[SessionList.patientArgsKey];
+          final bool navigateBackOnTap = args?[PatientList.allSelectedArgsKey] ?? false;
+          return SessionList(
+            patient: patient,
+            navigateBackOnTap: navigateBackOnTap,
+          );
         },
       ),
       GoRoute(

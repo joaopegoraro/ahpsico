@@ -74,14 +74,14 @@ class AdviceListModel extends BaseViewModel<AdviceListEvent> {
 
   /* Calls */
 
-  Future<void> fetchScreenData({String? patientUuid}) async {
+  Future<void> fetchScreenData({required String? patientUuid}) async {
     updateUi(() => _isLoading = true);
     await getUserData();
-    await _fetchAdvices();
+    await _fetchAdvices(patientUuid: patientUuid);
     updateUi(() => _isLoading = false);
   }
 
-  Future<void> _fetchAdvices({String? patientUuid}) async {
+  Future<void> _fetchAdvices({required String? patientUuid}) async {
     try {
       if (patientUuid != null) {
         await _adviceRepository.syncPatientAdvices(patientUuid);

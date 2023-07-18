@@ -132,7 +132,10 @@ class PatientDetail extends StatelessWidget {
                       enableFlex: true,
                       color: AhpsicoColors.violet,
                       icon: Icons.groups,
-                      onPressed: () => context.push(SessionList.route, extra: patient),
+                      onPressed: () => context.push(
+                        SessionList.route,
+                        extra: SessionList.buildArgs(patient: patient),
+                      ),
                     ),
                     AhpsicoSpacing.horizontalSpaceSmall,
                     HomeButton(
@@ -140,7 +143,10 @@ class PatientDetail extends StatelessWidget {
                       enableFlex: true,
                       color: AhpsicoColors.green,
                       icon: Icons.home_work,
-                      onPressed: () => context.push(AssignmentsList.route, extra: patient),
+                      onPressed: () => context.push(
+                        AssignmentsList.route,
+                        extra: patient,
+                      ),
                     ),
                   ],
                 ),

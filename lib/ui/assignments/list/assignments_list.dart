@@ -43,7 +43,7 @@ class AssignmentsList extends StatelessWidget {
         return model.isLoading || model.user == null;
       },
       onCreate: (model) {
-        model.fetchScreenData();
+        model.fetchScreenData(patientUuid: patient?.uuid);
       },
       topbarBuilder: (context, model) {
         return Topbar(
@@ -75,7 +75,7 @@ class AssignmentsList extends StatelessWidget {
                 onTap: (assignment) {
                   context.push(AssignmentDetail.route, extra: assignment).then((shouldRefresh) {
                     if (shouldRefresh == true) {
-                      model.fetchScreenData();
+                      model.fetchScreenData(patientUuid: patient?.uuid);
                     }
                   });
                 },

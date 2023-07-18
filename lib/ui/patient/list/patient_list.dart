@@ -21,19 +21,22 @@ class PatientList extends StatelessWidget {
   });
 
   static const route = "/patients";
-
-  final bool selectModeByDefault;
-  final bool allSelectedByDefault;
+  static const selectModeArgsKey = "selectMode";
+  static const allSelectedArgsKey = "allSelected";
 
   static Map<String, dynamic> buildArgs({
     bool selectMode = false,
     bool allSelected = false,
   }) {
     return {
-      "selectMode": selectMode,
-      "allSelected": allSelected,
+      selectModeArgsKey: selectMode,
+      allSelectedArgsKey: allSelected,
     };
   }
+
+  final bool selectModeByDefault;
+
+  final bool allSelectedByDefault;
 
   void _onEventEmmited(
     BuildContext context,
