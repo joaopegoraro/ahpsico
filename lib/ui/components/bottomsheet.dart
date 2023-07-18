@@ -9,11 +9,11 @@ class AhpsicoSheet extends StatelessWidget {
 
   final Widget content;
 
-  static void show({
+  static Future<T?> show<T>({
     required BuildContext context,
     required WidgetBuilder builder,
-  }) {
-    showModalBottomSheet(
+  }) async {
+    return await showModalBottomSheet<T>(
       context: context,
       useSafeArea: true,
       isScrollControlled: true,

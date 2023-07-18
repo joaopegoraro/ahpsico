@@ -59,7 +59,11 @@ class AssignmentsList extends StatelessWidget {
                 assignment: assignment,
                 isUserDoctor: patient != null,
                 onTap: (assignment) {
-                  context.push(AssignmentDetail.route, extra: assignment);
+                  context.push(AssignmentDetail.route, extra: assignment).then((shouldRefresh) {
+                    if (shouldRefresh == true) {
+                      model.fetchScreenData();
+                    }
+                  });
                 },
               ),
             );

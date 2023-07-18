@@ -16,17 +16,21 @@ import 'package:ahpsico/ui/schedule/schedule_screen.dart';
 import 'package:ahpsico/ui/session/detail/session_detail.dart';
 import 'package:ahpsico/ui/session/list/session_list.dart';
 import 'package:ahpsico/ui/signup/signup_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 final class AhpsicoRouter {
   AhpsicoRouter._();
 
   static final router = GoRouter(
-    initialLocation: PatientDetail.route,
+    initialLocation: PatientHome.route,
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const LoginScreen(),
+        builder: (context, state) {
+          final key = state.extra as Key?;
+          return LoginScreen(key: key);
+        },
       ),
 
       // Login and SignUp

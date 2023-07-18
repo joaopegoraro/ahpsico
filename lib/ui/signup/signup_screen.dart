@@ -99,13 +99,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     AhpsicoSpacing.verticalSpaceMedium,
                     Text(
-                      "Informe seu nome, e escolha se você é um Psicólogo ou um Paciente",
+                      "Informe seu nome completo, e escolha se você é um Psicólogo ou um Paciente",
                       style: AhpsicoText.regular3Style.copyWith(color: AhpsicoColors.dark25),
                     ),
                     AhpsicoSpacing.verticalSpaceRegular,
                     AhpsicoInputField(
                       controller: _nameController,
-                      hint: "Nome",
+                      hint: "Nome completo",
                       enabled: !model.isLoadingSignUp,
                       inputType: TextInputType.name,
                       onChanged: model.updateName,

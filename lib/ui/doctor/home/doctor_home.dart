@@ -105,7 +105,7 @@ class DoctorHome extends StatelessWidget {
       topbarBuilder: (context, model) {
         return HomeTopbar(
           userName: model.user!.firstName,
-          goToProfile: () => context.push(DoctorDetail.route),
+          editProfile: () => context.push(DoctorDetail.route),
           logout: model.openLogoutDialog,
         );
       },

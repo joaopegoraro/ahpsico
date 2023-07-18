@@ -4,7 +4,6 @@ import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/assignments/detail/assignment_detail_model.dart';
-import 'package:ahpsico/ui/assignments/list/assignments_list.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/components/home_button.dart';
 import 'package:ahpsico/ui/components/session_card.dart';
@@ -45,7 +44,7 @@ class AssignmentDetail extends StatelessWidget {
         });
       case AssignmentDetailEvent.deleteAssignment:
         model.deleteAssignment(assignment).then((updatedAssignment) {
-          context.go(AssignmentsList.route);
+          context.pop(true);
         });
     }
   }

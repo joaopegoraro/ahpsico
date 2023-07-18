@@ -6,13 +6,14 @@ import 'package:ahpsico/ui/assignments/list/assignments_list.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/components/advice_card.dart';
 import 'package:ahpsico/ui/components/assignment_card.dart';
+import 'package:ahpsico/ui/components/bottomsheet.dart';
 import 'package:ahpsico/ui/components/dialogs/logout_dialog.dart';
 import 'package:ahpsico/ui/components/home_button.dart';
 import 'package:ahpsico/ui/components/home_topbar.dart';
 import 'package:ahpsico/ui/components/session_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
-import 'package:ahpsico/ui/patient/detail/patient_detail.dart';
+import 'package:ahpsico/ui/patient/edit_name/edit_patient_name_sheet.dart';
 import 'package:ahpsico/ui/patient/home/patient_home_model.dart';
 import 'package:ahpsico/ui/schedule/schedule_screen.dart';
 import 'package:ahpsico/ui/session/detail/session_detail.dart';
@@ -38,13 +39,25 @@ class PatientHome extends StatelessWidget {
         AhpsicoSnackbar.showError(context, model.snackbarMessage);
       case PatientHomeEvent.navigateToLoginScreen:
         context.go(LoginScreen.route);
+      case PatientHomeEvent.openEditNameSheet:
+        AhpsicoSheet.show(
+          context: context,
+          builder: (context) {
+            return EditPatientNameSheet(patient: model.patient!);
+          },
+        ).then((shouldRefresh) {
+          print("RETORNO: $shouldRefresh");
+          if (shouldRefresh == true) {
+            model.fetchScreenData();
+          }
+        });
       case PatientHomeEvent.openLogoutDialog:
         showDialog(
           context: context,
           builder: (context) => LogoutDialog(
             onLogout: () {
-              model.logout();
               context.pop();
+              model.logout();
             },
           ),
         );
@@ -65,9 +78,7 @@ class PatientHome extends StatelessWidget {
       topbarBuilder: (context, model) {
         return HomeTopbar(
           userName: model.user!.firstName,
-          goToProfile: () {
-            // TODO
-          },
+          editProfile: model.openEditNameSheet,
           logout: model.openLogoutDialog,
         );
       },
