@@ -1,4 +1,6 @@
 import 'package:ahpsico/models/patient.dart';
+import 'package:ahpsico/ui/app/theme/colors.dart';
+import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/assignments/detail/assignment_detail.dart';
 import 'package:ahpsico/ui/assignments/list/assignments_list_model.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
@@ -6,7 +8,6 @@ import 'package:ahpsico/ui/components/assignment_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/components/topbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
-import 'package:ahpsico/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -51,8 +52,21 @@ class AssignmentsList extends StatelessWidget {
         );
       },
       bodyBuilder: (context, model) {
-        return ListView(
-          children: model.assignments.mapToList((assignment) {
+        if (model.assignments.isEmpty) {
+          return Center(
+            child: Text(
+              "Nenhuma tarefa encontrada",
+              style: AhpsicoText.title3Style.copyWith(
+                color: AhpsicoColors.dark75,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          );
+        }
+        return ListView.builder(
+          itemCount: model.assignments.length,
+          itemBuilder: (context, index) {
+            final assignment = model.assignments[index];
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: AssignmentCard(
@@ -67,7 +81,7 @@ class AssignmentsList extends StatelessWidget {
                 },
               ),
             );
-          }),
+          },
         );
       },
     );

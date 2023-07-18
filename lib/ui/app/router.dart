@@ -7,7 +7,6 @@ import 'package:ahpsico/ui/assignments/detail/assignment_detail.dart';
 import 'package:ahpsico/ui/assignments/list/assignments_list.dart';
 import 'package:ahpsico/ui/doctor/detail/doctor_detail.dart';
 import 'package:ahpsico/ui/doctor/home/doctor_home.dart';
-import 'package:ahpsico/ui/doctor/list/doctor_list.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:ahpsico/ui/patient/detail/patient_detail.dart';
 import 'package:ahpsico/ui/patient/home/patient_home.dart';
@@ -49,10 +48,6 @@ final class AhpsicoRouter {
       GoRoute(
         path: DoctorHome.route,
         builder: (context, state) => const DoctorHome(),
-      ),
-      GoRoute(
-        path: DoctorList.route,
-        builder: (context, state) => const DoctorList(),
       ),
       GoRoute(
         path: DoctorDetail.route,

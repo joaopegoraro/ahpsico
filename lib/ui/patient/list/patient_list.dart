@@ -1,4 +1,5 @@
 import 'package:ahpsico/ui/app/theme/colors.dart';
+import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/components/bottomsheet.dart';
 import 'package:ahpsico/ui/components/patient_card.dart';
@@ -9,7 +10,6 @@ import 'package:ahpsico/ui/patient/detail/patient_detail.dart';
 import 'package:ahpsico/ui/patient/list/patient_list_model.dart';
 import 'package:ahpsico/ui/patient/list/patient_search_delegate.dart';
 import 'package:ahpsico/ui/patient/send_message/send_message_sheet.dart';
-import 'package:ahpsico/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -154,8 +154,21 @@ class PatientList extends StatelessWidget {
         );
       },
       bodyBuilder: (context, model) {
-        return ListView(
-          children: model.patients.mapToList((patient) {
+        if (model.patients.isEmpty) {
+          return Center(
+            child: Text(
+              "Você não possui nenhum paciente",
+              style: AhpsicoText.title3Style.copyWith(
+                color: AhpsicoColors.dark75,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          );
+        }
+        return ListView.builder(
+          itemCount: model.patients.length,
+          itemBuilder: (context, index) {
+            final patient = model.patients[index];
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: PatientCard(
@@ -171,7 +184,7 @@ class PatientList extends StatelessWidget {
                 },
               ),
             );
-          }),
+          },
         );
       },
     );

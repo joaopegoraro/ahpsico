@@ -1,6 +1,7 @@
 import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/ui/advices/list/advices_list_model.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
+import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/components/advice_card.dart';
 import 'package:ahpsico/ui/components/dialogs/ahpsico_dialog.dart';
@@ -85,6 +86,17 @@ class AdvicesList extends StatelessWidget {
         );
       },
       bodyBuilder: (context, model) {
+        if (model.advices.isEmpty) {
+          return Center(
+            child: Text(
+              "Nenhuma mensagem encontrada",
+              style: AhpsicoText.title3Style.copyWith(
+                color: AhpsicoColors.dark75,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          );
+        }
         return ListView.builder(
           itemCount: model.advices.length,
           itemBuilder: (context, index) {
