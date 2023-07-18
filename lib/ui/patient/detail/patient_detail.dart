@@ -1,5 +1,4 @@
 import 'package:ahpsico/models/patient.dart';
-import 'package:ahpsico/ui/advices/list/advices_list.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
@@ -21,6 +20,7 @@ import 'package:ahpsico/utils/extensions.dart';
 import 'package:ahpsico/utils/mask_formatters.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PatientDetail extends StatelessWidget {
   const PatientDetail(
@@ -64,6 +64,24 @@ class PatientDetail extends StatelessWidget {
           onBackPressed: context.pop,
         );
       },
+      fabBuilder: (context, value) {
+        return FloatingActionButton.extended(
+          backgroundColor: AhpsicoColors.green,
+          label: Text(
+            "Falar pelo WhatsApp",
+            style: AhpsicoText.smallStyle.copyWith(
+              color: AhpsicoColors.light80,
+            ),
+          ),
+          onPressed: () {
+            launchUrl(Uri.parse("https://wa.me/${patient.phoneNumber}"));
+          },
+          icon: const Icon(
+            Icons.message,
+            color: AhpsicoColors.light80,
+          ),
+        );
+      },
       bodyBuilder: (context, model) {
         return ListView(
           children: [
@@ -77,23 +95,34 @@ class PatientDetail extends StatelessWidget {
                   ),
                 ),
                 AhpsicoSpacing.verticalSpaceRegular,
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Telefone:",
-                      style: AhpsicoText.regular2Style.copyWith(
-                        color: AhpsicoColors.dark25,
+                TextButton(
+                  onPressed: () => model.addPhoneToClipboard(patient.phoneNumber),
+                  style: const ButtonStyle(
+                    shape: MaterialStatePropertyAll(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(28)),
+                    )),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Telefone:",
+                        style: AhpsicoText.title3Style.copyWith(
+                          color: AhpsicoColors.dark25,
+                        ),
                       ),
-                    ),
-                    AhpsicoSpacing.horizontalSpaceSmall,
-                    Text(
-                      MaskFormatters.phoneMaskFormatter.maskText(patient.phoneNumber),
-                      style: AhpsicoText.title3Style.copyWith(
-                        color: AhpsicoColors.dark25,
+                      AhpsicoSpacing.horizontalSpaceSmall,
+                      Expanded(
+                        child: Text(
+                          MaskFormatters.phoneMaskFormatter.maskText(patient.phoneNumber),
+                          style: AhpsicoText.title3Style.copyWith(
+                            color: AhpsicoColors.dark25,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                      const Icon(Icons.copy),
+                    ],
+                  ),
                 ),
                 AhpsicoSpacing.verticalSpaceMedium,
                 Row(

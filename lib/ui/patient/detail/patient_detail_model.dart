@@ -7,8 +7,8 @@ import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
-import 'package:ahpsico/ui/app/app.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
+import 'package:flutter/services.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum PatientDetailEvent {
@@ -65,17 +65,21 @@ class PatientDetailModel extends BaseViewModel<PatientDetailEvent> {
   List<Advice> _advices = [];
   List<Advice> get advices => _advices;
 
+  /* Methods */
+
+  void addPhoneToClipboard(String phoneNumber) {
+    Clipboard.setData(ClipboardData(text: phoneNumber)).then((_) {
+      showSnackbar(
+        "Telefone copiado para área de transferência",
+        PatientDetailEvent.showSnackbarMessage,
+      );
+    });
+  }
+
   /* Calls */
 
   Future<void> fetchScreenData({required String patientUuid}) async {
     updateUi(() => _isLoading = true);
-    // TODO REMOVE THIS BLOCK
-    user = mockUser;
-    _sessions = mockSessions;
-    _assignments = mockAssignments;
-    _advices = mockAdvices;
-    return updateUi(() => _isLoading = false);
-    // TODO REMOVE BLOCK ENDS HERE
     await getUserData();
     await _getUpcomingSessions(patientUuid: patientUuid);
     await _getPendingAssignments(patientUuid: patientUuid);
