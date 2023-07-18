@@ -2,7 +2,7 @@ import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/session/session.dart';
-import 'package:ahpsico/ui/advices/advices_screen.dart';
+import 'package:ahpsico/ui/advices/list/advices_list.dart';
 import 'package:ahpsico/ui/assignments/detail/assignment_detail.dart';
 import 'package:ahpsico/ui/assignments/list/assignments_list.dart';
 import 'package:ahpsico/ui/doctor/detail/doctor_detail.dart';
@@ -22,7 +22,7 @@ final class AhpsicoRouter {
   AhpsicoRouter._();
 
   static final router = GoRouter(
-    initialLocation: AssignmentsList.route,
+    initialLocation: AdvicesList.route,
     routes: [
       GoRoute(
         path: '/',
@@ -87,8 +87,8 @@ final class AhpsicoRouter {
       // Advices
 
       GoRoute(
-        path: AdvicesScreen.route,
-        builder: (context, state) => const AdvicesScreen(),
+        path: AdvicesList.route,
+        builder: (context, state) => const AdvicesList(),
       ),
 
       // Schedule

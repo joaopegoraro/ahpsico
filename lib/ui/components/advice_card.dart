@@ -11,10 +11,18 @@ class AdviceCard extends StatefulWidget {
     super.key,
     required this.advice,
     required this.isUserDoctor,
+    this.selectModeOn = false,
+    this.isSelected = false,
+    this.onTap,
+    this.onLongPress,
   });
 
   final Advice advice;
   final bool isUserDoctor;
+  final bool selectModeOn;
+  final bool isSelected;
+  final void Function(Advice)? onTap;
+  final void Function(Advice)? onLongPress;
 
   @override
   State<AdviceCard> createState() => _AdviceCardState();
@@ -38,38 +46,62 @@ class _AdviceCardState extends State<AdviceCard> {
         borderRadius: BorderRadius.all(Radius.circular(4)),
       ),
       child: InkWell(
-        onTap: messageIsTooBig ? () => setState(() => isExpanded = !isExpanded) : null,
+        onTap: widget.selectModeOn
+            ? () => widget.onTap?.call(widget.advice)
+            : messageIsTooBig
+                ? () => setState(() => isExpanded = !isExpanded)
+                : null,
+        onLongPress: widget.onLongPress == null ? null : () => widget.onLongPress?.call(widget.advice),
         borderRadius: const BorderRadius.all(Radius.circular(4)),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.isUserDoctor
-                          ? "Enviado para ${widget.advice.patientIds.length} paciente(s)"
-                          : widget.advice.doctor.name,
-                      style: AhpsicoText.regular1Style.copyWith(
-                        color: AhpsicoColors.dark75,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  if (messageIsTooBig)
-                    Icon(
-                      isExpanded ? Icons.expand_less : Icons.expand_more,
-                    ),
-                ],
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: widget.selectModeOn && widget.isSelected
+                    ? Row(children: [
+                        Checkbox(
+                          value: widget.isSelected,
+                          fillColor: const MaterialStatePropertyAll(AhpsicoColors.violet),
+                          onChanged: null,
+                        ),
+                        AhpsicoSpacing.horizontalSpaceSmall,
+                      ])
+                    : const SizedBox.shrink(),
               ),
-              AhpsicoSpacing.verticalSpaceSmall,
-              Text(
-                !messageIsTooBig || isExpanded
-                    ? widget.advice.message
-                    : "${widget.advice.message.substring(0, math.min(widget.advice.message.length, 100))}...",
-                style: AhpsicoText.regular3Style.copyWith(color: AhpsicoColors.dark50),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.isUserDoctor
+                                ? "Enviado para ${widget.advice.patientIds.length} paciente(s)"
+                                : widget.advice.doctor.name,
+                            style: AhpsicoText.regular1Style.copyWith(
+                              color: AhpsicoColors.dark75,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        if (messageIsTooBig)
+                          Icon(
+                            isExpanded ? Icons.expand_less : Icons.expand_more,
+                          ),
+                      ],
+                    ),
+                    AhpsicoSpacing.verticalSpaceSmall,
+                    Text(
+                      !messageIsTooBig || isExpanded
+                          ? widget.advice.message
+                          : "${widget.advice.message.substring(0, math.min(widget.advice.message.length, 100))}...",
+                      style: AhpsicoText.regular3Style.copyWith(color: AhpsicoColors.dark50),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

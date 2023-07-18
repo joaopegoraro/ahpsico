@@ -64,7 +64,7 @@ class PatientList extends StatelessWidget {
     }
   }
 
-  String getTitle(PatientListModel model) {
+  String _getTitle(PatientListModel model) {
     if (model.isSelectModeOn) {
       final lenght = model.selectedPatientIds.length;
       if (lenght == 0) return "Nenhum selecionado";
@@ -74,7 +74,7 @@ class PatientList extends StatelessWidget {
     return "Seus pacientes";
   }
 
-  bool shouldPop(PatientListModel model) {
+  bool _shouldPop(PatientListModel model) {
     if (selectModeByDefault || allSelectedByDefault) {
       final isEmpty = model.selectedPatientIds.isEmpty;
       model.clearSelection();
@@ -92,7 +92,7 @@ class PatientList extends StatelessWidget {
     return BaseScreen(
       provider: patientListModelProvider,
       onEventEmitted: _onEventEmmited,
-      onWillPop: (model) async => shouldPop(model),
+      onWillPop: (model) async => _shouldPop(model),
       shouldShowLoading: (context, model) {
         return model.isLoading || model.user == null;
       },
@@ -121,38 +121,35 @@ class PatientList extends StatelessWidget {
       },
       topbarBuilder: (context, model) {
         return Topbar(
-          title: getTitle(model),
+          title: _getTitle(model),
           onBackPressed: () {
-            if (shouldPop(model)) context.pop();
+            if (_shouldPop(model)) context.pop();
           },
           actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: model.isSelectModeOn
-                  ? PopupMenuButton(
-                      child: const Icon(
-                        Icons.more_vert,
-                        color: AhpsicoColors.light80,
-                      ),
-                      itemBuilder: (context) => [
-                        if (model.areAllPatientsSelected)
-                          PopupMenuItem(
-                            onTap: model.clearSelection,
-                            child: const Text('Limpar seleção'),
-                          ),
-                        if (!model.areAllPatientsSelected)
-                          PopupMenuItem(
-                            onTap: model.selectAllPatients,
-                            child: const Text('Selecionar todos'),
-                          ),
-                      ],
-                    )
-                  : IconButton(
-                      onPressed: model.openSearchBar,
+            model.isSelectModeOn
+                ? PopupMenuButton(
+                    child: const Icon(
+                      Icons.more_vert,
                       color: AhpsicoColors.light80,
-                      icon: const Icon(Icons.search),
                     ),
-            ),
+                    itemBuilder: (context) => [
+                      if (model.areAllPatientsSelected)
+                        PopupMenuItem(
+                          onTap: model.clearSelection,
+                          child: const Text('Limpar seleção'),
+                        ),
+                      if (!model.areAllPatientsSelected)
+                        PopupMenuItem(
+                          onTap: model.selectAllPatients,
+                          child: const Text('Selecionar todos'),
+                        ),
+                    ],
+                  )
+                : IconButton(
+                    onPressed: model.openSearchBar,
+                    color: AhpsicoColors.light80,
+                    icon: const Icon(Icons.search),
+                  ),
           ],
         );
       },
