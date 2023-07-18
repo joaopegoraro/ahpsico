@@ -3,7 +3,7 @@ import 'package:ahpsico/ui/advices/list/advices_list_model.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
-import 'package:ahpsico/ui/components/advice_card.dart';
+import 'package:ahpsico/ui/advices/card/advice_card.dart';
 import 'package:ahpsico/ui/components/dialogs/ahpsico_dialog.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/components/topbar.dart';

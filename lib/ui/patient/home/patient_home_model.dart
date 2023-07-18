@@ -12,7 +12,6 @@ import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
-import 'package:ahpsico/ui/app/app.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 

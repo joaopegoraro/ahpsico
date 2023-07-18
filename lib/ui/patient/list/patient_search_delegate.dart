@@ -1,7 +1,7 @@
 import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
-import 'package:ahpsico/ui/components/patient_card.dart';
+import 'package:ahpsico/ui/patient/card/patient_card.dart';
 import 'package:ahpsico/utils/extensions.dart';
 import 'package:ahpsico/utils/mask_formatters.dart';
 import 'package:flutter/material.dart';

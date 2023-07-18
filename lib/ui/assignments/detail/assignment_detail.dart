@@ -6,7 +6,7 @@ import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/assignments/detail/assignment_detail_model.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/components/home_button.dart';
-import 'package:ahpsico/ui/components/session_card.dart';
+import 'package:ahpsico/ui/session/card/session_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/components/topbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';

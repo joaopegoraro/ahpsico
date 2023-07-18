@@ -4,7 +4,7 @@ import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/assignments/detail/assignment_detail.dart';
 import 'package:ahpsico/ui/assignments/list/assignments_list_model.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
-import 'package:ahpsico/ui/components/assignment_card.dart';
+import 'package:ahpsico/ui/assignments/card/assignment_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/components/topbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';

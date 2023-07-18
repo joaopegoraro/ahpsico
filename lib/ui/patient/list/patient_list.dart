@@ -2,7 +2,7 @@ import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/components/bottomsheet.dart';
-import 'package:ahpsico/ui/components/patient_card.dart';
+import 'package:ahpsico/ui/patient/card/patient_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/components/topbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
