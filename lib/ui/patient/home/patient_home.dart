@@ -7,9 +7,11 @@ import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/components/advice_card.dart';
 import 'package:ahpsico/ui/components/assignment_card.dart';
 import 'package:ahpsico/ui/components/bottomsheet.dart';
+import 'package:ahpsico/ui/components/dialogs/ahpsico_dialog.dart';
 import 'package:ahpsico/ui/components/dialogs/logout_dialog.dart';
 import 'package:ahpsico/ui/components/home_button.dart';
 import 'package:ahpsico/ui/components/home_topbar.dart';
+import 'package:ahpsico/ui/components/invite_card.dart';
 import 'package:ahpsico/ui/components/session_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
@@ -39,6 +41,16 @@ class PatientHome extends StatelessWidget {
         AhpsicoSnackbar.showError(context, model.snackbarMessage);
       case PatientHomeEvent.navigateToLoginScreen:
         context.go(LoginScreen.route);
+      case PatientHomeEvent.openAcceptInviteDialog:
+        if (model.selectedInvite == null) return;
+        AhpsicoDialog.show(
+          context: context,
+          content: "Gostaria de aceitar o convite de terapia com ${model.selectedInvite!.doctor.name}?",
+          firstButtonText: "Sim, aceitar convite",
+          onTapFirstButton: () => model.acceptInvite(model.selectedInvite!),
+          secondButtonText: "Não, rejeitar convite",
+          onTapSecondButton: () => model.denyInvite(model.selectedInvite!),
+        );
       case PatientHomeEvent.openEditNameSheet:
         AhpsicoSheet.show(
           context: context,
@@ -46,7 +58,6 @@ class PatientHome extends StatelessWidget {
             return EditPatientNameSheet(patient: model.patient!);
           },
         ).then((shouldRefresh) {
-          print("RETORNO: $shouldRefresh");
           if (shouldRefresh == true) {
             model.fetchScreenData();
           }
@@ -162,6 +173,23 @@ class PatientHome extends StatelessWidget {
               );
             }),
             AhpsicoSpacing.verticalSpaceLarge,
+            if (model.invites.isNotEmpty) ...[
+              Text(
+                "Convites de terapia recebidos",
+                style: AhpsicoText.title3Style.copyWith(
+                  color: AhpsicoColors.dark25,
+                ),
+              ),
+              AhpsicoSpacing.verticalSpaceSmall,
+              ...model.invites.map((invite) {
+                return InviteCard(
+                  invite: invite,
+                  userName: model.user!.firstName,
+                  onTap: model.openAcceptInviteDialog,
+                );
+              }),
+              AhpsicoSpacing.verticalSpaceLarge,
+            ],
             if (model.assignments.isNotEmpty) ...[
               Text(
                 "Mensagens recebidas",
@@ -177,8 +205,8 @@ class PatientHome extends StatelessWidget {
                   isUserDoctor: false,
                 );
               }),
+              AhpsicoSpacing.verticalSpaceLarge,
             ],
-            AhpsicoSpacing.verticalSpaceLarge,
             if (model.assignments.isNotEmpty) ...[
               Text(
                 "Tarefas pendentes",
@@ -197,8 +225,8 @@ class PatientHome extends StatelessWidget {
                   ),
                 );
               }),
+              AhpsicoSpacing.verticalSpaceLarge,
             ],
-            AhpsicoSpacing.verticalSpaceLarge,
           ].mapToList((item) {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),

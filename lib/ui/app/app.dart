@@ -2,6 +2,7 @@ import 'package:ahpsico/models/advice.dart';
 import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/assignment/assignment_status.dart';
 import 'package:ahpsico/models/doctor.dart';
+import 'package:ahpsico/models/invite.dart';
 import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/models/session/session_status.dart';
@@ -46,6 +47,13 @@ const mockPatient = Patient(
   uuid: 'oms euid',
   name: "Andréa Pegoraro",
   phoneNumber: '99999999999',
+);
+
+final mockInvite = Invite(
+  id: 0,
+  doctor: mockDoctor,
+  patientId: mockPatient.uuid,
+  phoneNumber: mockPatient.phoneNumber,
 );
 
 final mockAdvices = <Advice>[

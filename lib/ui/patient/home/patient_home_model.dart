@@ -1,20 +1,24 @@
 import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/repositories/advice_repository.dart';
 import 'package:ahpsico/data/repositories/assignment_repository.dart';
+import 'package:ahpsico/data/repositories/invite_repository.dart';
 import 'package:ahpsico/data/repositories/patient_repository.dart';
 import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/advice.dart';
 import 'package:ahpsico/models/assignment/assignment.dart';
+import 'package:ahpsico/models/invite.dart';
 import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
+import 'package:ahpsico/ui/app/app.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum PatientHomeEvent {
   openLogoutDialog,
+  openAcceptInviteDialog,
   openEditNameSheet,
   navigateToLoginScreen,
   showSnackbarMessage,
@@ -28,6 +32,7 @@ final patientHomeModelProvider = ViewModelProviderFactory.create((ref) {
   final assignmentRepository = ref.watch(assignmentRepositoryProvider);
   final adviceRepository = ref.watch(adviceRepositoryProvider);
   final patientRepository = ref.watch(patientRepositoryProvider);
+  final inviteRepository = ref.watch(inviteRepositoryProvider);
   return PatientHomeModel(
     authService,
     userRepository,
@@ -35,6 +40,7 @@ final patientHomeModelProvider = ViewModelProviderFactory.create((ref) {
     sessionRepository,
     assignmentRepository,
     adviceRepository,
+    inviteRepository,
   );
 });
 
@@ -46,6 +52,7 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
     this._sessionRepository,
     this._assignmentRepository,
     this._adviceRepository,
+    this._inviteRepository,
   ) : super(
           errorEvent: PatientHomeEvent.showSnackbarError,
           messageEvent: PatientHomeEvent.showSnackbarMessage,
@@ -58,6 +65,7 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
   final SessionRepository _sessionRepository;
   final AssignmentRepository _assignmentRepository;
   final AdviceRepository _adviceRepository;
+  final InviteRepository _inviteRepository;
 
   /* Fields */
 
@@ -76,6 +84,12 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
   List<Advice> _advices = [];
   List<Advice> get advices => _advices;
 
+  List<Invite> _invites = [];
+  List<Invite> get invites => _invites;
+
+  Invite? _selectedInvite;
+  Invite? get selectedInvite => _selectedInvite;
+
   /* Methods */
 
   void openEditNameSheet() {
@@ -84,6 +98,11 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
 
   void openLogoutDialog() {
     emitEvent(PatientHomeEvent.openLogoutDialog);
+  }
+
+  void openAcceptInviteDialog(Invite invite) {
+    _selectedInvite = invite;
+    emitEvent(PatientHomeEvent.openAcceptInviteDialog);
   }
 
   /* Calls */
@@ -95,6 +114,7 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
     await _getUpcomingSessions();
     await _getPendingAssignments();
     await _getReceivedAdvices();
+    await _getReceivedInvites();
     updateUi(() => _isLoading = false);
   }
 
@@ -154,5 +174,45 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
       showConnectionError();
     }
     _advices = await _adviceRepository.getPatientAdvices(userUid);
+  }
+
+  Future<void> _getReceivedInvites() async {
+    try {
+      await _inviteRepository.sync();
+    } on ApiUnauthorizedException catch (_) {
+      logout(showError: true);
+    } on ApiConnectionException catch (_) {
+      showConnectionError();
+    } on ApiInvitesNotFoundException catch (_) {
+      _invites = [];
+      return;
+    }
+    _invites = await _inviteRepository.get();
+  }
+
+  Future<void> acceptInvite(Invite invite) async {
+    updateUi(() => _isLoading = true);
+    try {
+      await _inviteRepository.accept(invite.id);
+      fetchScreenData();
+    } on ApiUnauthorizedException catch (_) {
+      logout(showError: true);
+    } on ApiConnectionException catch (_) {
+      showConnectionError();
+    }
+    updateUi(() => _isLoading = false);
+  }
+
+  Future<void> denyInvite(Invite invite) async {
+    updateUi(() => _isLoading = true);
+    try {
+      await _inviteRepository.delete(invite.id);
+      fetchScreenData();
+    } on ApiUnauthorizedException catch (_) {
+      logout(showError: true);
+    } on ApiConnectionException catch (_) {
+      showConnectionError();
+    }
+    updateUi(() => _isLoading = false);
   }
 }
