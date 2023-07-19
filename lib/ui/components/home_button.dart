@@ -63,10 +63,13 @@ class HomeButton extends StatelessWidget {
               ),
               AhpsicoSpacing.horizontalSpaceSmall,
               Flexible(
-                child: Text(
-                  text,
-                  style: AhpsicoText.regular2Style.copyWith(color: textColor),
-                  maxLines: 3,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Text(
+                    text,
+                    style: AhpsicoText.regular2Style.copyWith(color: textColor),
+                    maxLines: 3,
+                  ),
                 ),
               ),
             ],

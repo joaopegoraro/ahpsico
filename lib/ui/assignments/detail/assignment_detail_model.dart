@@ -12,6 +12,7 @@ enum AssignmentDetailEvent {
   cancelAssignment,
   deleteAssignment,
   showSnackbarError,
+  showSnackbarMessage,
   navigateToLogin,
 }
 
@@ -33,6 +34,7 @@ class AssignmentDetailModel extends BaseViewModel<AssignmentDetailEvent> {
     this._assignmentRepository,
   ) : super(
           errorEvent: AssignmentDetailEvent.showSnackbarError,
+          messageEvent: AssignmentDetailEvent.showSnackbarMessage,
           navigateToLoginEvent: AssignmentDetailEvent.navigateToLogin,
         );
 
@@ -80,6 +82,10 @@ class AssignmentDetailModel extends BaseViewModel<AssignmentDetailEvent> {
       showConnectionError();
     }
     updateUi(() => _isLoading = false);
+    showSnackbar(
+      "Tarefa concluída com sucesso!",
+      AssignmentDetailEvent.showSnackbarMessage,
+    );
     return newAssignment;
   }
 
@@ -96,6 +102,10 @@ class AssignmentDetailModel extends BaseViewModel<AssignmentDetailEvent> {
       showConnectionError();
     }
     updateUi(() => _isLoading = false);
+    showSnackbar(
+      "Tarefa cancelada com sucesso!",
+      AssignmentDetailEvent.showSnackbarMessage,
+    );
     return newAssignment;
   }
 
@@ -109,5 +119,9 @@ class AssignmentDetailModel extends BaseViewModel<AssignmentDetailEvent> {
       showConnectionError();
     }
     updateUi(() => _isLoading = false);
+    showSnackbar(
+      "Tarefa deletada com sucesso!",
+      AssignmentDetailEvent.showSnackbarMessage,
+    );
   }
 }

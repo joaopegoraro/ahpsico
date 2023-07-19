@@ -5,6 +5,7 @@ import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/assignments/detail/assignment_detail_model.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
+import 'package:ahpsico/ui/components/dialogs/ahpsico_dialog.dart';
 import 'package:ahpsico/ui/components/home_button.dart';
 import 'package:ahpsico/ui/session/card/session_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
@@ -32,20 +33,50 @@ class AssignmentDetail extends StatelessWidget {
     switch (event) {
       case AssignmentDetailEvent.showSnackbarError:
         AhpsicoSnackbar.showError(context, model.snackbarMessage);
+      case AssignmentDetailEvent.showSnackbarMessage:
+        AhpsicoSnackbar.showSuccess(context, model.snackbarMessage);
       case AssignmentDetailEvent.navigateToLogin:
         context.go(LoginScreen.route);
       case AssignmentDetailEvent.cancelAssignment:
-        model.cancelAssignment(assignment).then((updatedAssignment) {
-          context.go(AssignmentDetail.route, extra: updatedAssignment);
-        });
+        AhpsicoDialog.show(
+          context: context,
+          content: "Tem certeza que deseja cancelar a tarefa?",
+          onTapFirstButton: () {
+            context.pop();
+            model.cancelAssignment(assignment).then((updatedAssignment) {
+              context.replace(AssignmentDetail.route, extra: updatedAssignment);
+            });
+          },
+          firstButtonText: "Sim, cancelar a tarefa",
+          secondButtonText: "Não, fechar",
+        );
+
       case AssignmentDetailEvent.concludeAssignment:
-        model.concludeAssignment(assignment).then((updatedAssignment) {
-          context.go(AssignmentDetail.route, extra: updatedAssignment);
-        });
+        AhpsicoDialog.show(
+          context: context,
+          content: "Tem certeza que deseja marcar a tarefa como concluída?",
+          onTapFirstButton: () {
+            context.pop();
+            model.concludeAssignment(assignment).then((updatedAssignment) {
+              context.replace(AssignmentDetail.route, extra: updatedAssignment);
+            });
+          },
+          firstButtonText: "Sim, marcar como concluída",
+          secondButtonText: "Não, fechar",
+        );
       case AssignmentDetailEvent.deleteAssignment:
-        model.deleteAssignment(assignment).then((updatedAssignment) {
-          context.pop(true);
-        });
+        AhpsicoDialog.show(
+          context: context,
+          content: "Tem certeza que deseja deletar a tarefa?",
+          onTapFirstButton: () {
+            context.pop();
+            model.deleteAssignment(assignment).then((updatedAssignment) {
+              context.pop(true);
+            });
+          },
+          firstButtonText: "Sim, deletar a tarefa",
+          secondButtonText: "Não, fechar",
+        );
     }
   }
 
@@ -73,7 +104,10 @@ class AssignmentDetail extends StatelessWidget {
         return model.isLoading || model.user == null;
       },
       topbarBuilder: (context, model) {
-        return const Topbar(title: "Tarefa");
+        return Topbar(
+          title: "Tarefa",
+          onBackPressed: context.pop,
+        );
       },
       bodyBuilder: (context, model) {
         return CustomScrollView(

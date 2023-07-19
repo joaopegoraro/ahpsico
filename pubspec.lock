@@ -395,10 +395,9 @@ packages:
   mvvm_riverpod:
     dependency: "direct main"
     description:
-      name: mvvm_riverpod
-      sha256: caba5fecd98b829f61136d3fec35de746607ff5b062daa9a82f46c364e8cf1ff
-      url: "https://pub.dev"
-    source: hosted
+      path: "../mvvm_riverpod"
+      relative: true
+    source: path
     version: "1.0.1"
   node_preamble:
     dependency: transitive

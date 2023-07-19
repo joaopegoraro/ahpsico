@@ -8,6 +8,7 @@ class BaseScreen<VM extends ViewModel<EVENT>, EVENT> extends StatelessWidget {
     required this.provider,
     required this.onEventEmitted,
     this.onCreate,
+    this.onDispose,
     this.onWillPop,
     required this.shouldShowLoading,
     this.fabBuilder,
@@ -23,6 +24,7 @@ class BaseScreen<VM extends ViewModel<EVENT>, EVENT> extends StatelessWidget {
   final bool Function(BuildContext, VM value) shouldShowLoading;
   final Future<bool> Function(VM value)? onWillPop;
   final void Function(VM)? onCreate;
+  final void Function()? onDispose;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +32,7 @@ class BaseScreen<VM extends ViewModel<EVENT>, EVENT> extends StatelessWidget {
       body: ViewModelBuilder<VM, EVENT>(
           provider: provider,
           onEventEmitted: onEventEmitted,
+          onDispose: onDispose,
           onCreate: (model) {
             if (onCreate != null) {
               WidgetsBinding.instance.addPostFrameCallback(
