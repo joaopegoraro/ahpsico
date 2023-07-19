@@ -7,6 +7,7 @@ import 'package:ahpsico/ui/assignments/list/assignments_list.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/advices/card/advice_card.dart';
 import 'package:ahpsico/ui/assignments/card/assignment_card.dart';
+import 'package:ahpsico/ui/components/expandable_fab.dart';
 import 'package:ahpsico/ui/components/home_button.dart';
 import 'package:ahpsico/ui/session/card/session_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
@@ -44,6 +45,8 @@ class PatientDetail extends StatelessWidget {
         AhpsicoSnackbar.showError(context, model.snackbarMessage);
       case PatientDetailEvent.navigateToLoginScreen:
         context.go(LoginScreen.route);
+      case PatientDetailEvent.openCreateAssignmentSheet:
+      // TODO
     }
   }
 
@@ -64,22 +67,77 @@ class PatientDetail extends StatelessWidget {
           onBackPressed: context.pop,
         );
       },
-      fabBuilder: (context, value) {
-        return FloatingActionButton.extended(
-          backgroundColor: AhpsicoColors.green,
-          label: Text(
-            "FALAR PELO WHATSAPP",
-            style: AhpsicoText.smallStyle.copyWith(
-              color: AhpsicoColors.light80,
+      fabBuilder: (context, model) {
+        return ExpandableFab(
+          distance: 112,
+          children: [
+            InkWell(
+              onTap: () {
+                launchUrl(Uri.parse("https://wa.me/${patient.phoneNumber}"));
+              },
+              borderRadius: const BorderRadius.all(Radius.circular(30)),
+              child: Material(
+                clipBehavior: Clip.antiAlias,
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30))),
+                color: AhpsicoColors.green,
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.message,
+                        color: AhpsicoColors.light80,
+                      ),
+                      AhpsicoSpacing.horizontalSpaceSmall,
+                      FittedBox(
+                        fit: BoxFit.contain,
+                        child: Text(
+                          "ABRIR NO WHATSAPP",
+                          style: AhpsicoText.smallStyle.copyWith(
+                            color: AhpsicoColors.light80,
+                          ),
+                        ),
+                      ),
+                      AhpsicoSpacing.horizontalSpaceSmall,
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-          onPressed: () {
-            launchUrl(Uri.parse("https://wa.me/${patient.phoneNumber}"));
-          },
-          icon: const Icon(
-            Icons.message,
-            color: AhpsicoColors.light80,
-          ),
+            InkWell(
+              borderRadius: const BorderRadius.all(Radius.circular(30)),
+              onTap: model.openCreateAssignmentSheet,
+              child: Material(
+                clipBehavior: Clip.antiAlias,
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30))),
+                color: AhpsicoColors.blue,
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.home_work,
+                        color: AhpsicoColors.light80,
+                      ),
+                      AhpsicoSpacing.horizontalSpaceSmall,
+                      FittedBox(
+                        fit: BoxFit.contain,
+                        child: Text(
+                          "CRIAR TAREFA",
+                          style: AhpsicoText.smallStyle.copyWith(
+                            color: AhpsicoColors.light80,
+                          ),
+                        ),
+                      ),
+                      AhpsicoSpacing.horizontalSpaceSmall,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
       bodyBuilder: (context, model) {

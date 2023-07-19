@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 @immutable
-class DoctorFab extends StatefulWidget {
-  const DoctorFab({
+class ExpandableFab extends StatefulWidget {
+  const ExpandableFab({
     super.key,
     this.initialOpen,
     required this.distance,
@@ -16,10 +16,10 @@ class DoctorFab extends StatefulWidget {
   final List<Widget> children;
 
   @override
-  State<DoctorFab> createState() => _ExpandableFabState();
+  State<ExpandableFab> createState() => _ExpandableFabState();
 }
 
-class _ExpandableFabState extends State<DoctorFab> with SingleTickerProviderStateMixin {
+class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _expandAnimation;
   bool _open = false;
@@ -97,6 +97,7 @@ class _ExpandableFabState extends State<DoctorFab> with SingleTickerProviderStat
         child: Material(
           shape: const CircleBorder(),
           clipBehavior: Clip.antiAlias,
+          color: AhpsicoColors.violet,
           elevation: 4,
           child: InkWell(
             onTap: _toggle,
@@ -104,7 +105,7 @@ class _ExpandableFabState extends State<DoctorFab> with SingleTickerProviderStat
               padding: EdgeInsets.all(8),
               child: Icon(
                 Icons.close,
-                color: AhpsicoColors.violet,
+                color: AhpsicoColors.light80,
               ),
             ),
           ),

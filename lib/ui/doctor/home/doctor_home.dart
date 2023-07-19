@@ -10,7 +10,7 @@ import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/doctor/detail/doctor_detail.dart';
 import 'package:ahpsico/ui/doctor/home/doctor_home_model.dart';
 import 'package:ahpsico/ui/invite/invite_patient/invite_patient_sheet.dart';
-import 'package:ahpsico/ui/doctor/widgets/doctor_fab.dart';
+import 'package:ahpsico/ui/components/expandable_fab.dart';
 import 'package:ahpsico/ui/doctor/widgets/doctor_fab_action.dart';
 import 'package:ahpsico/ui/components/home_button.dart';
 import 'package:ahpsico/ui/components/home_topbar.dart';
@@ -68,38 +68,31 @@ class DoctorHome extends StatelessWidget {
         return model.isLoading || model.user == null;
       },
       fabBuilder: (context, model) {
-        if (model.isLoading) return null;
-        return Align(
-          alignment: Alignment.bottomRight,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: DoctorFab(
-              distance: 112,
-              children: [
-                DoctorFabAction(
-                  onPressed: model.openInvitePatientSheet,
-                  icon: const Icon(Icons.person_add),
-                ),
-                DoctorFabAction(
-                  onPressed: () => context.push(
-                    PatientList.route,
-                    extra: PatientList.buildArgs(
-                      selectMode: true,
-                      allSelected: true,
-                    ),
-                  ),
-                  icon: const Icon(Icons.tips_and_updates),
-                ),
-                DoctorFabAction(
-                  onPressed: () => context.push(
-                    PatientList.route,
-                    extra: PatientList.buildArgs(selectMode: true),
-                  ),
-                  icon: const Icon(Icons.outgoing_mail),
-                ),
-              ],
+        return ExpandableFab(
+          distance: 112,
+          children: [
+            DoctorFabAction(
+              onPressed: model.openInvitePatientSheet,
+              icon: const Icon(Icons.person_add),
             ),
-          ),
+            DoctorFabAction(
+              onPressed: () => context.push(
+                PatientList.route,
+                extra: PatientList.buildArgs(
+                  selectMode: true,
+                  allSelected: true,
+                ),
+              ),
+              icon: const Icon(Icons.tips_and_updates),
+            ),
+            DoctorFabAction(
+              onPressed: () => context.push(
+                PatientList.route,
+                extra: PatientList.buildArgs(selectMode: true),
+              ),
+              icon: const Icon(Icons.outgoing_mail),
+            ),
+          ],
         );
       },
       topbarBuilder: (context, model) {

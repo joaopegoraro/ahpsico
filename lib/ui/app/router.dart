@@ -23,7 +23,7 @@ final class AhpsicoRouter {
   AhpsicoRouter._();
 
   static final router = GoRouter(
-    initialLocation: SessionDetail.route,
+    initialLocation: PatientDetail.route,
     routes: [
       GoRoute(
         path: '/',
@@ -79,6 +79,7 @@ final class AhpsicoRouter {
       GoRoute(
         path: PatientDetail.route,
         builder: (context, state) {
+          return const PatientDetail(mockPatient);
           final patient = state.extra as Patient;
           return PatientDetail(patient);
         },
