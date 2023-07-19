@@ -22,7 +22,7 @@ final class AhpsicoRouter {
   AhpsicoRouter._();
 
   static final router = GoRouter(
-    initialLocation: PatientDetail.route,
+    initialLocation: ScheduleScreen.route,
     routes: [
       GoRoute(
         path: '/',

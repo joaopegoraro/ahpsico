@@ -197,7 +197,7 @@ class SessionDetail extends StatelessWidget {
                           onPressed: () {
                             // TODO
                           },
-                          color: AhpsicoColors.violet,
+                          color: AhpsicoColors.blue,
                           icon: Icons.edit_calendar,
                         ),
                         AhpsicoSpacing.horizontalSpaceSmall,
@@ -205,7 +205,7 @@ class SessionDetail extends StatelessWidget {
                           text: "CONCLUIR",
                           enableFlex: true,
                           onPressed: model.emitConcludeSessionEvent,
-                          color: AhpsicoColors.blue,
+                          color: AhpsicoColors.violet,
                           icon: Icons.assignment_turned_in,
                         ),
                       ],

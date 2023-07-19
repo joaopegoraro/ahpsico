@@ -221,25 +221,11 @@ class PatientDetail extends StatelessWidget {
                 ),
               ],
             ),
-            AhpsicoSpacing.verticalSpaceMedium,
-            TextButton(
-              onPressed: () => context.push(ScheduleScreen.route),
-              style: const ButtonStyle(
-                shape: MaterialStatePropertyAll(RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(28)),
-                )),
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    "Sessões agendadas com você",
-                    style: AhpsicoText.title3Style.copyWith(
-                      color: AhpsicoColors.dark25,
-                    ),
-                  ),
-                  const Spacer(),
-                  const Icon(Icons.arrow_forward),
-                ],
+            AhpsicoSpacing.verticalSpaceLarge,
+            Text(
+              "Sessões agendadas com você",
+              style: AhpsicoText.title3Style.copyWith(
+                color: AhpsicoColors.dark25,
               ),
             ),
             AhpsicoSpacing.verticalSpaceSmall,
