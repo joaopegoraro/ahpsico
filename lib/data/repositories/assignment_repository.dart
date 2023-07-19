@@ -8,6 +8,8 @@ import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/assignment/assignment_status.dart';
 import 'package:ahpsico/services/api/api_service.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/utils/extensions.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
@@ -145,7 +147,7 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
       whereArgs: [patientId, if (pending) AssignmentStatus.pending.value],
     );
 
-    final assignments = await Future.wait(assignmentsMap.map((assignmentMap) async {
+    final assignments = await Future.wait(assignmentsMap.mapToList((assignmentMap) async {
       final entity = AssignmentEntity.fromMap(assignmentMap);
 
       final doctorsMap = await _db.query(
@@ -175,9 +177,9 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
         patientEntity: patientEntity,
         sessionEntity: sessionEntity,
       );
-    }).toList());
+    }));
 
-    return assignments;
+    return assignments.sorted((a, b) => b.deliverySession.date.compareTo(a.deliverySession.date));
   }
 
   @override

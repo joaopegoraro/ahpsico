@@ -117,7 +117,8 @@ final class SessionRepositoryImpl implements SessionRepository {
     final now = DateTime.now().subtract(const Duration(hours: 1)).millisecondsSinceEpoch;
     final sessionsMap = await _db.query(
       SessionEntity.tableName,
-      where: "${SessionEntity.patientIdColumn} = ?${upcoming ? " AND ${SessionEntity.dateColumn} >= ?" : ""}",
+      where:
+          "${SessionEntity.patientIdColumn} = ?${upcoming ? " AND ${SessionEntity.dateColumn} >= ?" : ""} ORDER BY ${SessionEntity.dateColumn} DESC",
       whereArgs: [patientId, if (upcoming) now],
     );
 
@@ -188,7 +189,7 @@ final class SessionRepositoryImpl implements SessionRepository {
     final sessionsMap = await _db.query(
       SessionEntity.tableName,
       where: "${SessionEntity.doctorIdColumn} = ?"
-          "${date == null ? "" : " AND ${SessionEntity.dateColumn} >= ? AND ${SessionEntity.dateColumn} <= ?"}",
+          "${date == null ? "" : " AND ${SessionEntity.dateColumn} >= ? AND ${SessionEntity.dateColumn} <= ?"} ORDER BY ${SessionEntity.dateColumn} DESC",
       whereArgs: [
         doctorId,
         if (date != null) ...[
