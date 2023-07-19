@@ -109,12 +109,13 @@ class ScheduleScreen extends StatelessWidget {
           }),
           eventListBuilder: (context, events) {
             if (events.isEmpty) {
-              return const Expanded(
+              return Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(32.0),
                   child: Text(
                     "Você não possui nenhuma sessão agendada para esse dia",
                     textAlign: TextAlign.center,
+                    style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.dark75),
                   ),
                 ),
               );
@@ -147,10 +148,13 @@ class ScheduleScreen extends StatelessWidget {
           eventDoneColor: Colors.green,
           selectedColor: Colors.pink,
           selectedTodayColor: Colors.red,
+          expandableDateFormat: "EEEE, dd MMMM",
           todayColor: Colors.blue,
           eventColor: null,
           locale: 'pt_BR',
           todayButtonText: 'Hoje',
+          bottomBarTextStyle: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.dark75),
+          displayMonthTextStyle: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.dark75),
           dayOfWeekStyle: AhpsicoText.tinyStyle.copyWith(color: AhpsicoColors.dark75),
         );
       },
