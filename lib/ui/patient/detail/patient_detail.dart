@@ -2,11 +2,13 @@ import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
+import 'package:ahpsico/ui/assignments/create_assignment/create_assignment_sheet.dart';
 import 'package:ahpsico/ui/assignments/detail/assignment_detail.dart';
 import 'package:ahpsico/ui/assignments/list/assignments_list.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/advices/card/advice_card.dart';
 import 'package:ahpsico/ui/assignments/card/assignment_card.dart';
+import 'package:ahpsico/ui/components/bottomsheet.dart';
 import 'package:ahpsico/ui/components/expandable_fab.dart';
 import 'package:ahpsico/ui/components/home_button.dart';
 import 'package:ahpsico/ui/session/card/session_card.dart';
@@ -46,7 +48,16 @@ class PatientDetail extends StatelessWidget {
       case PatientDetailEvent.navigateToLoginScreen:
         context.go(LoginScreen.route);
       case PatientDetailEvent.openCreateAssignmentSheet:
-      // TODO
+        AhpsicoSheet.show(
+          context: context,
+          builder: (context) {
+            return CreateAssignmentSheet(patient: patient);
+          },
+        ).then((shouldRefresh) {
+          if (shouldRefresh == true) {
+            model.fetchScreenData(patientUuid: patient.uuid);
+          }
+        });
     }
   }
 

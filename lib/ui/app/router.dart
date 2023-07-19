@@ -3,7 +3,6 @@ import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/ui/advices/list/advices_list.dart';
-import 'package:ahpsico/ui/app/app.dart';
 import 'package:ahpsico/ui/assignments/detail/assignment_detail.dart';
 import 'package:ahpsico/ui/assignments/list/assignments_list.dart';
 import 'package:ahpsico/ui/doctor/detail/doctor_detail.dart';
@@ -79,7 +78,6 @@ final class AhpsicoRouter {
       GoRoute(
         path: PatientDetail.route,
         builder: (context, state) {
-          return const PatientDetail(mockPatient);
           final patient = state.extra as Patient;
           return PatientDetail(patient);
         },
@@ -109,7 +107,7 @@ final class AhpsicoRouter {
         builder: (context, state) {
           final args = state.extra as Map<String, dynamic>?;
           final Patient? patient = args?[SessionList.patientArgsKey];
-          final bool navigateBackOnTap = args?[PatientList.allSelectedArgsKey] ?? false;
+          final bool navigateBackOnTap = args?[SessionList.navigateBackOnTapArgsKey] ?? false;
           return SessionList(
             patient: patient,
             navigateBackOnTap: navigateBackOnTap,

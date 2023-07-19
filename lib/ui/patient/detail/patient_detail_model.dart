@@ -7,7 +7,6 @@ import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
-import 'package:ahpsico/ui/app/app.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:flutter/services.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
@@ -86,14 +85,6 @@ class PatientDetailModel extends BaseViewModel<PatientDetailEvent> {
 
   Future<void> fetchScreenData({required String patientUuid}) async {
     updateUi(() => _isLoading = true);
-    // TODO REMOVE
-    user = mockUser;
-    _sessions = mockSessions;
-    _assignments = mockAssignments;
-    _advices = mockAdvices;
-    return updateUi(() => _isLoading = false);
-    // TODO END REMOVE
-
     await getUserData();
     await _getUpcomingSessions(patientUuid: patientUuid);
     await _getPendingAssignments(patientUuid: patientUuid);
