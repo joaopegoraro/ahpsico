@@ -3,6 +3,7 @@ import 'package:ahpsico/models/session/session_status.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
+import 'package:ahpsico/ui/booking/booking_screen.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/components/topbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
@@ -89,6 +90,9 @@ class ScheduleScreen extends StatelessWidget {
           icon: Icon(model.user!.isDoctor ? Icons.block : Icons.schedule),
           onPressed: () {
             // TODO
+            if (model.user!.isDoctor) {
+              context.push(BookingScreen.route);
+            }
           },
         );
       },
@@ -111,7 +115,7 @@ class ScheduleScreen extends StatelessWidget {
             if (events.isEmpty) {
               return Expanded(
                 child: Padding(
-                  padding: EdgeInsets.all(32.0),
+                  padding: const EdgeInsets.all(32.0),
                   child: Text(
                     "Você não possui nenhuma sessão agendada para esse dia",
                     textAlign: TextAlign.center,
@@ -145,11 +149,11 @@ class ScheduleScreen extends StatelessWidget {
           },
           isExpandable: true,
           isExpanded: true,
-          eventDoneColor: Colors.green,
-          selectedColor: Colors.pink,
-          selectedTodayColor: Colors.red,
+          eventDoneColor: AhpsicoColors.green,
+          selectedColor: AhpsicoColors.violet,
+          selectedTodayColor: AhpsicoColors.red,
           expandableDateFormat: "EEEE, dd MMMM",
-          todayColor: Colors.blue,
+          todayColor: AhpsicoColors.blue,
           eventColor: null,
           locale: 'pt_BR',
           todayButtonText: 'Hoje',

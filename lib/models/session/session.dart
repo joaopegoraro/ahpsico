@@ -14,7 +14,6 @@ class Session {
     required this.id,
     required this.doctor,
     required this.patient,
-    required this.groupId,
     required this.groupIndex,
     required this.status,
     required this.type,
@@ -24,7 +23,6 @@ class Session {
   final int id;
   final Doctor doctor;
   final Patient patient;
-  final int groupId;
   final int groupIndex;
   final SessionStatus status;
   final SessionType type;
@@ -53,7 +51,6 @@ class Session {
     int? id,
     Doctor? doctor,
     Patient? patient,
-    int? groupId,
     int? groupIndex,
     SessionStatus? status,
     SessionType? type,
@@ -63,7 +60,6 @@ class Session {
       id: id ?? this.id,
       doctor: doctor ?? this.doctor,
       patient: patient ?? this.patient,
-      groupId: groupId ?? this.groupId,
       groupIndex: groupIndex ?? this.groupIndex,
       status: status ?? this.status,
       type: type ?? this.type,
@@ -76,7 +72,6 @@ class Session {
       'id': id,
       'doctor': doctor.toMap(),
       'patient': patient.toMap(),
-      'group_id': groupId,
       'group_index': groupIndex,
       'status': status.value,
       'type': type.value,
@@ -89,7 +84,6 @@ class Session {
       id: map['id'] as int,
       doctor: Doctor.fromMap(map['doctor'] as Map<String, dynamic>),
       patient: Patient.fromMap(map['patient'] as Map<String, dynamic>),
-      groupId: map['group_id'] as int,
       groupIndex: map['group_index'] as int,
       status: SessionStatus.fromValue(map['status']),
       type: SessionType.fromValue(map['type']),
@@ -107,7 +101,7 @@ class Session {
 
   @override
   String toString() {
-    return 'Session(id: $id, doctor: $doctor, patient: $patient, groupId: $groupId, groupIndex: $groupIndex, status: $status, type: $type, date: $date)';
+    return 'Session(id: $id, doctor: $doctor, patient: $patient, groupIndex: $groupIndex, status: $status, type: $type, date: $date)';
   }
 
   @override
@@ -117,7 +111,6 @@ class Session {
     return other.id == id &&
         other.doctor == doctor &&
         other.patient == patient &&
-        other.groupId == groupId &&
         other.groupIndex == groupIndex &&
         other.status == status &&
         other.type == type &&
@@ -129,7 +122,6 @@ class Session {
     return id.hashCode ^
         doctor.hashCode ^
         patient.hashCode ^
-        groupId.hashCode ^
         groupIndex.hashCode ^
         status.hashCode ^
         type.hashCode ^

@@ -15,6 +15,8 @@ abstract interface class SessionRepository {
   /// throws:
   /// - [ApiConnectionException] when the request suffers any connection problems;
   /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
+  /// - [ApiSessionAlreadyBookedException] when the response returns a 409 indicating there
+  /// already is a session booked at that time
   ///
   /// returns:
   /// - the created [Session];

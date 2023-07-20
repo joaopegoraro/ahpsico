@@ -5,6 +5,7 @@ import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/invite.dart';
 import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/assignment/assignment.dart';
+import 'package:ahpsico/models/schedule.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/models/advice.dart';
@@ -100,6 +101,11 @@ abstract interface class ApiService {
   /// throws:
   /// - [ApiConnectionException] when the request suffers any connection problems;
   /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
+  Future<List<Schedule>> getDoctorSchedule(String doctorId);
+
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<Patient> getPatient(String uuid);
 
   /// throws:
@@ -141,6 +147,8 @@ abstract interface class ApiService {
   /// throws:
   /// - [ApiConnectionException] when the request suffers any connection problems;
   /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
+  /// - [ApiSessionAlreadyBookedException] when the response returns a 409 indicating there
+  /// already is a session booked at that time
   Future<Session> createSession(Session session);
 
   /// throws:
@@ -177,6 +185,16 @@ abstract interface class ApiService {
   /// - [ApiConnectionException] when the request suffers any connection problems;
   /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   Future<void> deleteAdvice(int id);
+
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
+  Future<Schedule> createSchedule(Schedule schedule);
+
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
+  Future<void> deleteSchedule(int id);
 }
 
 final apiServiceProvider = Provider<ApiService>((ref) {
@@ -365,6 +383,18 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
+  Future<List<Schedule>> getDoctorSchedule(String doctorId) async {
+    return await request(
+      method: "GET",
+      endpoint: "doctors/$doctorId/schedule",
+      parseSuccess: (response) {
+        final List jsonList = json.decode(response.data);
+        return jsonList.map((e) => Schedule.fromMap(e)).toList();
+      },
+    );
+  }
+
+  @override
   Future<Patient> getPatient(String uuid) async {
     return await request(
       method: "GET",
@@ -467,6 +497,11 @@ class ApiServiceImpl implements ApiService {
       parseSuccess: (response) {
         return Session.fromJson(response.data);
       },
+      parseFailure: (response) {
+        if (response.statusCode == 409) {
+          throw const ApiSessionAlreadyBookedException();
+        }
+      },
     );
   }
 
@@ -554,6 +589,29 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "DELETE",
       endpoint: "advices/$id",
+      parseSuccess: (response) {/* SUCCESS */},
+    );
+  }
+
+  @override
+  Future<Schedule> createSchedule(Schedule schedule) async {
+    return await request(
+      method: "POST",
+      endpoint: "schedule",
+      requestBody: () {
+        return schedule.toMap();
+      },
+      parseSuccess: (response) {
+        return Schedule.fromJson(response.data);
+      },
+    );
+  }
+
+  @override
+  Future<void> deleteSchedule(int id) async {
+    return await request(
+      method: "DELETE",
+      endpoint: "schedule/$id",
       parseSuccess: (response) {/* SUCCESS */},
     );
   }

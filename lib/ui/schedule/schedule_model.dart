@@ -58,12 +58,12 @@ class ScheduleModel extends BaseViewModel<ScheduleEvent> {
     // TODO END OF BLOCK
 
     updateUi(() => _isLoading = true);
-    await getUserData(sync: true);
-    await _getTodaySessions();
+    await getUserData();
+    await _getSessions();
     updateUi(() => _isLoading = false);
   }
 
-  Future<void> _getTodaySessions() async {
+  Future<void> _getSessions() async {
     final userUid = user!.uid;
     final isDoctor = user!.isDoctor;
     try {

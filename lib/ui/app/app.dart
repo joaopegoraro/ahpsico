@@ -4,6 +4,7 @@ import 'package:ahpsico/models/assignment/assignment_status.dart';
 import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/invite.dart';
 import 'package:ahpsico/models/patient.dart';
+import 'package:ahpsico/models/schedule.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/models/session/session_status.dart';
 import 'package:ahpsico/models/session/session_type.dart';
@@ -125,12 +126,22 @@ final mockAssignments = <Assignment>[
   ),
 ];
 
+final mockSchedules = List.generate(30, (index) {
+  final now = DateTime.now();
+  final hours = Duration(hours: index);
+  return Schedule(
+    id: index,
+    doctorUuid: mockDoctor.uuid,
+    date: index % 2 == 0 ? now.add(hours) : now.subtract(hours),
+    isSession: index % 2 == 0,
+  );
+});
+
 final mockSessions = <Session>[
   Session(
     id: 0,
     doctor: mockDoctor,
     patient: mockPatient.copyWith(name: "Janaína Gomes"),
-    groupId: 0,
     groupIndex: 0,
     status: SessionStatus.confirmed,
     type: SessionType.individual,
@@ -140,7 +151,6 @@ final mockSessions = <Session>[
     id: 4,
     doctor: mockDoctor,
     patient: mockPatient.copyWith(name: "Carlos Marques"),
-    groupId: 0,
     groupIndex: 0,
     status: SessionStatus.confirmed,
     type: SessionType.individual,
@@ -150,7 +160,6 @@ final mockSessions = <Session>[
     id: 5,
     doctor: mockDoctor,
     patient: mockPatient.copyWith(name: "Ana Silveira"),
-    groupId: 0,
     groupIndex: 0,
     status: SessionStatus.concluded,
     type: SessionType.individual,
@@ -160,7 +169,6 @@ final mockSessions = <Session>[
     id: 6,
     doctor: mockDoctor,
     patient: mockPatient.copyWith(name: "Júlio Mariano"),
-    groupId: 0,
     groupIndex: 0,
     status: SessionStatus.notConfirmed,
     type: SessionType.individual,
@@ -170,7 +178,6 @@ final mockSessions = <Session>[
     id: 6,
     doctor: mockDoctor,
     patient: mockPatient.copyWith(name: "Carol Andrade"),
-    groupId: 0,
     groupIndex: 3,
     status: SessionStatus.canceled,
     type: SessionType.monthly,
@@ -180,7 +187,6 @@ final mockSessions = <Session>[
     id: 1,
     doctor: mockDoctor,
     patient: mockPatient.copyWith(name: "Túlio Teixeira"),
-    groupId: 0,
     groupIndex: 0,
     status: SessionStatus.notConfirmed,
     type: SessionType.individual,
@@ -190,7 +196,6 @@ final mockSessions = <Session>[
     id: 3,
     doctor: mockDoctor,
     patient: mockPatient.copyWith(name: "Larissa Costa"),
-    groupId: 0,
     groupIndex: 0,
     status: SessionStatus.notConfirmed,
     type: SessionType.monthly,

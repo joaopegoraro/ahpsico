@@ -6,7 +6,6 @@ class SessionEntity {
     required this.id,
     required this.doctorId,
     required this.patientId,
-    required this.groupId,
     required this.groupIndex,
     required this.status,
     required this.type,
@@ -16,7 +15,6 @@ class SessionEntity {
   final int id;
   final String doctorId;
   final String patientId;
-  final int groupId;
   final int groupIndex;
   final String status;
   final String type;
@@ -26,7 +24,6 @@ class SessionEntity {
   static const idColumn = "_id";
   static const doctorIdColumn = "doctor_id";
   static const patientIdColumn = "patient_id";
-  static const groupIdColumn = "group_id";
   static const groupIndexColumn = "group_index";
   static const statusColumn = "status";
   static const typeColumn = "type";
@@ -37,7 +34,6 @@ class SessionEntity {
      $idColumn INTEGER PRIMARY KEY, 
      $doctorIdColumn TEXT,
      $patientIdColumn TEXT,
-     $groupIdColumn INTEGER,
      $groupIndexColumn INTEGER,
      $statusColumn TEXT,
      $typeColumn TEXT,
@@ -60,7 +56,6 @@ class SessionEntity {
       id: id ?? this.id,
       doctorId: doctorId ?? this.doctorId,
       patientId: patientId ?? this.patientId,
-      groupId: groupId ?? this.groupId,
       groupIndex: groupIndex ?? this.groupIndex,
       status: status ?? this.status,
       type: type ?? this.type,
@@ -73,7 +68,6 @@ class SessionEntity {
       idColumn: id,
       doctorIdColumn: doctorId,
       patientIdColumn: patientId,
-      groupIdColumn: groupId,
       groupIndexColumn: groupIndex,
       statusColumn: status,
       typeColumn: type,
@@ -86,7 +80,6 @@ class SessionEntity {
       id: map[idColumn] as int,
       doctorId: map[doctorIdColumn] as String,
       patientId: map[patientIdColumn] as String,
-      groupId: map[groupIdColumn] as int,
       groupIndex: map[groupIndexColumn] as int,
       status: map[statusColumn] as String,
       type: map[typeColumn] as String,
@@ -96,7 +89,7 @@ class SessionEntity {
 
   @override
   String toString() {
-    return 'SessionEntity(id: $id, doctorId: $doctorId, patientId: $patientId, groupId: $groupId, groupIndex: $groupIndex, status: $status, type: $type, date: $dateInMillisecondsSinceEpoch)';
+    return 'SessionEntity(id: $id, doctorId: $doctorId, patientId: $patientId, groupIndex: $groupIndex, status: $status, type: $type, date: $dateInMillisecondsSinceEpoch)';
   }
 
   @override
@@ -106,7 +99,6 @@ class SessionEntity {
     return other.id == id &&
         other.doctorId == doctorId &&
         other.patientId == patientId &&
-        other.groupId == groupId &&
         other.groupIndex == groupIndex &&
         other.status == status &&
         other.type == type &&
@@ -118,7 +110,6 @@ class SessionEntity {
     return id.hashCode ^
         doctorId.hashCode ^
         patientId.hashCode ^
-        groupId.hashCode ^
         groupIndex.hashCode ^
         status.hashCode ^
         type.hashCode ^

@@ -16,7 +16,6 @@ import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/components/topbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:ahpsico/ui/patient/detail/patient_detail_model.dart';
-import 'package:ahpsico/ui/schedule/schedule_screen.dart';
 import 'package:ahpsico/ui/session/detail/session_detail.dart';
 import 'package:ahpsico/ui/session/list/session_list.dart';
 import 'package:ahpsico/utils/extensions.dart';

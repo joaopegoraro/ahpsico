@@ -76,3 +76,11 @@ class ApiPatientAlreadyWithDoctorException extends ApiException {
           code: "api_patient_already_with_doctor",
         );
 }
+
+class ApiSessionAlreadyBookedException extends ApiException {
+  const ApiSessionAlreadyBookedException({String? message})
+      : super(
+          message: "There already is a session booked at this time",
+          code: "api_session_already_booked",
+        );
+}
