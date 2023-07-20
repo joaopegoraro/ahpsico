@@ -6,6 +6,7 @@ import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/booking/booking_screen.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/components/topbar.dart';
+import 'package:ahpsico/ui/doctor/list/doctor_list.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:ahpsico/ui/schedule/schedule_model.dart';
 import 'package:ahpsico/ui/session/card/session_card.dart';
@@ -89,9 +90,10 @@ class ScheduleScreen extends StatelessWidget {
           ),
           icon: Icon(model.user!.isDoctor ? Icons.block : Icons.schedule),
           onPressed: () {
-            // TODO
             if (model.user!.isDoctor) {
               context.push(BookingScreen.route);
+            } else {
+              context.push(DoctorList.route);
             }
           },
         );

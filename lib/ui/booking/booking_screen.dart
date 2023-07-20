@@ -70,8 +70,7 @@ class BookingScreen extends StatelessWidget {
       case BookingEvent.navigateToLoginScreen:
         context.go(LoginScreen.route);
       case BookingEvent.navigateBack:
-        context.pop();
-        context.pop();
+        context.pop(true);
       case BookingEvent.openScheduleAlreadyBookedDialog:
         AhpsicoDialog.show(
           context: context,
