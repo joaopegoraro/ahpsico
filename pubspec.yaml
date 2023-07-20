@@ -32,6 +32,8 @@ dependencies:
   share_plus: ^7.0.2
   url_launcher: ^6.1.12
   flutter_neat_and_clean_calendar: ^0.3.13+28
+  upgrader: ^8.0.0
+  firebase_remote_config: ^4.2.4
 
 dependency_overrides:
   macos_ui:

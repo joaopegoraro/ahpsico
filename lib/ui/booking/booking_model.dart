@@ -11,7 +11,6 @@ import 'package:ahpsico/models/session/session_status.dart';
 import 'package:ahpsico/models/session/session_type.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
-import 'package:ahpsico/ui/app/app.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:collection/collection.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
@@ -236,14 +235,6 @@ class BookingModel extends BaseViewModel<BookingEvent> {
   }
 
   Future<void> fetchScreenData({required String? doctorUuid}) async {
-    // TODO REMOVE BLOCK
-    user = mockUser;
-    _patient = mockPatient;
-    _schedule = mockSchedules;
-    print("SCHEDULES:\n $_schedule");
-    return updateUi(() => _isLoading = false);
-    // TODO END OF BLOCK
-
     updateUi(() => _isLoading = true);
     await getUserData();
     if (doctorUuid != null) {
