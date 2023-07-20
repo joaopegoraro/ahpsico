@@ -59,6 +59,35 @@ class BookingModel extends BaseViewModel<BookingEvent> {
   final ScheduleRepository _scheduleRepository;
   final PatientRepository _patientRepository;
 
+  /* Utils */
+
+  final Map<String, Duration> availableSchedule = const {
+    "08:00": Duration(hours: 08),
+    "08:30": Duration(hours: 08, minutes: 30),
+    "09:00": Duration(hours: 09),
+    "09:30": Duration(hours: 09, minutes: 30),
+    "10:00": Duration(hours: 10),
+    "10:30": Duration(hours: 10, minutes: 30),
+    "11:00": Duration(hours: 11),
+    "11:30": Duration(hours: 11, minutes: 30),
+    "13:00": Duration(hours: 13),
+    "13:30": Duration(hours: 13, minutes: 30),
+    "14:00": Duration(hours: 14),
+    "14:30": Duration(hours: 14, minutes: 30),
+    "15:00": Duration(hours: 15),
+    "15:30": Duration(hours: 15, minutes: 30),
+    "16:00": Duration(hours: 16),
+    "16:30": Duration(hours: 16, minutes: 30),
+    "17:00": Duration(hours: 17),
+    "17:30": Duration(hours: 17, minutes: 30),
+    "18:00": Duration(hours: 18),
+    "18:30": Duration(hours: 18, minutes: 30),
+    "19:00": Duration(hours: 19),
+    "19:30": Duration(hours: 19, minutes: 30),
+    "20:00": Duration(hours: 20),
+    "20:30": Duration(hours: 20, minutes: 30),
+  };
+
   /* Fields */
 
   Patient? _patient;

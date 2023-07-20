@@ -33,11 +33,14 @@ class _BookingCardState extends State<BookingCard> {
   @override
   void initState() {
     super.initState();
-    final bookingTime = widget.booking.value;
+    final bookingTimeStart = widget.booking.value;
+    final bookingTimeEnd = widget.booking.value.add(const Duration(hours: 1));
     _blockedScheduleId = widget.blockedTimeRanges.entries.firstWhereOrNull((range) {
-      final isAfterStart = bookingTime.isAfter(range.value.start);
-      final isBeforeEnd = bookingTime.isBefore(range.value.end);
-      return isAfterStart && isBeforeEnd;
+      final isStartAfterStart = bookingTimeStart.isAfter(range.value.start);
+      final isStartBeforeEnd = bookingTimeStart.isBefore(range.value.end);
+      final isEndAfterStart = bookingTimeEnd.isAfter(range.value.start);
+      final isEndBeforeEnd = bookingTimeEnd.isBefore(range.value.end);
+      return (isStartAfterStart && isStartBeforeEnd) || (isEndAfterStart && isEndBeforeEnd);
     })?.key;
   }
 
@@ -59,12 +62,15 @@ class _BookingCardState extends State<BookingCard> {
         borderRadius: const BorderRadius.all(Radius.circular(4)),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Center(
-            child: Text(
-              widget.booking.key,
-              style: AhpsicoText.regular1Style.copyWith(
-                color: AhpsicoColors.light80,
-                fontWeight: FontWeight.w600,
+          child: FittedBox(
+            fit: BoxFit.contain,
+            child: Center(
+              child: Text(
+                widget.booking.key,
+                style: AhpsicoText.regular1Style.copyWith(
+                  color: AhpsicoColors.light80,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),

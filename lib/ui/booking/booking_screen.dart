@@ -28,35 +28,6 @@ class BookingScreen extends StatelessWidget {
 
   static const _scheduleMetadata = "schedule";
 
-  static const Map<String, Duration> availableSchedule = {
-    "08:00": Duration(hours: 08),
-    "08:30": Duration(hours: 08, minutes: 30),
-    "09:00": Duration(hours: 09),
-    "09:30": Duration(hours: 09, minutes: 30),
-    "10:00": Duration(hours: 10),
-    "10:30": Duration(hours: 10, minutes: 30),
-    "11:00": Duration(hours: 11),
-    "11:30": Duration(hours: 11, minutes: 30),
-    "12:00": Duration(hours: 12),
-    "12:30": Duration(hours: 12, minutes: 30),
-    "13:00": Duration(hours: 13),
-    "13:30": Duration(hours: 13, minutes: 30),
-    "14:00": Duration(hours: 14),
-    "14:30": Duration(hours: 14, minutes: 30),
-    "15:00": Duration(hours: 15),
-    "15:30": Duration(hours: 15, minutes: 30),
-    "16:00": Duration(hours: 16),
-    "16:30": Duration(hours: 16, minutes: 30),
-    "17:00": Duration(hours: 17),
-    "17:30": Duration(hours: 17, minutes: 30),
-    "18:00": Duration(hours: 18),
-    "18:30": Duration(hours: 18, minutes: 30),
-    "19:00": Duration(hours: 19),
-    "19:30": Duration(hours: 19, minutes: 30),
-    "20:00": Duration(hours: 20),
-    "20:30": Duration(hours: 20, minutes: 30),
-  };
-
   void _onEventEmitted(
     BuildContext context,
     BookingModel model,
@@ -82,6 +53,7 @@ class BookingScreen extends StatelessWidget {
           context: context,
           builder: (context) {
             return CreateSessionDialog(
+              dateTime: model.selectedDate,
               onConfirm: (isMonthly) {
                 context.pop();
                 model.scheduleSession(
@@ -114,12 +86,14 @@ class BookingScreen extends StatelessWidget {
       },
       bodyBuilder: (context, model) {
         return Calendar(
-          startOnMonday: true,
+          startOnMonday: false,
+          hideTodayIcon: true,
           weekDays: const ['Dom', 'Seg', 'Ter', "Qua", "Qui", "Sex", "Sab"],
           onDateSelected: model.setSelectedDate,
           eventsList: model.schedule.mapToList((schedule) {
             return NeatCleanCalendarEvent(
               schedule.id.toString(),
+              color: AhpsicoColors.light,
               startTime: schedule.date,
               endTime: schedule.date.add(const Duration(hours: 1)),
               metadata: {_scheduleMetadata: schedule},
@@ -143,85 +117,35 @@ class BookingScreen extends StatelessWidget {
             }));
 
             return Expanded(
-              child: Column(
+              child: GridView.count(
+                padding: const EdgeInsets.all(16),
+                key: Key(model.selectedDate.toString()),
+                crossAxisCount: 4,
+                addAutomaticKeepAlives: false,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              height: 5,
-                              width: 5,
-                              color: AhpsicoColors.red,
-                            ),
-                            AhpsicoSpacing.horizontalSpaceTiny,
-                            Text(
-                              doctor == null ? "Horário bloqueado" : "Horário indisponível",
-                              style: AhpsicoText.tinyStyle.copyWith(
-                                color: AhpsicoColors.dark75,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Spacer(),
-                        Row(
-                          children: [
-                            Container(
-                              height: 5,
-                              width: 5,
-                              color: AhpsicoColors.blue,
-                            ),
-                            AhpsicoSpacing.horizontalSpaceTiny,
-                            Text(
-                              "Horário disponível",
-                              style: AhpsicoText.tinyStyle.copyWith(
-                                color: AhpsicoColors.dark75,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  GridView.builder(
-                    itemCount: availableSchedule.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                    ),
-                    itemBuilder: (context, index) {
-                      final availableBooking = availableSchedule.entries.elementAt(index);
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          bottom: index == events.length - 1 ? 32 : 0,
-                        ),
-                        child: BookingCard(
-                          booking: MapEntry(
-                            availableBooking.key,
-                            selectedDay.add(availableBooking.value),
-                          ),
-                          blockedTimeRanges: blockedTimeRanges,
-                          onTapAvailable: (bookingTime) {
-                            if (doctor == null) {
-                              model.blockSchedule(bookingTime);
-                            } else {
-                              model.openSessionCreationDialog(bookingTime);
-                            }
-                          },
-                          onTapBlocked: (blockedScheduleId) {
-                            if (doctor == null) {
-                              model.unblockSchedule(blockedScheduleId);
-                            } else {
-                              model.showBookingNotAvailableError();
-                            }
-                          },
-                        ),
-                      );
-                    },
-                  ),
+                  ...model.availableSchedule.entries.map((availableBooking) {
+                    return BookingCard(
+                      booking: MapEntry(
+                        availableBooking.key,
+                        selectedDay.add(availableBooking.value),
+                      ),
+                      blockedTimeRanges: blockedTimeRanges,
+                      onTapAvailable: (bookingTime) {
+                        if (doctor == null) {
+                          model.blockSchedule(bookingTime);
+                        } else {
+                          model.openSessionCreationDialog(bookingTime);
+                        }
+                      },
+                      onTapBlocked: (blockedScheduleId) {
+                        if (doctor == null) {
+                          model.unblockSchedule(blockedScheduleId);
+                        } else {
+                          model.showBookingNotAvailableError();
+                        }
+                      },
+                    );
+                  }),
                 ],
               ),
             );

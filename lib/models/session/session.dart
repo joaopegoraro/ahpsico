@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:ahpsico/constants/app_constants.dart';
 import 'package:ahpsico/models/doctor.dart';
@@ -29,22 +28,11 @@ class Session {
   final DateTime date;
 
   String get readableDate {
-    final now = DateTime.now();
-    final yesterday = now.subtract(const Duration(days: 1));
-    final tomorrow = now.add(const Duration(days: 1));
-    final dayDifference = date.difference(now).inDays;
-    if (TimeUtils.areDatesSameDay(date, yesterday)) return "Ontem";
-    if (TimeUtils.areDatesSameDay(date, now)) return "Hoje";
-    if (TimeUtils.areDatesSameDay(date, tomorrow)) return "Amanhã";
-    if (dayDifference > 1 && dayDifference <= 6) {
-      // "Segunda-feira"
-      return DateFormat('EEEE').format(date).split('-').first;
-    }
-    return DateFormat.MMMMEEEEd(Platform.localeName).format(date); // "sábado, 25 de maio"
+    return TimeUtils.getReadableDate(date);
   }
 
   String get dateTime {
-    return DateFormat.Hm().format(date);
+    return TimeUtils.getDateAsHours(date);
   }
 
   Session copyWith({
