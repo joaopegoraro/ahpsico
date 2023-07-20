@@ -216,6 +216,7 @@ class BookingModel extends BaseViewModel<BookingEvent> {
       return item.id == blockedScheduleId;
     });
     if (blockedSchedule?.isSession == true) {
+      updateUi(() => _isLoading = false);
       return emitEvent(BookingEvent.openScheduleAlreadyBookedDialog);
     }
 

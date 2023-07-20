@@ -52,7 +52,7 @@ class ScheduleModel extends BaseViewModel<ScheduleEvent> {
 
   Future<void> fetchScreenData() async {
     // TODO REMOVE BLOCK
-    user = mockUser.copyWith(isDoctor: false);
+    user = mockUser.copyWith(isDoctor: true);
     _sessions = mockSessions;
     return updateUi(() => _isLoading = false);
     // TODO END OF BLOCK

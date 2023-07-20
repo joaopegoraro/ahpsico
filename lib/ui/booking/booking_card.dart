@@ -27,14 +27,14 @@ class BookingCard extends StatefulWidget {
 
 class _BookingCardState extends State<BookingCard> {
   late final int? _blockedScheduleId;
-
-  bool get _isAvailable => _blockedScheduleId == null;
+  late final bool _isAvailable;
 
   @override
   void initState() {
     super.initState();
     final bookingTimeStart = widget.booking.value;
     final bookingTimeEnd = widget.booking.value.add(const Duration(hours: 1));
+
     _blockedScheduleId = widget.blockedTimeRanges.entries.firstWhereOrNull((range) {
       final isStartAfterStart = bookingTimeStart.isAfter(range.value.start);
       final isStartBeforeEnd = bookingTimeStart.isBefore(range.value.end);
@@ -42,6 +42,10 @@ class _BookingCardState extends State<BookingCard> {
       final isEndBeforeEnd = bookingTimeEnd.isBefore(range.value.end);
       return (isStartAfterStart && isStartBeforeEnd) || (isEndAfterStart && isEndBeforeEnd);
     })?.key;
+
+    final bookingLimit = DateTime.now().add(const Duration(hours: 3));
+    final isBookingTooSoon = widget.booking.value.isBefore(bookingLimit);
+    _isAvailable = !isBookingTooSoon && _blockedScheduleId == null;
   }
 
   @override

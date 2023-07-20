@@ -91,9 +91,9 @@ class ScheduleScreen extends StatelessWidget {
           icon: Icon(model.user!.isDoctor ? Icons.block : Icons.schedule),
           onPressed: () {
             if (model.user!.isDoctor) {
-              context.push(BookingScreen.route);
+              context.push(BookingScreen.route).then((_) => model.fetchScreenData());
             } else {
-              context.push(DoctorList.route);
+              context.push(DoctorList.route).then((_) => model.fetchScreenData());
             }
           },
         );

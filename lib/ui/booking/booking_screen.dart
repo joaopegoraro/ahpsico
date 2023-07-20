@@ -1,7 +1,6 @@
 import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/schedule.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
-import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/booking/booking_card.dart';
@@ -12,6 +11,7 @@ import 'package:ahpsico/ui/components/topbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:ahpsico/ui/session/create_session/create_session_dialog.dart';
 import 'package:ahpsico/utils/extensions.dart';
+import 'package:ahpsico/utils/time_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_neat_and_clean_calendar/flutter_neat_and_clean_calendar.dart';
 import 'package:go_router/go_router.dart';
@@ -93,19 +93,32 @@ class BookingScreen extends StatelessWidget {
           eventsList: model.schedule.mapToList((schedule) {
             return NeatCleanCalendarEvent(
               schedule.id.toString(),
-              color: AhpsicoColors.light,
+              color: null,
               startTime: schedule.date,
               endTime: schedule.date.add(const Duration(hours: 1)),
               metadata: {_scheduleMetadata: schedule},
             );
           }),
-          dayBuilder: (context, day) {},
           eventListBuilder: (context, events) {
             final selectedDay = DateTime(
               model.selectedDate.year,
               model.selectedDate.month,
               model.selectedDate.day,
             );
+            final now = DateTime.now();
+
+            if (!TimeUtils.areDatesSameDay(selectedDay, now) && selectedDay.isBefore(DateTime.now())) {
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Text(
+                    "O dia selecionado já aconteceu",
+                    textAlign: TextAlign.center,
+                    style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.dark75),
+                  ),
+                ),
+              );
+            }
 
             final Map<int, DateTimeRange> blockedTimeRanges = Map.fromEntries(events.mapToList((event) {
               final schedule = event.metadata![_scheduleMetadata] as Schedule;
@@ -157,7 +170,6 @@ class BookingScreen extends StatelessWidget {
           selectedTodayColor: AhpsicoColors.red,
           expandableDateFormat: "EEEE, dd MMMM",
           todayColor: AhpsicoColors.blue,
-          eventColor: null,
           locale: 'pt_BR',
           todayButtonText: 'Hoje',
           bottomBarTextStyle: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.dark75),
