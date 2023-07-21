@@ -154,6 +154,7 @@ abstract interface class ApiService {
   /// throws:
   /// - [ApiConnectionException] when the request suffers any connection problems;
   /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
+  /// - [ApiSessionAlreadyBookedException] when the response returns a 409 indicating there
   Future<Session> updateSession(Session session);
 
   /// throws:
@@ -515,6 +516,11 @@ class ApiServiceImpl implements ApiService {
       },
       parseSuccess: (response) {
         return Session.fromJson(response.data);
+      },
+      parseFailure: (response) {
+        if (response.statusCode == 409) {
+          throw const ApiSessionAlreadyBookedException();
+        }
       },
     );
   }
