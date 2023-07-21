@@ -4,6 +4,7 @@ import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
+import 'package:ahpsico/ui/booking/booking_screen.dart';
 import 'package:ahpsico/ui/components/dialogs/ahpsico_dialog.dart';
 import 'package:ahpsico/ui/components/home_button.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
@@ -195,7 +196,16 @@ class SessionDetail extends StatelessWidget {
                           text: "REMARCAR",
                           enableFlex: true,
                           onPressed: () {
-                            // TODO
+                            context
+                                .push<Session?>(
+                              BookingScreen.route,
+                              extra: BookingScreen.buildArgs(session: session),
+                            )
+                                .then((updatedSession) {
+                              if (updatedSession != null) {
+                                context.replace(SessionDetail.route, extra: updatedSession);
+                              }
+                            });
                           },
                           color: AhpsicoColors.blue,
                           icon: Icons.edit_calendar,

@@ -1,5 +1,6 @@
 import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/schedule.dart';
+import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
@@ -20,11 +21,25 @@ class BookingScreen extends StatelessWidget {
   const BookingScreen({
     super.key,
     required this.doctor,
+    required this.session,
   });
 
   static const route = "/booking";
+  static const doctorArgKey = "doctor";
+  static const sessionArgkey = "session";
+
+  static Map<String, dynamic> buildArgs({
+    Doctor? doctor,
+    Session? session,
+  }) {
+    return {
+      doctorArgKey: doctor,
+      sessionArgkey: session,
+    };
+  }
 
   final Doctor? doctor;
+  final Session? session;
 
   static const _scheduleMetadata = "schedule";
 
@@ -41,12 +56,27 @@ class BookingScreen extends StatelessWidget {
       case BookingEvent.navigateToLoginScreen:
         context.go(LoginScreen.route);
       case BookingEvent.navigateBack:
-        context.pop(true);
+        context.pop();
       case BookingEvent.openScheduleAlreadyBookedDialog:
         AhpsicoDialog.show(
           context: context,
           content: "Já existe uma sessão agendada nesse horário, por isso não é possível desbloqueá-lo",
           firstButtonText: "Ok",
+        );
+      case BookingEvent.openRescheduleSessionDialog:
+        AhpsicoDialog.show(
+          context: context,
+          content: "Tem certeza que deseja remarcar a sessão para "
+              "${TimeUtils.getReadableDate(model.selectedDate)}, "
+              "às ${TimeUtils.getDateAsHours(model.selectedDate)}?",
+          firstButtonText: "Sim, tenho certeza",
+          secondButtonText: "Cancelar",
+          onTapFirstButton: () {
+            context.pop();
+            model.rescheduleSession(session: session!).then((updatedSession) {
+              context.pop(updatedSession);
+            });
+          },
         );
       case BookingEvent.openSessionCreationDialog:
         showDialog(
@@ -80,7 +110,11 @@ class BookingScreen extends StatelessWidget {
       },
       topbarBuilder: (context, model) {
         return Topbar(
-          title: doctor == null ? "Horários" : "Agendamento",
+          title: session != null
+              ? "Remarcar"
+              : doctor != null
+                  ? "Agendamento"
+                  : "Horários",
           onBackPressed: context.pop,
         );
       },
@@ -144,17 +178,21 @@ class BookingScreen extends StatelessWidget {
                       ),
                       blockedTimeRanges: blockedTimeRanges,
                       onTapAvailable: (bookingTime) {
-                        if (doctor == null) {
-                          model.blockSchedule(bookingTime);
-                        } else {
+                        if (session != null) {
+                          model.openRescheduleSessionDialog(bookingTime);
+                        } else if (doctor != null) {
                           model.openSessionCreationDialog(bookingTime);
+                        } else {
+                          model.blockSchedule(bookingTime);
                         }
                       },
                       onTapBlocked: (blockedScheduleId) {
-                        if (doctor == null) {
-                          model.unblockSchedule(blockedScheduleId);
-                        } else {
+                        if (session != null) {
                           model.showBookingNotAvailableError();
+                        } else if (doctor != null) {
+                          model.showBookingNotAvailableError();
+                        } else {
+                          model.unblockSchedule(blockedScheduleId);
                         }
                       },
                     );

@@ -158,8 +158,11 @@ final class AhpsicoRouter {
       GoRoute(
         path: BookingScreen.route,
         builder: (context, state) {
-          final doctor = state.extra as Doctor?;
-          return BookingScreen(doctor: doctor);
+          final args = state.extra as Map<String, dynamic>?;
+          return BookingScreen(
+            doctor: args?[BookingScreen.doctorArgKey],
+            session: args?[BookingScreen.sessionArgkey],
+          );
         },
       ),
     ],

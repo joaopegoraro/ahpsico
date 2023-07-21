@@ -18,6 +18,7 @@ import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 enum BookingEvent {
   openScheduleAlreadyBookedDialog,
   openSessionCreationDialog,
+  openRescheduleSessionDialog,
   navigateToLoginScreen,
   navigateBack,
   showSnackbarMessage,
@@ -117,6 +118,11 @@ class BookingModel extends BaseViewModel<BookingEvent> {
     emitEvent(BookingEvent.openSessionCreationDialog);
   }
 
+  void openRescheduleSessionDialog(DateTime sessionTime) {
+    _newSessionTime = sessionTime;
+    emitEvent(BookingEvent.openRescheduleSessionDialog);
+  }
+
   void showBookingNotAvailableError() {
     showSnackbar(
       "O horário selecionado não está disponível",
@@ -181,6 +187,34 @@ class BookingModel extends BaseViewModel<BookingEvent> {
     }
 
     updateUi(() => _isLoading = false);
+  }
+
+  Future<Session?> rescheduleSession({required Session session}) async {
+    updateUi(() => _isLoading = true);
+
+    final updatedSession = session.copyWith(date: _newSessionTime!);
+
+    try {
+      final result = await _sessionRepository.update(updatedSession);
+      showSnackbar(
+        "Sessão remarcada com sucesso!",
+        BookingEvent.showSnackbarMessage,
+      );
+      updateUi(() => _isLoading = false);
+      return result;
+    } on ApiSessionAlreadyBookedException catch (_) {
+      showSnackbar(
+        "Ops! Parece que o horário escolhido não está mais disponível",
+        BookingEvent.showSnackbarError,
+      );
+    } on ApiUnauthorizedException catch (_) {
+      logout(showError: true);
+    } on ApiConnectionException catch (_) {
+      showConnectionError();
+    }
+
+    updateUi(() => _isLoading = false);
+    return null;
   }
 
   Future<void> blockSchedule(DateTime blockTime) async {

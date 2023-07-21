@@ -66,7 +66,12 @@ class DoctorList extends StatelessWidget {
               child: DoctorCard(
                 doctor: doctor,
                 onTap: (doctor) {
-                  context.push(BookingScreen.route, extra: doctor).then((_) => context.pop());
+                  context
+                      .push(
+                        BookingScreen.route,
+                        extra: BookingScreen.buildArgs(doctor: doctor),
+                      )
+                      .then((_) => context.pop());
                 },
               ),
             );
