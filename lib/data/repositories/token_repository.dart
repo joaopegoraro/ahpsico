@@ -7,7 +7,7 @@ abstract interface class TokenRepository {
   Future<void> clear();
 }
 
-final tokenRepositoryProvider = Provider((ref) {
+final tokenRepositoryProvider = Provider<TokenRepository>((ref) {
   return TokenRepositoryImpl();
 });
 

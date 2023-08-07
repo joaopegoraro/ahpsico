@@ -19,6 +19,13 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 abstract interface class ApiService {
   /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
+  ///
+  /// Sends the verification code to the provided [phoneNumber]
+  Future<void> sendVerificationCode(String phoneNumber);
+
+  /// throws:
   /// - [ApiUserNotRegisteredException] when the user trying to login is
   /// not yet registered.
   /// - [ApiConnectionException] when the request suffers any connection problems;
@@ -202,6 +209,18 @@ class ApiServiceImpl implements ApiService {
   ApiServiceImpl(this._dio);
 
   final Dio _dio;
+
+  @override
+  Future<void> sendVerificationCode(String phoneNumber) async {
+    return await request(
+      method: "POST",
+      endpoint: "verification-code",
+      requestBody: () => {
+        "phoneNumber": phoneNumber,
+      },
+      parseSuccess: (response) {/* SUCCESS! */},
+    );
+  }
 
   @override
   Future<User> login(String phoneNumber, String code) async {

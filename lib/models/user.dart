@@ -79,14 +79,14 @@ class User {
 
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
-      uuid: map['uuid'] as String,
-      name: map['name'] as String,
-      phoneNumber: map['phoneNumber'] as String,
-      description: map['description'] as String,
-      crp: map['crp'] as String,
-      pixKey: map['pixKey'] as String,
-      paymentDetails: map['paymentDetails'] as String,
-      role: UserRole.fromValue(map['role']),
+      uuid: map['uuid'] as String? ?? "",
+      name: map['name'] as String? ?? "",
+      phoneNumber: map['phoneNumber'] as String? ?? "",
+      description: map['description'] as String? ?? "",
+      crp: map['crp'] as String? ?? "",
+      pixKey: map['pixKey'] as String? ?? "",
+      paymentDetails: map['paymentDetails'] as String? ?? "",
+      role: UserRole.fromValue(map['role'] as int? ?? 0),
     );
   }
 
