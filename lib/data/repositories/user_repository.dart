@@ -1,21 +1,20 @@
 import 'package:ahpsico/data/database/ahpsico_database.dart';
 import 'package:ahpsico/data/database/entities/user_entity.dart';
-import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/database/mappers/user_mapper.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class UserRepository {
-  Future<ApiException?> sync(String uuid);
+  Future<ApiError?> sync(String uuid);
 
-  Future<User> get(String uuid);
+  Future<User?> get(String uuid);
 
-  Future<(User?, ApiException?)> create(String userName, UserRole role);
+  Future<(User?, ApiError?)> create(String userName, UserRole role);
 
-  Future<(User?, ApiException?)> update(User user);
+  Future<(User?, ApiError?)> update(User user);
 
   Future<void> clear();
 }
@@ -37,7 +36,7 @@ final class UserRepositoryImpl implements UserRepository {
   final sqflite.Database _db;
 
   @override
-  Future<(User?, ApiException?)> create(String userName, UserRole role) async {
+  Future<(User?, ApiError?)> create(String userName, UserRole role) async {
     final (createdUser, err) = await _api.signUp(userName, role);
     if (err != null) return (null, err);
     await _db.insert(
@@ -49,7 +48,7 @@ final class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<(User?, ApiException?)> update(User user) async {
+  Future<(User?, ApiError?)> update(User user) async {
     final (updatedUser, err) = await _api.updateUser(user);
     if (err != null) return (null, err);
     await _db.insert(
@@ -61,7 +60,7 @@ final class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<ApiException?> sync(String uuid) async {
+  Future<ApiError?> sync(String uuid) async {
     final (user, err) = await _api.getUser(uuid);
     if (err != null) return err;
 
@@ -78,7 +77,7 @@ final class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<User> get(String uuid) async {
+  Future<User?> get(String uuid) async {
     final usersMap = await _db.query(
       UserEntity.tableName,
       where: "${UserEntity.uuidColumn} = ?",
@@ -86,7 +85,7 @@ final class UserRepositoryImpl implements UserRepository {
     );
 
     if (usersMap.isEmpty) {
-      throw const DatabaseNotFoundException(message: "No user found");
+      return null;
     }
 
     final entity = UserEntity.fromMap(usersMap.first);

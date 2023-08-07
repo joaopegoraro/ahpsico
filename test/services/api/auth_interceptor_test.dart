@@ -1,5 +1,5 @@
 import 'package:ahpsico/services/api/auth_interceptor.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/services/auth/token.dart';
 import 'package:collection/collection.dart';
@@ -30,7 +30,7 @@ void main() {
     verifyNever(() => mockRequestInterceptorHandler.next(any()));
     final captured = verify(() => mockRequestInterceptorHandler.reject(captureAny())).captured;
     final error = captured.first as DioException;
-    final apiException = error.error as ApiException;
+    final apiException = error.error as ApiError;
     assert(apiException.message == expectedError.message);
     assert(apiException.code == expectedError.code);
   });
@@ -44,7 +44,7 @@ void main() {
     verifyNever(() => mockRequestInterceptorHandler.next(any()));
     final captured = verify(() => mockRequestInterceptorHandler.reject(captureAny())).captured;
     final error = captured.first as DioException;
-    final apiException = error.error as ApiException;
+    final apiException = error.error as ApiError;
     assert(apiException.message == expectedError.message);
     assert(apiException.code == expectedError.code);
   });

@@ -1,14 +1,14 @@
 import 'package:ahpsico/models/schedule.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 abstract interface class ScheduleRepository {
-  Future<(Schedule?, ApiException?)> create(Schedule schedule);
+  Future<(Schedule?, ApiError?)> create(Schedule schedule);
 
-  Future<ApiException?> delete(int id);
+  Future<ApiError?> delete(int id);
 
-  Future<(List<Schedule>?, ApiException?)> getDoctorSchedule(String doctorId);
+  Future<(List<Schedule>?, ApiError?)> getDoctorSchedule(String doctorId);
 }
 
 final scheduleRepositoryProvider = Provider<ScheduleRepository>((ref) {
@@ -24,17 +24,17 @@ final class ScheduleRepositoryImpl implements ScheduleRepository {
   final ApiService _api;
 
   @override
-  Future<(Schedule?, ApiException?)> create(Schedule schedule) async {
+  Future<(Schedule?, ApiError?)> create(Schedule schedule) async {
     return await _api.createSchedule(schedule);
   }
 
   @override
-  Future<ApiException?> delete(int id) async {
+  Future<ApiError?> delete(int id) async {
     return await _api.deleteSchedule(id);
   }
 
   @override
-  Future<(List<Schedule>?, ApiException?)> getDoctorSchedule(String doctorId) async {
+  Future<(List<Schedule>?, ApiError?)> getDoctorSchedule(String doctorId) async {
     return await _api.getDoctorSchedule(doctorId);
   }
 }

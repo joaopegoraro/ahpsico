@@ -8,7 +8,7 @@ import 'package:ahpsico/data/repositories/doctor_repository.dart';
 import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:collection/collection.dart';
 import 'package:faker/faker.dart';
 import 'package:ahpsico/data/database/exceptions.dart';
@@ -49,7 +49,8 @@ void main() {
     registerFallbackValue(doctor);
 
     sqflite_ffi.sqfliteFfiInit();
-    sqflite_ffi.databaseFactory = sqflite_ffi.databaseFactoryFfi..deleteDatabase(AhpsicoDatabase.dbName);
+    sqflite_ffi.databaseFactory = sqflite_ffi.databaseFactoryFfi
+      ..deleteDatabase(AhpsicoDatabase.dbName);
     database = await AhpsicoDatabase.instance;
     doctorRepository = DoctorRepositoryImpl(
       apiService: mockApiService,
@@ -71,11 +72,12 @@ void main() {
   group("sync", () {
     test('api error throws', () async {
       const code = "some code";
-      when(() => mockApiService.getDoctor(any())).thenAnswer((_) async => throw const ApiException(code: code));
+      when(() => mockApiService.getDoctor(any()))
+          .thenAnswer((_) async => throw const ApiError(code: code));
       try {
         await doctorRepository.sync('some id');
         assert(false);
-      } on ApiException catch (e) {
+      } on ApiError catch (e) {
         assert(e.code == code);
       }
     });
@@ -108,11 +110,12 @@ void main() {
   group("update", () {
     test('api error throws', () async {
       const code = "some code";
-      when(() => mockApiService.updateDoctor(any())).thenAnswer((_) async => throw const ApiException(code: code));
+      when(() => mockApiService.updateDoctor(any()))
+          .thenAnswer((_) async => throw const ApiError(code: code));
       try {
         await doctorRepository.update(mockDoctor);
         assert(false);
-      } on ApiException catch (e) {
+      } on ApiError catch (e) {
         assert(e.code == code);
       }
     });
@@ -129,11 +132,12 @@ void main() {
   group("syncPatientDoctors", () {
     test('api error throws', () async {
       const code = "some code";
-      when(() => mockApiService.getPatientDoctors(any())).thenAnswer((_) async => throw const ApiException(code: code));
+      when(() => mockApiService.getPatientDoctors(any()))
+          .thenAnswer((_) async => throw const ApiError(code: code));
       try {
         await doctorRepository.syncPatientDoctors('some id');
         assert(false);
-      } on ApiException catch (e) {
+      } on ApiError catch (e) {
         assert(e.code == code);
       }
     });

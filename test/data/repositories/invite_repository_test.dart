@@ -11,7 +11,7 @@ import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/invite.dart';
 import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:collection/collection.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -57,7 +57,8 @@ void main() {
     registerFallbackValue(invite);
 
     sqflite_ffi.sqfliteFfiInit();
-    sqflite_ffi.databaseFactory = sqflite_ffi.databaseFactoryFfi..deleteDatabase(AhpsicoDatabase.dbName);
+    sqflite_ffi.databaseFactory = sqflite_ffi.databaseFactoryFfi
+      ..deleteDatabase(AhpsicoDatabase.dbName);
     database = await AhpsicoDatabase.instance;
     inviteRepository = InviteRepositoryImpl(
       apiService: mockApiService,
@@ -80,11 +81,12 @@ void main() {
   group("create", () {
     test('api error throws', () async {
       const code = "some code";
-      when(() => mockApiService.createInvite(any())).thenAnswer((_) async => throw const ApiException(code: code));
+      when(() => mockApiService.createInvite(any()))
+          .thenAnswer((_) async => throw const ApiError(code: code));
       try {
         await inviteRepository.create(invite.phoneNumber);
         assert(false);
-      } on ApiException catch (e) {
+      } on ApiError catch (e) {
         assert(e.code == code);
       }
     });
@@ -111,11 +113,12 @@ void main() {
   group("delete", () {
     test('api error throws', () async {
       const code = "some code";
-      when(() => mockApiService.deleteInvite(any())).thenAnswer((_) async => throw const ApiException(code: code));
+      when(() => mockApiService.deleteInvite(any()))
+          .thenAnswer((_) async => throw const ApiError(code: code));
       try {
         await inviteRepository.delete(invite.id);
         assert(false);
-      } on ApiException catch (e) {
+      } on ApiError catch (e) {
         assert(e.code == code);
       }
     });
@@ -125,7 +128,8 @@ void main() {
       await database.insert(PatientEntity.tableName, PatientMapper.toEntity(patient).toMap());
       await database.insert(DoctorEntity.tableName, DoctorMapper.toEntity(doctor).toMap());
       assert(
-        await database.insert(InviteEntity.tableName, InviteMapper.toEntity(invite).toMap()) == invite.id,
+        await database.insert(InviteEntity.tableName, InviteMapper.toEntity(invite).toMap()) ==
+            invite.id,
       );
       await inviteRepository.delete(invite.id);
       final savedInviteMap = await database.query(
@@ -140,11 +144,12 @@ void main() {
   group("accept", () {
     test('api error throws', () async {
       const code = "some code";
-      when(() => mockApiService.acceptInvite(any())).thenAnswer((_) async => throw const ApiException(code: code));
+      when(() => mockApiService.acceptInvite(any()))
+          .thenAnswer((_) async => throw const ApiError(code: code));
       try {
         await inviteRepository.accept(invite.id);
         assert(false);
-      } on ApiException catch (e) {
+      } on ApiError catch (e) {
         assert(e.code == code);
       }
     });
@@ -154,7 +159,8 @@ void main() {
       await database.insert(PatientEntity.tableName, PatientMapper.toEntity(patient).toMap());
       await database.insert(DoctorEntity.tableName, DoctorMapper.toEntity(doctor).toMap());
       assert(
-        await database.insert(InviteEntity.tableName, InviteMapper.toEntity(invite).toMap()) == invite.id,
+        await database.insert(InviteEntity.tableName, InviteMapper.toEntity(invite).toMap()) ==
+            invite.id,
       );
       await inviteRepository.accept(invite.id);
       final savedInviteMap = await database.query(
@@ -169,11 +175,12 @@ void main() {
   group("sync", () {
     test('api error throws', () async {
       const code = "some code";
-      when(() => mockApiService.getInvites()).thenAnswer((_) async => throw const ApiException(code: code));
+      when(() => mockApiService.getInvites())
+          .thenAnswer((_) async => throw const ApiError(code: code));
       try {
         await inviteRepository.sync();
         assert(false);
-      } on ApiException catch (e) {
+      } on ApiError catch (e) {
         assert(e.code == code);
       }
     });

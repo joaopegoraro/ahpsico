@@ -1,7 +1,7 @@
 import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/user.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/services/auth/auth_user.dart';
 import 'package:ahpsico/services/auth/credentials.dart';

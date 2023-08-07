@@ -5,24 +5,24 @@ import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/mappers/advice_mapper.dart';
 import 'package:ahpsico/models/advice.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class AdviceRepository {
-  Future<(Advice?, ApiException?)> create(Advice advice);
+  Future<(Advice?, ApiError?)> create(Advice advice);
 
-  Future<(Advice?, ApiException?)> update(Advice advice);
+  Future<(Advice?, ApiError?)> update(Advice advice);
 
-  Future<ApiException?> delete(int id);
+  Future<ApiError?> delete(int id);
 
   Future<List<Advice>> getPatientAdvices(String patientId);
 
-  Future<ApiException?> syncPatientAdvices(String patientId);
+  Future<ApiError?> syncPatientAdvices(String patientId);
 
   Future<List<Advice>> getDoctorAdvices(String doctorId);
 
-  Future<ApiException?> syncDoctorAdvices(String doctorId);
+  Future<ApiError?> syncDoctorAdvices(String doctorId);
 
   Future<int> clear();
 }
@@ -44,7 +44,7 @@ final class AdviceRepositoryImpl implements AdviceRepository {
   final sqflite.Database _db;
 
   @override
-  Future<(Advice?, ApiException?)> create(Advice advice) async {
+  Future<(Advice?, ApiError?)> create(Advice advice) async {
     final (createdAdvice, err) = await _api.createAdvice(advice);
     if (err != null) return (createdAdvice, err);
     await _db.insert(
@@ -56,7 +56,7 @@ final class AdviceRepositoryImpl implements AdviceRepository {
   }
 
   @override
-  Future<(Advice?, ApiException?)> update(Advice advice) async {
+  Future<(Advice?, ApiError?)> update(Advice advice) async {
     final (updatedAdvice, err) = await _api.updateAdvice(advice);
     if (err != null) return (updatedAdvice, err);
     await _db.insert(
@@ -69,7 +69,7 @@ final class AdviceRepositoryImpl implements AdviceRepository {
   }
 
   @override
-  Future<ApiException?> delete(int id) async {
+  Future<ApiError?> delete(int id) async {
     final err = await _api.deleteAdvice(id);
     if (err != null) return err;
 
@@ -123,7 +123,7 @@ final class AdviceRepositoryImpl implements AdviceRepository {
   }
 
   @override
-  Future<ApiException?> syncPatientAdvices(String patientId) async {
+  Future<ApiError?> syncPatientAdvices(String patientId) async {
     final (advices, err) = await _api.getPatientAdvices(patientId);
     if (err != null) return err;
 
@@ -197,7 +197,7 @@ final class AdviceRepositoryImpl implements AdviceRepository {
   }
 
   @override
-  Future<ApiException?> syncDoctorAdvices(String doctorId) async {
+  Future<ApiError?> syncDoctorAdvices(String doctorId) async {
     final (advices, err) = await _api.getDoctorAdvices(doctorId);
     if (err != null) return err;
 

@@ -16,7 +16,7 @@ import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/models/session/session_status.dart';
 import 'package:ahpsico/models/session/session_type.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:collection/collection.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -77,7 +77,8 @@ void main() {
     registerFallbackValue(assignment);
 
     sqflite_ffi.sqfliteFfiInit();
-    sqflite_ffi.databaseFactory = sqflite_ffi.databaseFactoryFfi..deleteDatabase(AhpsicoDatabase.dbName);
+    sqflite_ffi.databaseFactory = sqflite_ffi.databaseFactoryFfi
+      ..deleteDatabase(AhpsicoDatabase.dbName);
     database = await AhpsicoDatabase.instance;
     assignmentRepository = AssignmentRepositoryImpl(
       apiService: mockApiService,
@@ -100,11 +101,12 @@ void main() {
   group("create", () {
     test('api error throws', () async {
       const code = "some code";
-      when(() => mockApiService.createAssignment(any())).thenAnswer((_) async => throw const ApiException(code: code));
+      when(() => mockApiService.createAssignment(any()))
+          .thenAnswer((_) async => throw const ApiError(code: code));
       try {
         await assignmentRepository.create(mockAssignment);
         assert(false);
-      } on ApiException catch (e) {
+      } on ApiError catch (e) {
         assert(e.code == code);
       }
     });
@@ -134,11 +136,12 @@ void main() {
   group("update", () {
     test('api error throws', () async {
       const code = "some code";
-      when(() => mockApiService.updateAssignment(any())).thenAnswer((_) async => throw const ApiException(code: code));
+      when(() => mockApiService.updateAssignment(any()))
+          .thenAnswer((_) async => throw const ApiError(code: code));
       try {
         await assignmentRepository.update(mockAssignment);
         assert(false);
-      } on ApiException catch (e) {
+      } on ApiError catch (e) {
         assert(e.code == code);
       }
     });
@@ -168,11 +171,12 @@ void main() {
   group("delete", () {
     test('api error throws', () async {
       const code = "some code";
-      when(() => mockApiService.deleteAssignment(any())).thenAnswer((_) async => throw const ApiException(code: code));
+      when(() => mockApiService.deleteAssignment(any()))
+          .thenAnswer((_) async => throw const ApiError(code: code));
       try {
         await assignmentRepository.delete(assignment.id);
         assert(false);
-      } on ApiException catch (e) {
+      } on ApiError catch (e) {
         assert(e.code == code);
       }
     });
@@ -183,7 +187,8 @@ void main() {
       await database.insert(DoctorEntity.tableName, DoctorMapper.toEntity(doctor).toMap());
       await database.insert(SessionEntity.tableName, SessionMapper.toEntity(session).toMap());
       assert(
-        await database.insert(AssignmentEntity.tableName, AssignmentMapper.toEntity(assignment).toMap()) ==
+        await database.insert(
+                AssignmentEntity.tableName, AssignmentMapper.toEntity(assignment).toMap()) ==
             assignment.id,
       );
       await assignmentRepository.delete(assignment.id);
@@ -200,11 +205,11 @@ void main() {
     test('api error throws', () async {
       const code = "some code";
       when(() => mockApiService.getPatientAssignments(any()))
-          .thenAnswer((_) async => throw const ApiException(code: code));
+          .thenAnswer((_) async => throw const ApiError(code: code));
       try {
         await assignmentRepository.syncPatientAssignments('some id');
         assert(false);
-      } on ApiException catch (e) {
+      } on ApiError catch (e) {
         assert(e.code == code);
       }
     });

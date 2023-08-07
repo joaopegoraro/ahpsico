@@ -4,21 +4,21 @@ import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/mappers/session_mapper.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class SessionRepository {
-  Future<(Session?, ApiException?)> create(Session session);
+  Future<(Session?, ApiError?)> create(Session session);
 
-  Future<(Session?, ApiException?)> update(Session session);
+  Future<(Session?, ApiError?)> update(Session session);
 
   Future<List<Session>> getPatientSessions(
     String patientId, {
     bool upcoming = false,
   });
 
-  Future<ApiException?> syncPatientSessions(
+  Future<ApiError?> syncPatientSessions(
     String patientId, {
     bool? upcoming,
   });
@@ -28,7 +28,7 @@ abstract interface class SessionRepository {
     DateTime? date,
   });
 
-  Future<ApiException?> syncDoctorSessions(
+  Future<ApiError?> syncDoctorSessions(
     String doctorId, {
     DateTime? date,
   });
@@ -53,7 +53,7 @@ final class SessionRepositoryImpl implements SessionRepository {
   final sqflite.Database _db;
 
   @override
-  Future<(Session?, ApiException?)> create(Session session) async {
+  Future<(Session?, ApiError?)> create(Session session) async {
     final (createdSession, err) = await _api.createSession(session);
     if (err != null) return (null, err);
 
@@ -67,7 +67,7 @@ final class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Future<(Session?, ApiException?)> update(Session session) async {
+  Future<(Session?, ApiError?)> update(Session session) async {
     final (updatedSession, err) = await _api.updateSession(session);
     if (err != null) return (null, err);
 
@@ -122,7 +122,7 @@ final class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Future<ApiException?> syncPatientSessions(
+  Future<ApiError?> syncPatientSessions(
     String patientId, {
     bool? upcoming,
   }) async {
@@ -204,7 +204,7 @@ final class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Future<ApiException?> syncDoctorSessions(
+  Future<ApiError?> syncDoctorSessions(
     String doctorId, {
     DateTime? date,
   }) async {

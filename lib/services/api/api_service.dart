@@ -8,7 +8,7 @@ import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/models/advice.dart';
 import 'package:ahpsico/services/api/auth_interceptor.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,70 +17,70 @@ import 'package:meta/meta.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 abstract interface class ApiService {
-  Future<ApiException?> sendVerificationCode(String phoneNumber);
+  Future<ApiError?> sendVerificationCode(String phoneNumber);
 
-  Future<(User?, ApiException?)> login(String phoneNumber, String code);
+  Future<(User?, ApiError?)> login(String phoneNumber, String code);
 
-  Future<(User?, ApiException?)> signUp(String userName, UserRole role);
+  Future<(User?, ApiError?)> signUp(String userName, UserRole role);
 
-  Future<(Invite?, ApiException?)> createInvite(String phoneNumber);
+  Future<(Invite?, ApiError?)> createInvite(String phoneNumber);
 
-  Future<(List<Invite>?, ApiException?)> getInvites();
+  Future<(List<Invite>?, ApiError?)> getInvites();
 
-  Future<ApiException?> deleteInvite(int id);
+  Future<ApiError?> deleteInvite(int id);
 
-  Future<ApiException?> acceptInvite(int id);
+  Future<ApiError?> acceptInvite(int id);
 
-  Future<(User?, ApiException?)> getUser(String uuid);
+  Future<(User?, ApiError?)> getUser(String uuid);
 
-  Future<(User?, ApiException?)> updateUser(User user);
+  Future<(User?, ApiError?)> updateUser(User user);
 
-  Future<(List<User>?, ApiException?)> getDoctorPatients(String doctorId);
+  Future<(List<User>?, ApiError?)> getDoctorPatients(String doctorId);
 
-  Future<(List<Session>?, ApiException?)> getDoctorSessions(
+  Future<(List<Session>?, ApiError?)> getDoctorSessions(
     String doctorId, {
     DateTime? date,
   });
 
-  Future<(List<Advice>?, ApiException?)> getDoctorAdvices(String doctorId);
+  Future<(List<Advice>?, ApiError?)> getDoctorAdvices(String doctorId);
 
-  Future<(List<Schedule>?, ApiException?)> getDoctorSchedule(String doctorId);
+  Future<(List<Schedule>?, ApiError?)> getDoctorSchedule(String doctorId);
 
-  Future<(List<User>?, ApiException?)> getPatientDoctors(String patientId);
+  Future<(List<User>?, ApiError?)> getPatientDoctors(String patientId);
 
-  Future<(List<Session>?, ApiException?)> getPatientSessions(
+  Future<(List<Session>?, ApiError?)> getPatientSessions(
     String patientId, {
     bool? upcoming,
   });
 
-  Future<(List<Assignment>?, ApiException?)> getPatientAssignments(
+  Future<(List<Assignment>?, ApiError?)> getPatientAssignments(
     String patientId, {
     bool? pending,
   });
 
-  Future<(List<Advice>?, ApiException?)> getPatientAdvices(String patientId);
+  Future<(List<Advice>?, ApiError?)> getPatientAdvices(String patientId);
 
-  Future<(Session?, ApiException?)> getSession(int id);
+  Future<(Session?, ApiError?)> getSession(int id);
 
-  Future<(Session?, ApiException?)> createSession(Session session);
+  Future<(Session?, ApiError?)> createSession(Session session);
 
-  Future<(Session?, ApiException?)> updateSession(Session session);
+  Future<(Session?, ApiError?)> updateSession(Session session);
 
-  Future<(Assignment?, ApiException?)> createAssignment(Assignment assignment);
+  Future<(Assignment?, ApiError?)> createAssignment(Assignment assignment);
 
-  Future<(Assignment?, ApiException?)> updateAssignment(Assignment assignment);
+  Future<(Assignment?, ApiError?)> updateAssignment(Assignment assignment);
 
-  Future<ApiException?> deleteAssignment(int id);
+  Future<ApiError?> deleteAssignment(int id);
 
-  Future<(Advice?, ApiException?)> createAdvice(Advice advice);
+  Future<(Advice?, ApiError?)> createAdvice(Advice advice);
 
-  Future<(Advice?, ApiException?)> updateAdvice(Advice advice);
+  Future<(Advice?, ApiError?)> updateAdvice(Advice advice);
 
-  Future<ApiException?> deleteAdvice(int id);
+  Future<ApiError?> deleteAdvice(int id);
 
-  Future<(Schedule?, ApiException?)> createSchedule(Schedule schedule);
+  Future<(Schedule?, ApiError?)> createSchedule(Schedule schedule);
 
-  Future<ApiException?> deleteSchedule(int id);
+  Future<ApiError?> deleteSchedule(int id);
 }
 
 final apiServiceProvider = Provider<ApiService>((ref) {
@@ -101,7 +101,7 @@ class ApiServiceImpl implements ApiService {
   final Dio _dio;
 
   @override
-  Future<ApiException?> sendVerificationCode(String phoneNumber) async {
+  Future<ApiError?> sendVerificationCode(String phoneNumber) async {
     final (_, err) = await request(
       method: "POST",
       endpoint: "verification-code",
@@ -114,7 +114,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(User?, ApiException?)> login(String phoneNumber, String code) async {
+  Future<(User?, ApiError?)> login(String phoneNumber, String code) async {
     return await request(
       method: "POST",
       endpoint: "login",
@@ -127,7 +127,7 @@ class ApiServiceImpl implements ApiService {
       },
       parseFailure: (response) {
         if (response.statusCode == 406) {
-          return const ApiUserNotRegisteredException();
+          return const ApiUserNotRegisteredError();
         }
         return null;
       },
@@ -135,7 +135,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(User?, ApiException?)> signUp(String userName, UserRole role) async {
+  Future<(User?, ApiError?)> signUp(String userName, UserRole role) async {
     return await request(
       method: "POST",
       endpoint: "signup",
@@ -148,7 +148,7 @@ class ApiServiceImpl implements ApiService {
       },
       parseFailure: (response) {
         if (response.statusCode == 406) {
-          return const ApiUserAlreadyRegisteredException();
+          return const ApiUserAlreadyRegisteredError();
         }
         return null;
       },
@@ -156,7 +156,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(Invite?, ApiException?)> createInvite(String phoneNumber) async {
+  Future<(Invite?, ApiError?)> createInvite(String phoneNumber) async {
     return await request(
       method: "POST",
       endpoint: "invites",
@@ -169,15 +169,15 @@ class ApiServiceImpl implements ApiService {
       parseFailure: (response) {
         switch (response.statusCode) {
           case 404:
-            return const ApiPatientNotRegisteredException();
+            return const ApiPatientNotRegisteredError();
           case 409:
             final errorBody = json.decode(response.data) as Map<String, dynamic>;
             final errorCode = errorBody['code'] as String;
             switch (errorCode) {
               case "invite_already_sent":
-                return const ApiInviteAlreadySentException();
+                return const ApiInviteAlreadySentError();
               case "patient_already_with_doctor":
-                return const ApiPatientAlreadyWithDoctorException();
+                return const ApiPatientAlreadyWithDoctorError();
               default:
                 return null;
             }
@@ -189,7 +189,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(List<Invite>?, ApiException?)> getInvites() async {
+  Future<(List<Invite>?, ApiError?)> getInvites() async {
     return await request(
       method: "GET",
       endpoint: "invites",
@@ -199,7 +199,7 @@ class ApiServiceImpl implements ApiService {
       },
       parseFailure: (response) {
         if (response.statusCode == 404) {
-          return const ApiInvitesNotFoundException();
+          return const ApiInvitesNotFoundError();
         }
         return null;
       },
@@ -207,7 +207,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<ApiException?> deleteInvite(int id) async {
+  Future<ApiError?> deleteInvite(int id) async {
     final (_, err) = await request(
       method: "DELETE",
       endpoint: "invites/$id",
@@ -217,7 +217,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<ApiException?> acceptInvite(int id) async {
+  Future<ApiError?> acceptInvite(int id) async {
     final (_, err) = await request(
       method: "POST",
       endpoint: "invites/$id/accept",
@@ -227,7 +227,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(User?, ApiException?)> getUser(String uuid) async {
+  Future<(User?, ApiError?)> getUser(String uuid) async {
     return await request(
       method: "GET",
       endpoint: "users/$uuid",
@@ -238,7 +238,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(User?, ApiException?)> updateUser(User user) async {
+  Future<(User?, ApiError?)> updateUser(User user) async {
     return await request(
       method: "PUT",
       endpoint: "users/${user.uuid}",
@@ -252,7 +252,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(List<User>?, ApiException?)> getDoctorPatients(String doctorUuid) async {
+  Future<(List<User>?, ApiError?)> getDoctorPatients(String doctorUuid) async {
     return await request(
       method: "GET",
       endpoint: "patients",
@@ -267,7 +267,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(List<Session>?, ApiException?)> getDoctorSessions(
+  Future<(List<Session>?, ApiError?)> getDoctorSessions(
     String doctorUuid, {
     DateTime? date,
   }) async {
@@ -290,7 +290,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(List<Advice>?, ApiException?)> getDoctorAdvices(String doctorUuid) async {
+  Future<(List<Advice>?, ApiError?)> getDoctorAdvices(String doctorUuid) async {
     return await request(
       method: "GET",
       endpoint: "advices",
@@ -305,7 +305,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(List<Schedule>?, ApiException?)> getDoctorSchedule(String doctorUuid) async {
+  Future<(List<Schedule>?, ApiError?)> getDoctorSchedule(String doctorUuid) async {
     return await request(
       method: "GET",
       endpoint: "schedule",
@@ -320,7 +320,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(List<User>?, ApiException?)> getPatientDoctors(String patientId) async {
+  Future<(List<User>?, ApiError?)> getPatientDoctors(String patientId) async {
     return await request(
       method: "GET",
       endpoint: "doctors",
@@ -335,7 +335,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(List<Session>?, ApiException?)> getPatientSessions(
+  Future<(List<Session>?, ApiError?)> getPatientSessions(
     String patientId, {
     bool? upcoming,
   }) async {
@@ -354,7 +354,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(List<Assignment>?, ApiException?)> getPatientAssignments(
+  Future<(List<Assignment>?, ApiError?)> getPatientAssignments(
     String patientId, {
     bool? pending,
   }) async {
@@ -373,7 +373,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(List<Advice>?, ApiException?)> getPatientAdvices(String patientId) async {
+  Future<(List<Advice>?, ApiError?)> getPatientAdvices(String patientId) async {
     return await request(
       method: "GET",
       endpoint: "advices",
@@ -388,7 +388,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(Session?, ApiException?)> getSession(int id) async {
+  Future<(Session?, ApiError?)> getSession(int id) async {
     return await request(
       method: "GET",
       endpoint: "sessions/$id",
@@ -399,7 +399,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(Session?, ApiException?)> createSession(Session session) async {
+  Future<(Session?, ApiError?)> createSession(Session session) async {
     return await request(
       method: "POST",
       endpoint: "sessions",
@@ -411,7 +411,7 @@ class ApiServiceImpl implements ApiService {
       },
       parseFailure: (response) {
         if (response.statusCode == 409) {
-          return const ApiSessionAlreadyBookedException();
+          return const ApiSessionAlreadyBookedError();
         }
         return null;
       },
@@ -419,7 +419,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(Session?, ApiException?)> updateSession(Session session) async {
+  Future<(Session?, ApiError?)> updateSession(Session session) async {
     return await request(
       method: "PUT",
       endpoint: "sessions/${session.id}",
@@ -431,7 +431,7 @@ class ApiServiceImpl implements ApiService {
       },
       parseFailure: (response) {
         if (response.statusCode == 409) {
-          return const ApiSessionAlreadyBookedException();
+          return const ApiSessionAlreadyBookedError();
         }
         return null;
       },
@@ -439,7 +439,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(Assignment?, ApiException?)> createAssignment(Assignment assignment) async {
+  Future<(Assignment?, ApiError?)> createAssignment(Assignment assignment) async {
     return await request(
       method: "POST",
       endpoint: "assignments",
@@ -453,7 +453,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(Assignment?, ApiException?)> updateAssignment(Assignment assignment) async {
+  Future<(Assignment?, ApiError?)> updateAssignment(Assignment assignment) async {
     return await request(
       method: "PUT",
       endpoint: "assignments/${assignment.id}",
@@ -467,7 +467,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<ApiException?> deleteAssignment(int id) async {
+  Future<ApiError?> deleteAssignment(int id) async {
     final (_, err) = await request(
       method: "DELETE",
       endpoint: "assignments/$id",
@@ -477,7 +477,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(Advice?, ApiException?)> createAdvice(Advice advice) async {
+  Future<(Advice?, ApiError?)> createAdvice(Advice advice) async {
     return await request(
       method: "POST",
       endpoint: "advices",
@@ -491,7 +491,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(Advice?, ApiException?)> updateAdvice(Advice advice) async {
+  Future<(Advice?, ApiError?)> updateAdvice(Advice advice) async {
     return await request(
       method: "PUT",
       endpoint: "assignments/${advice.id}",
@@ -505,7 +505,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<ApiException?> deleteAdvice(int id) async {
+  Future<ApiError?> deleteAdvice(int id) async {
     final (_, err) = await request(
       method: "DELETE",
       endpoint: "advices/$id",
@@ -515,7 +515,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(Schedule?, ApiException?)> createSchedule(Schedule schedule) async {
+  Future<(Schedule?, ApiError?)> createSchedule(Schedule schedule) async {
     return await request(
       method: "POST",
       endpoint: "schedule",
@@ -529,7 +529,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<ApiException?> deleteSchedule(int id) async {
+  Future<ApiError?> deleteSchedule(int id) async {
     final (_, err) = await request(
       method: "DELETE",
       endpoint: "schedule/$id",
@@ -539,11 +539,11 @@ class ApiServiceImpl implements ApiService {
   }
 
   @visibleForTesting
-  Future<(T?, ApiException?)> request<T>({
+  Future<(T?, ApiError?)> request<T>({
     required String method,
     required String endpoint,
     required T Function(Response response) parseSuccess,
-    ApiException? Function(Response response)? parseFailure,
+    ApiError? Function(Response response)? parseFailure,
     Object? Function()? requestBody,
     Map<String, dynamic>? Function()? buildQueryParameters,
   }) async {
@@ -557,10 +557,10 @@ class ApiServiceImpl implements ApiService {
 
       switch (response.statusCode) {
         case 400:
-          return (null, const ApiBadRequestException());
+          return (null, const ApiBadRequestError());
         case 401:
         case 403:
-          return (null, const ApiUnauthorizedException());
+          return (null, const ApiUnauthorizedError());
       }
 
       if (response.statusCode == null ||
@@ -574,7 +574,7 @@ class ApiServiceImpl implements ApiService {
         final errorBody = nullData ? null : json.decode(response.data) as Map<dynamic, dynamic>;
         return (
           null,
-          ApiException(
+          ApiError(
             message: nullData ? "Empty response data" : errorBody.toString(),
             code: "Status: ${response.statusCode}",
           ),
@@ -583,14 +583,14 @@ class ApiServiceImpl implements ApiService {
 
       return (parseSuccess(response), null);
     } on DioException catch (e) {
-      if (e.error is ApiException) return (null, e.error as ApiException);
+      if (e.error is ApiError) return (null, e.error as ApiError);
       switch (e.type) {
         case DioExceptionType.connectionTimeout:
         case DioExceptionType.sendTimeout:
         case DioExceptionType.receiveTimeout:
         case DioExceptionType.connectionError:
         default:
-          return (null, ApiConnectionException(message: e.message));
+          return (null, ApiConnectionError(message: e.message));
       }
     }
   }

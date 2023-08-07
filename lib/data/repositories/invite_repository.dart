@@ -4,20 +4,20 @@ import 'package:ahpsico/data/database/entities/invite_entity.dart';
 import 'package:ahpsico/data/database/mappers/invite_mapper.dart';
 import 'package:ahpsico/models/invite.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class InviteRepository {
-  Future<(Invite?, ApiException?)> create(String phoneNumber);
+  Future<(Invite?, ApiError?)> create(String phoneNumber);
 
-  Future<ApiException?> sync();
+  Future<ApiError?> sync();
 
   Future<List<Invite>> get();
 
-  Future<ApiException?> delete(int id);
+  Future<ApiError?> delete(int id);
 
-  Future<ApiException?> accept(int id);
+  Future<ApiError?> accept(int id);
 
   /// Clears the table;
   Future<void> clear();
@@ -40,7 +40,7 @@ final class InviteRepositoryImpl implements InviteRepository {
   final sqflite.Database _db;
 
   @override
-  Future<(Invite?, ApiException?)> create(String phoneNumber) async {
+  Future<(Invite?, ApiError?)> create(String phoneNumber) async {
     final (createdInvite, err) = await _api.createInvite(phoneNumber);
     if (err != null) return (null, err);
 
@@ -54,7 +54,7 @@ final class InviteRepositoryImpl implements InviteRepository {
   }
 
   @override
-  Future<ApiException?> sync() async {
+  Future<ApiError?> sync() async {
     final (invites, err) = await _api.getInvites();
     if (err != null) return err;
 
@@ -91,7 +91,7 @@ final class InviteRepositoryImpl implements InviteRepository {
   }
 
   @override
-  Future<ApiException?> accept(int id) async {
+  Future<ApiError?> accept(int id) async {
     final err = await _api.acceptInvite(id);
     if (err != null) return err;
 
@@ -105,7 +105,7 @@ final class InviteRepositoryImpl implements InviteRepository {
   }
 
   @override
-  Future<ApiException?> delete(int id) async {
+  Future<ApiError?> delete(int id) async {
     final err = await _api.deleteInvite(id);
     if (err != null) return err;
 

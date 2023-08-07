@@ -4,7 +4,7 @@ import 'package:ahpsico/constants/app_constants.dart';
 import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:ahpsico/utils/mask_formatters.dart';

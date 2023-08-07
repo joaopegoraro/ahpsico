@@ -1,9 +1,8 @@
-import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:flutter/material.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
@@ -56,31 +55,23 @@ abstract class BaseViewModel<T> extends ViewModel<T> {
 
   @protected
   Future<void> getUserData({bool sync = false}) async {
-    final uuid = await preferencesRepository.findToken();
-    try {
-      _user = await userRepository.get(uuid ?? "");
-    } on DatabaseNotFoundException catch (_) {
-      await logout(showError: true);
-      return;
+    final uuid = await preferencesRepository.findUuid();
+    if (uuid == null) {
+      return await logout(showError: true);
     }
 
     if (sync) {
-      try {
-        await userRepository.sync(_user!.uuid);
-      } on ApiUnauthorizedException catch (_) {
-        logout(showError: true);
-        return;
-      } on ApiConnectionException catch (_) {
-        showConnectionError();
-        return;
+      final err = await userRepository.sync(uuid);
+      if (err is ApiUnauthorizedException) {
+        return await logout(showError: true);
+      } else if (err is ApiConnectionException) {
+        return showConnectionError();
       }
     }
 
-    try {
-      _user = await userRepository.get(uuid ?? "");
-    } on DatabaseNotFoundException catch (_) {
-      await logout(showError: true);
-      return;
+    _user = await userRepository.get(uuid);
+    if (_user == null) {
+      return await logout(showError: true);
     }
   }
 

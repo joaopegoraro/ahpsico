@@ -4,7 +4,7 @@ import 'package:ahpsico/data/database/mappers/user_mapper.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:faker/faker.dart';
 import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,7 +35,8 @@ void main() {
     registerFallbackValue(user);
 
     sqflite_ffi.sqfliteFfiInit();
-    sqflite_ffi.databaseFactory = sqflite_ffi.databaseFactoryFfi..deleteDatabase(AhpsicoDatabase.dbName);
+    sqflite_ffi.databaseFactory = sqflite_ffi.databaseFactoryFfi
+      ..deleteDatabase(AhpsicoDatabase.dbName);
     database = await AhpsicoDatabase.instance;
     userRepository = UserRepositoryImpl(
       apiService: mockApiService,
@@ -55,11 +56,11 @@ void main() {
   group("sync", () {
     test('api error throws', () async {
       const code = "some code";
-      when(() => mockApiService.login()).thenAnswer((_) async => throw const ApiException(code: code));
+      when(() => mockApiService.login()).thenAnswer((_) async => throw const ApiError(code: code));
       try {
         await userRepository.sync();
         assert(false);
-      } on ApiException catch (e) {
+      } on ApiError catch (e) {
         assert(e.code == code);
       }
     });
@@ -92,11 +93,12 @@ void main() {
   group("create", () {
     test('api error throws', () async {
       const code = "some code";
-      when(() => mockApiService.signUp(any())).thenAnswer((_) async => throw const ApiException(code: code));
+      when(() => mockApiService.signUp(any()))
+          .thenAnswer((_) async => throw const ApiError(code: code));
       try {
         await userRepository.create(mockUser);
         assert(false);
-      } on ApiException catch (e) {
+      } on ApiError catch (e) {
         assert(e.code == code);
       }
     });

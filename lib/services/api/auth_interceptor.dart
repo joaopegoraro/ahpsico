@@ -1,5 +1,5 @@
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,7 +16,7 @@ class AuthInterceptor extends Interceptor {
       final error = DioException(
         requestOptions: options,
         type: DioExceptionType.unknown,
-        error: ApiUnauthorizedException(message: message),
+        error: ApiUnauthorizedError(message: message),
         message: message,
       );
       return handler.reject(error);

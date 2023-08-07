@@ -11,7 +11,7 @@ import 'package:ahpsico/models/session/session_status.dart';
 import 'package:ahpsico/models/session/session_type.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -124,7 +124,8 @@ void main() {
   }
 
   group("request", () {
-    test("Response with error code should throw ApiException if no parseFailure has been provided", () async {
+    test("Response with error code should throw ApiException if no parseFailure has been provided",
+        () async {
       final bodyJson = json.encode({'mensagem': 'erro'});
       final decodedBody = json.decode(bodyJson) as Map<String, dynamic>;
       try {
@@ -133,7 +134,7 @@ void main() {
           statusCode: 404,
         );
         assert(false);
-      } on ApiException catch (e) {
+      } on ApiError catch (e) {
         assert(e.message == decodedBody.toString());
       }
     });
@@ -145,7 +146,7 @@ void main() {
           statusCode: 404,
         );
         assert(false);
-      } on ApiException catch (e) {
+      } on ApiError catch (e) {
         assert(e.code == "Status: 404");
       }
     });
@@ -253,7 +254,8 @@ void main() {
 
   group("invites", () {
     group("create invite", () {
-      test("response with code patient_not_registered throws ApiPatientNotRegisteredException", () async {
+      test("response with code patient_not_registered throws ApiPatientNotRegisteredException",
+          () async {
         const body = {'code': "patient_not_registered"};
         try {
           await testRequest(
@@ -268,7 +270,9 @@ void main() {
         }
       });
 
-      test("response with code patient_already_with_doctor throws ApiPatientAlreadyWithDoctorException", () async {
+      test(
+          "response with code patient_already_with_doctor throws ApiPatientAlreadyWithDoctorException",
+          () async {
         const body = {'code': "patient_already_with_doctor"};
         try {
           await testRequest(
@@ -371,7 +375,8 @@ void main() {
     });
 
     test("successfully retrieving doctor patients returns patient list", () async {
-      final expectedPatients = List.generate(1, (index) => mockedPatient.copyWith(uuid: "some other id $index"));
+      final expectedPatients =
+          List.generate(1, (index) => mockedPatient.copyWith(uuid: "some other id $index"));
       await testRequest(
         onlyMock: true,
         responseBody: json.encode(expectedPatients.map((patient) => patient.toMap()).toList()),
@@ -421,7 +426,8 @@ void main() {
     });
 
     test("successfully retrieving patient doctors returns doctor list", () async {
-      final expectedDoctors = List.generate(1, (index) => mockedDoctor.copyWith(uuid: "some other id $index"));
+      final expectedDoctors =
+          List.generate(1, (index) => mockedDoctor.copyWith(uuid: "some other id $index"));
       await testRequest(
         onlyMock: true,
         responseBody: json.encode(expectedDoctors.map((e) => e.toMap()).toList()),

@@ -4,14 +4,14 @@ import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/mappers/user_mapper.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class PatientRepository {
   Future<List<User>> getDoctorPatients(String doctorId);
 
-  Future<ApiException?> syncDoctorPatients(String doctorId);
+  Future<ApiError?> syncDoctorPatients(String doctorId);
 
   Future<void> clear();
 }
@@ -51,7 +51,7 @@ final class PatientRepositoryImpl implements PatientRepository {
   }
 
   @override
-  Future<ApiException?> syncDoctorPatients(String doctorId) async {
+  Future<ApiError?> syncDoctorPatients(String doctorId) async {
     final (patients, err) = await _api.getDoctorPatients(doctorId);
     if (err != null) return err;
 

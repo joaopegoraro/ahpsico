@@ -6,25 +6,25 @@ import 'package:ahpsico/data/database/mappers/assignment_mapper.dart';
 import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/assignment/assignment_status.dart';
 import 'package:ahpsico/services/api/api_service.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/utils/extensions.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class AssignmentRepository {
-  Future<(Assignment?, ApiException?)> create(Assignment assignment);
+  Future<(Assignment?, ApiError?)> create(Assignment assignment);
 
-  Future<(Assignment?, ApiException?)> update(Assignment assignment);
+  Future<(Assignment?, ApiError?)> update(Assignment assignment);
 
-  Future<ApiException?> delete(int id);
+  Future<ApiError?> delete(int id);
 
   Future<List<Assignment>> getPatientAssignments(
     String patientId, {
     bool pending = false,
   });
 
-  Future<ApiException?> syncPatientAssignments(
+  Future<ApiError?> syncPatientAssignments(
     String patientId, {
     bool? pending,
   });
@@ -49,7 +49,7 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
   final sqflite.Database _db;
 
   @override
-  Future<(Assignment?, ApiException?)> create(Assignment assignment) async {
+  Future<(Assignment?, ApiError?)> create(Assignment assignment) async {
     final (createdAssignment, err) = await _api.createAssignment(assignment);
     if (err != null) return (null, err);
 
@@ -62,7 +62,7 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
   }
 
   @override
-  Future<(Assignment?, ApiException?)> update(Assignment assignment) async {
+  Future<(Assignment?, ApiError?)> update(Assignment assignment) async {
     final (updatedAssignment, err) = await _api.updateAssignment(assignment);
     if (err != null) return (null, err);
 
@@ -76,7 +76,7 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
   }
 
   @override
-  Future<ApiException?> delete(int id) async {
+  Future<ApiError?> delete(int id) async {
     final err = await _api.deleteAssignment(id);
     if (err != null) return err;
 
@@ -90,7 +90,7 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
   }
 
   @override
-  Future<ApiException?> syncPatientAssignments(
+  Future<ApiError?> syncPatientAssignments(
     String patientId, {
     bool? pending,
   }) async {
