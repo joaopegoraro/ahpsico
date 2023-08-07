@@ -9,64 +9,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class SessionRepository {
-  /// Creates remotely an [Session] and then saves it to the local database;
-  ///
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  /// - [ApiSessionAlreadyBookedException] when the response returns a 409 indicating there
-  /// already is a session booked at that time
-  ///
-  /// returns:
-  /// - the created [Session];
-  Future<Session> create(Session session);
+  Future<(Session?, ApiException?)> create(Session session);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  /// - [ApiSessionAlreadyBookedException] when the response returns a 409 indicating there
-  ///
-  /// returns:
-  /// - the updated [Session];
-  Future<Session> update(Session session);
+  Future<(Session?, ApiException?)> update(Session session);
 
-  /// returns:
-  /// - the [Session] list of the [Patient] with [patientId];
   Future<List<Session>> getPatientSessions(
     String patientId, {
     bool upcoming = false,
   });
 
-  /// Fetches from the API the [Session] list from the [Patient] with the provided [patientId]
-  /// and saves it in the local database;
-  ///
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<void> syncPatientSessions(
+  Future<ApiException?> syncPatientSessions(
     String patientId, {
     bool? upcoming,
   });
 
-  /// returns:
-  /// - the [Session] list of the [Doctor] with [doctorId];
   Future<List<Session>> getDoctorSessions(
     String doctorId, {
     DateTime? date,
   });
 
-  /// Fetches from the API the [Session] list from the [Doctor] with the provided [doctorId]
-  /// and saves it in the local database;
-  ///
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<void> syncDoctorSessions(
+  Future<ApiException?> syncDoctorSessions(
     String doctorId, {
     DateTime? date,
   });
 
-  /// Clears the table;
   Future<void> clear();
 }
 
@@ -87,27 +53,31 @@ final class SessionRepositoryImpl implements SessionRepository {
   final sqflite.Database _db;
 
   @override
-  Future<Session> create(Session session) async {
-    final createdSession = await _api.createSession(session);
+  Future<(Session?, ApiException?)> create(Session session) async {
+    final (createdSession, err) = await _api.createSession(session);
+    if (err != null) return (null, err);
+
     await _db.insert(
       SessionEntity.tableName,
-      SessionMapper.toEntity(createdSession).toMap(),
+      SessionMapper.toEntity(createdSession!).toMap(),
       conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
     );
-    return createdSession;
+
+    return (createdSession, null);
   }
 
   @override
-  Future<Session> update(Session session) async {
-    final updatedSession = await _api.updateSession(session);
+  Future<(Session?, ApiException?)> update(Session session) async {
+    final (updatedSession, err) = await _api.updateSession(session);
+    if (err != null) return (null, err);
 
     await _db.insert(
       SessionEntity.tableName,
-      SessionMapper.toEntity(updatedSession).toMap(),
+      SessionMapper.toEntity(updatedSession!).toMap(),
       conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
     );
 
-    return updatedSession;
+    return (updatedSession, err);
   }
 
   @override
@@ -152,15 +122,17 @@ final class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Future<void> syncPatientSessions(
+  Future<ApiException?> syncPatientSessions(
     String patientId, {
     bool? upcoming,
   }) async {
+    final (sessions, err) = await _api.getPatientSessions(patientId, upcoming: upcoming);
+    if (err != null) return err;
+
     // substract one hour so ongoing sessions also count as upcoming
     final now = DateTime.now().subtract(const Duration(hours: 1)).millisecondsSinceEpoch;
-    final sessions = await _api.getPatientSessions(patientId, upcoming: upcoming);
-    final batch = _db.batch();
 
+    final batch = _db.batch();
     batch.delete(
       SessionEntity.tableName,
       where:
@@ -168,7 +140,7 @@ final class SessionRepositoryImpl implements SessionRepository {
       whereArgs: [patientId, if (upcoming == true) now],
     );
 
-    for (final session in sessions) {
+    for (final session in sessions!) {
       batch.insert(
         SessionEntity.tableName,
         SessionMapper.toEntity(session).toMap(),
@@ -176,6 +148,8 @@ final class SessionRepositoryImpl implements SessionRepository {
       );
     }
     await batch.commit(noResult: true);
+
+    return null;
   }
 
   @override
@@ -230,11 +204,13 @@ final class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Future<void> syncDoctorSessions(
+  Future<ApiException?> syncDoctorSessions(
     String doctorId, {
     DateTime? date,
   }) async {
-    final sessions = await _api.getDoctorSessions(doctorId, date: date);
+    final (sessions, err) = await _api.getDoctorSessions(doctorId, date: date);
+    if (err != null) return err;
+
     final batch = _db.batch();
 
     final today = DateTime.now();
@@ -256,7 +232,7 @@ final class SessionRepositoryImpl implements SessionRepository {
       ],
     );
 
-    for (final session in sessions) {
+    for (final session in sessions!) {
       batch.insert(
         SessionEntity.tableName,
         SessionMapper.toEntity(session).toMap(),
@@ -264,6 +240,8 @@ final class SessionRepositoryImpl implements SessionRepository {
       );
     }
     await batch.commit(noResult: true);
+
+    return null;
   }
 
   @override

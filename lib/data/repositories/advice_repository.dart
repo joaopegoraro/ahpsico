@@ -10,54 +10,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class AdviceRepository {
-  /// Creates remotely an [Advice] and then saves it to the local database;
-  ///
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  ///
-  /// returns:
-  /// - the created [Advice];
-  Future<Advice> create(Advice advice);
+  Future<(Advice?, ApiException?)> create(Advice advice);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  ///
-  /// returns:
-  /// - the updated [Advice];
-  Future<Advice> update(Advice advice);
+  Future<(Advice?, ApiException?)> update(Advice advice);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<void> delete(int id);
+  Future<ApiException?> delete(int id);
 
-  /// returns:
-  /// - the [Advice] list of the [Patient] with [patientId];
   Future<List<Advice>> getPatientAdvices(String patientId);
 
-  /// Fetches from the API the [Advice] list from the [Patient] with the provided [patientId]
-  /// and saves it in the local database;
-  ///
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<void> syncPatientAdvices(String patientId);
+  Future<ApiException?> syncPatientAdvices(String patientId);
 
-  /// returns:
-  /// - the [Advice] list of the [Doctor] with [doctorId];
   Future<List<Advice>> getDoctorAdvices(String doctorId);
 
-  /// Fetches from the API the [Advice] list from the [Doctor] with the provided [doctorId]
-  /// and saves it in the local database;
-  ///
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<void> syncDoctorAdvices(String doctorId);
+  Future<ApiException?> syncDoctorAdvices(String doctorId);
 
-  /// Clears the table;
   Future<int> clear();
 }
 
@@ -78,38 +44,42 @@ final class AdviceRepositoryImpl implements AdviceRepository {
   final sqflite.Database _db;
 
   @override
-  Future<Advice> create(Advice advice) async {
-    final createdAdvice = await _api.createAdvice(advice);
+  Future<(Advice?, ApiException?)> create(Advice advice) async {
+    final (createdAdvice, err) = await _api.createAdvice(advice);
+    if (err != null) return (createdAdvice, err);
     await _db.insert(
       AdviceEntity.tableName,
-      AdviceMapper.toEntity(createdAdvice).toMap(),
+      AdviceMapper.toEntity(createdAdvice!).toMap(),
       conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
     );
-    return createdAdvice;
+    return (createdAdvice, null);
   }
 
   @override
-  Future<Advice> update(Advice advice) async {
-    final updatedAdvice = await _api.updateAdvice(advice);
-
+  Future<(Advice?, ApiException?)> update(Advice advice) async {
+    final (updatedAdvice, err) = await _api.updateAdvice(advice);
+    if (err != null) return (updatedAdvice, err);
     await _db.insert(
       AdviceEntity.tableName,
-      AdviceMapper.toEntity(updatedAdvice).toMap(),
+      AdviceMapper.toEntity(updatedAdvice!).toMap(),
       conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
     );
 
-    return updatedAdvice;
+    return (updatedAdvice, null);
   }
 
   @override
-  Future<void> delete(int id) async {
-    await _api.deleteAdvice(id);
+  Future<ApiException?> delete(int id) async {
+    final err = await _api.deleteAdvice(id);
+    if (err != null) return err;
 
     await _db.delete(
       AdviceEntity.tableName,
       where: "${AdviceEntity.idColumn} = ?",
       whereArgs: [id],
     );
+
+    return null;
   }
 
   @override
@@ -153,10 +123,11 @@ final class AdviceRepositoryImpl implements AdviceRepository {
   }
 
   @override
-  Future<void> syncPatientAdvices(String patientId) async {
-    final advices = await _api.getPatientAdvices(patientId);
-    final batch = _db.batch();
+  Future<ApiException?> syncPatientAdvices(String patientId) async {
+    final (advices, err) = await _api.getPatientAdvices(patientId);
+    if (err != null) return err;
 
+    final batch = _db.batch();
     batch.rawDelete(
       """
         DELETE FROM ${AdviceEntity.tableName} WHERE ${AdviceEntity.idColumn} in (
@@ -167,7 +138,7 @@ final class AdviceRepositoryImpl implements AdviceRepository {
       [patientId],
     );
 
-    for (final advice in advices) {
+    for (final advice in advices!) {
       batch.insert(
         AdviceEntity.tableName,
         AdviceMapper.toEntity(advice).toMap(),
@@ -180,6 +151,8 @@ final class AdviceRepositoryImpl implements AdviceRepository {
       );
     }
     await batch.commit(noResult: true);
+
+    return null;
   }
 
   @override
@@ -224,8 +197,10 @@ final class AdviceRepositoryImpl implements AdviceRepository {
   }
 
   @override
-  Future<void> syncDoctorAdvices(String doctorId) async {
-    final advices = await _api.getDoctorAdvices(doctorId);
+  Future<ApiException?> syncDoctorAdvices(String doctorId) async {
+    final (advices, err) = await _api.getDoctorAdvices(doctorId);
+    if (err != null) return err;
+
     final batch = _db.batch();
 
     batch.delete(
@@ -234,7 +209,7 @@ final class AdviceRepositoryImpl implements AdviceRepository {
       whereArgs: [doctorId],
     );
 
-    for (final advice in advices) {
+    for (final advice in advices!) {
       batch.insert(
         AdviceEntity.tableName,
         AdviceMapper.toEntity(advice).toMap(),
@@ -249,6 +224,8 @@ final class AdviceRepositoryImpl implements AdviceRepository {
       }
     }
     await batch.commit(noResult: true);
+
+    return null;
   }
 
   @override

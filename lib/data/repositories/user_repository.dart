@@ -9,43 +9,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class UserRepository {
-  /// throws:
-  /// - [ApiUserNotRegisteredException] when the user trying to login is
-  /// not yet registered.
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  /// the fetched [User];
-  Future<void> sync(String uuid);
+  Future<ApiException?> sync(String uuid);
 
-  /// throws:
-  /// - [DatabaseNotFoundException] when there are no users to retrieve;
-  ///
-  /// returns:
-  /// - the [User] tied to this account;
   Future<User> get(String uuid);
 
-  /// Creates remotely an [User] and then saves it to the local database;
-  ///
-  /// throws:
-  /// - [ApiUserAlreadyRegisteredException] when the user trying to sign up is
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  ///
-  /// returns:
-  /// - the created [User];
-  Future<User> create(String userName, UserRole role);
+  Future<(User?, ApiException?)> create(String userName, UserRole role);
 
-  /// Updates remotely an [User] and then saves it to the local database;
-  ///
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  ///
-  /// returns:
-  /// - the created [User];
-  Future<User> update(User user);
+  Future<(User?, ApiException?)> update(User user);
 
-  /// Clears the table;
   Future<void> clear();
 }
 
@@ -66,38 +37,44 @@ final class UserRepositoryImpl implements UserRepository {
   final sqflite.Database _db;
 
   @override
-  Future<User> create(String userName, UserRole role) async {
-    final createdUser = await _api.signUp(userName, role);
+  Future<(User?, ApiException?)> create(String userName, UserRole role) async {
+    final (createdUser, err) = await _api.signUp(userName, role);
+    if (err != null) return (null, err);
     await _db.insert(
       UserEntity.tableName,
-      UserMapper.toEntity(createdUser).toMap(),
+      UserMapper.toEntity(createdUser!).toMap(),
       conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
     );
-    return createdUser;
+    return (createdUser, null);
   }
 
   @override
-  Future<User> update(User user) async {
-    final updatedUser = await _api.updateUser(user);
+  Future<(User?, ApiException?)> update(User user) async {
+    final (updatedUser, err) = await _api.updateUser(user);
+    if (err != null) return (null, err);
     await _db.insert(
       UserEntity.tableName,
-      UserMapper.toEntity(updatedUser).toMap(),
+      UserMapper.toEntity(updatedUser!).toMap(),
       conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
     );
-    return updatedUser;
+    return (updatedUser, null);
   }
 
   @override
-  Future<void> sync(String uuid) async {
-    final user = await _api.getUser(uuid);
+  Future<ApiException?> sync(String uuid) async {
+    final (user, err) = await _api.getUser(uuid);
+    if (err != null) return err;
+
     final batch = _db.batch();
     batch.delete(UserEntity.tableName);
     batch.insert(
       UserEntity.tableName,
-      UserMapper.toEntity(user).toMap(),
+      UserMapper.toEntity(user!).toMap(),
       conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
     );
     await batch.commit(noResult: true);
+
+    return null;
   }
 
   @override

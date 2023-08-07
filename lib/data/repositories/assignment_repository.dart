@@ -13,48 +13,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class AssignmentRepository {
-  /// Creates remotely an [Assignment] and then saves it to the local database;
-  ///
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  ///
-  /// returns:
-  /// - the created [Assignment];
-  Future<Assignment> create(Assignment assignment);
+  Future<(Assignment?, ApiException?)> create(Assignment assignment);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  ///
-  /// returns:
-  /// - the updated [Assignment];
-  Future<Assignment> update(Assignment assignment);
+  Future<(Assignment?, ApiException?)> update(Assignment assignment);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<void> delete(int id);
+  Future<ApiException?> delete(int id);
 
-  /// returns:
-  /// - the [Assignment] list of the [Patient] with [patientId];
   Future<List<Assignment>> getPatientAssignments(
     String patientId, {
     bool pending = false,
   });
 
-  /// Fetches from the API the [Assignment] list from the [Patient] with the provided [patientId]
-  /// and saves it in the local database;
-  ///
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<void> syncPatientAssignments(
+  Future<ApiException?> syncPatientAssignments(
     String patientId, {
     bool? pending,
   });
 
-  /// Clears the table;
   Future<void> clear();
 }
 
@@ -75,48 +49,55 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
   final sqflite.Database _db;
 
   @override
-  Future<Assignment> create(Assignment assignment) async {
-    final createdAssignment = await _api.createAssignment(assignment);
-    await _db.insert(
-      AssignmentEntity.tableName,
-      AssignmentMapper.toEntity(createdAssignment).toMap(),
-      conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-    );
-    return createdAssignment;
-  }
-
-  @override
-  Future<Assignment> update(Assignment assignment) async {
-    final updatedAssignment = await _api.updateAssignment(assignment);
+  Future<(Assignment?, ApiException?)> create(Assignment assignment) async {
+    final (createdAssignment, err) = await _api.createAssignment(assignment);
+    if (err != null) return (null, err);
 
     await _db.insert(
       AssignmentEntity.tableName,
-      AssignmentMapper.toEntity(updatedAssignment).toMap(),
+      AssignmentMapper.toEntity(createdAssignment!).toMap(),
       conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
     );
-
-    return updatedAssignment;
+    return (createdAssignment, null);
   }
 
   @override
-  Future<void> delete(int id) async {
-    await _api.deleteAssignment(id);
+  Future<(Assignment?, ApiException?)> update(Assignment assignment) async {
+    final (updatedAssignment, err) = await _api.updateAssignment(assignment);
+    if (err != null) return (null, err);
+
+    await _db.insert(
+      AssignmentEntity.tableName,
+      AssignmentMapper.toEntity(updatedAssignment!).toMap(),
+      conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
+    );
+
+    return (updatedAssignment, null);
+  }
+
+  @override
+  Future<ApiException?> delete(int id) async {
+    final err = await _api.deleteAssignment(id);
+    if (err != null) return err;
 
     await _db.delete(
       AssignmentEntity.tableName,
       where: "${AssignmentEntity.idColumn} = ?",
       whereArgs: [id],
     );
+
+    return null;
   }
 
   @override
-  Future<void> syncPatientAssignments(
+  Future<ApiException?> syncPatientAssignments(
     String patientId, {
     bool? pending,
   }) async {
-    final assignments = await _api.getPatientAssignments(patientId, pending: pending);
-    final batch = _db.batch();
+    final (assignments, err) = await _api.getPatientAssignments(patientId, pending: pending);
+    if (err != null) return err;
 
+    final batch = _db.batch();
     batch.delete(
       AssignmentEntity.tableName,
       where: "${AssignmentEntity.patientIdColumn} = ?"
@@ -124,7 +105,7 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
       whereArgs: [patientId, if (pending == true) AssignmentStatus.pending.value],
     );
 
-    for (final assignment in assignments) {
+    for (final assignment in assignments!) {
       batch.insert(
         AssignmentEntity.tableName,
         AssignmentMapper.toEntity(assignment).toMap(),
@@ -132,6 +113,8 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
       );
     }
     await batch.commit(noResult: true);
+
+    return null;
   }
 
   @override

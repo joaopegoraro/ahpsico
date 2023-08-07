@@ -9,19 +9,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class PatientRepository {
-  /// returns:
-  /// - the patient list of the doctor with [doctorId];
   Future<List<User>> getDoctorPatients(String doctorId);
 
-  /// Fetches from the API the patient list from the doctor with the provided [uuid]
-  /// and saves it in the local database;
-  ///
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<void> syncDoctorPatients(String doctorId);
+  Future<ApiException?> syncDoctorPatients(String doctorId);
 
-  /// Clears the table;
   Future<void> clear();
 }
 
@@ -60,8 +51,10 @@ final class PatientRepositoryImpl implements PatientRepository {
   }
 
   @override
-  Future<void> syncDoctorPatients(String doctorId) async {
-    final patients = await _api.getDoctorPatients(doctorId);
+  Future<ApiException?> syncDoctorPatients(String doctorId) async {
+    final (patients, err) = await _api.getDoctorPatients(doctorId);
+    if (err != null) return err;
+
     final batch = _db.batch();
 
     batch.rawDelete(
@@ -74,7 +67,7 @@ final class PatientRepositoryImpl implements PatientRepository {
       [doctorId],
     );
 
-    for (final patient in patients) {
+    for (final patient in patients!) {
       batch.insert(
         UserEntity.tableName,
         UserMapper.toEntity(patient).toMap(),
@@ -87,6 +80,8 @@ final class PatientRepositoryImpl implements PatientRepository {
       );
     }
     await batch.commit(noResult: true);
+
+    return null;
   }
 
   @override

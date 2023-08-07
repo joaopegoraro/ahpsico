@@ -1,17 +1,12 @@
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/api_service.dart';
+import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 abstract interface class AuthService {
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  /// - [ApiBadRequestException] when the response returns a status of 400;
-  ///
-  /// Sends the verification code to the provided [phoneNumber]
-  Future<void> sendVerificationCode(String phoneNumber);
-  Future<User> login(String phoneNumber, String code);
+  Future<ApiException?> sendVerificationCode(String phoneNumber);
+  Future<(User?, ApiException?)> login(String phoneNumber, String code);
   Future<void> signOut();
 }
 
@@ -28,12 +23,12 @@ final class AuthServiceImpl implements AuthService {
   final PreferencesRepository _preferencesRepository;
 
   @override
-  Future<void> sendVerificationCode(String phoneNumber) async {
+  Future<ApiException?> sendVerificationCode(String phoneNumber) async {
     return await _apiService.sendVerificationCode(phoneNumber);
   }
 
   @override
-  Future<User> login(String phoneNumber, String code) async {
+  Future<(User?, ApiException?)> login(String phoneNumber, String code) async {
     return await _apiService.login(phoneNumber, code);
   }
 
