@@ -1,7 +1,6 @@
 import 'package:ahpsico/models/assignment/assignment.dart';
-import 'package:ahpsico/models/doctor.dart';
-import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/ui/advices/list/advices_list.dart';
 import 'package:ahpsico/ui/assignments/detail/assignment_detail.dart';
 import 'package:ahpsico/ui/assignments/list/assignments_list.dart';
@@ -54,7 +53,7 @@ final class AhpsicoRouter {
       GoRoute(
         path: DoctorDetail.route,
         builder: (context, state) {
-          final doctor = state.extra as Doctor?;
+          final doctor = state.extra as User?;
           return DoctorDetail(doctor);
         },
       ),
@@ -86,7 +85,7 @@ final class AhpsicoRouter {
       GoRoute(
         path: PatientDetail.route,
         builder: (context, state) {
-          final patient = state.extra as Patient;
+          final patient = state.extra as User;
           return PatientDetail(patient);
         },
       ),
@@ -96,7 +95,7 @@ final class AhpsicoRouter {
       GoRoute(
         path: AdvicesList.route,
         builder: (context, state) {
-          final patient = state.extra as Patient?;
+          final patient = state.extra as User?;
           return AdvicesList(patient: patient);
         },
       ),
@@ -114,7 +113,7 @@ final class AhpsicoRouter {
         path: SessionList.route,
         builder: (context, state) {
           final args = state.extra as Map<String, dynamic>?;
-          final Patient? patient = args?[SessionList.patientArgsKey];
+          final User? patient = args?[SessionList.patientArgsKey];
           final bool navigateBackOnTap = args?[SessionList.navigateBackOnTapArgsKey] ?? false;
           return SessionList(
             patient: patient,
@@ -135,7 +134,7 @@ final class AhpsicoRouter {
       GoRoute(
         path: AssignmentsList.route,
         builder: (context, state) {
-          final patient = state.extra as Patient?;
+          final patient = state.extra as User?;
           return AssignmentsList(patient: patient);
         },
       ),

@@ -147,7 +147,15 @@ class LoginModel extends BaseViewModel<LoginEvent> {
     updateUi(() => _isLoadingSendingCode = true);
     final unmaskedPhone = "+55${MaskFormatters.phoneMaskFormatter.unmaskText(phoneNumber)}";
 
-    await authService.sendVerificationCode(unmaskedPhone);
+    try {
+      await authService.sendVerificationCode(unmaskedPhone);
+    } on ApiUnauthorizedException catch (_) {
+      logout(showError: true);
+      return;
+    } on ApiConnectionException catch (_) {
+      showConnectionError();
+      return;
+    }
     // TODO
 //      onCodeSent: (verificationId) {
 //        updateUi(() {

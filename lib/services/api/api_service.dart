@@ -9,7 +9,7 @@ import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/models/advice.dart';
 import 'package:ahpsico/services/api/auth_interceptor.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
-import 'package:ahpsico/utils/extensions.dart';
+import 'package:ahpsico/utils/result.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,179 +18,70 @@ import 'package:meta/meta.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 abstract interface class ApiService {
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  ///
-  /// Sends the verification code to the provided [phoneNumber]
-  Future<void> sendVerificationCode(String phoneNumber);
+  Future<Result<void, ApiException>> sendVerificationCode(String phoneNumber);
 
-  /// throws:
-  /// - [ApiUserNotRegisteredException] when the user trying to login is
-  /// not yet registered.
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  ///
-  /// The login credential is the [AuthToken] that is passed
-  /// in the headers.
+  Future<Result<User, ApiException>> login(String phoneNumber, String code);
 
-  /// Returns the user data
-  Future<User> login(String phoneNumber, String code);
+  Future<Result<User, ApiException>> signUp(String userName, UserRole role);
 
-  /// throws:
-  /// - [ApiUserAlreadyRegisteredException] when the user trying to sign up is
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  /// already registered.
+  Future<Result<Invite, ApiException>> createInvite(String phoneNumber);
 
-  /// Returns the user data
-  Future<User> signUp(String userName, UserRole role);
+  Future<Result<List<Invite>, ApiException>> getInvites();
 
-  /// throws:
-  /// - [ApiPatientNotRegisteredException] when there is not patient registered
-  /// with the phone number that was passed;
-  /// - [ApiPatientAlreadyWithDoctorException] when the patient you are trying to
-  /// invite already is your patient;
-  /// - [ApiInviteAlreadySentException] when this invite was already sent to the patient;
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  ///
-  /// returns:
-  /// - The created [Invite]
-  Future<Invite> createInvite(String phoneNumber);
+  Future<Result<void, ApiException>> deleteInvite(int id);
 
-  /// throws:
-  /// - [ApiInvitesNotFoundException] when there are no invites tied to this account
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<List<Invite>> getInvites();
+  Future<Result<void, ApiException>> acceptInvite(int id);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<void> deleteInvite(int id);
+  Future<Result<User, ApiException>> getUser(String uuid);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<void> acceptInvite(int id);
+  Future<Result<User, ApiException>> updateUser(User user);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<User> getUser(String uuid);
+  Future<Result<List<User>, ApiException>> getDoctorPatients(String doctorId);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<User> updateUser(User user);
-
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<List<User>> getDoctorPatients(String doctorId);
-
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<List<Session>> getDoctorSessions(
+  Future<Result<List<Session>, ApiException>> getDoctorSessions(
     String doctorId, {
     DateTime? date,
   });
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<List<Advice>> getDoctorAdvices(String doctorId);
+  Future<Result<List<Advice>, ApiException>> getDoctorAdvices(String doctorId);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<List<Schedule>> getDoctorSchedule(String doctorId);
+  Future<Result<List<Schedule>, ApiException>> getDoctorSchedule(String doctorId);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<List<User>> getPatientDoctors(String patientId);
+  Future<Result<List<User>, ApiException>> getPatientDoctors(String patientId);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<List<Session>> getPatientSessions(
+  Future<Result<List<Session>, ApiException>> getPatientSessions(
     String patientId, {
     bool? upcoming,
   });
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<List<Assignment>> getPatientAssignments(
+  Future<Result<List<Assignment>, ApiException>> getPatientAssignments(
     String patientId, {
     bool? pending,
   });
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<List<Advice>> getPatientAdvices(String patientId);
+  Future<Result<List<Advice>, ApiException>> getPatientAdvices(String patientId);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<Session> getSession(int id);
+  Future<Result<Session, ApiException>> getSession(int id);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  /// - [ApiSessionAlreadyBookedException] when the response returns a 409 indicating there
-  /// already is a session booked at that time
-  Future<Session> createSession(Session session);
+  Future<Result<Session, ApiException>> createSession(Session session);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  /// - [ApiSessionAlreadyBookedException] when the response returns a 409 indicating there
-  Future<Session> updateSession(Session session);
+  Future<Result<Session, ApiException>> updateSession(Session session);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<Assignment> createAssignment(Assignment assignment);
+  Future<Result<Assignment, ApiException>> createAssignment(Assignment assignment);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<Assignment> updateAssignment(Assignment assignment);
+  Future<Result<Assignment, ApiException>> updateAssignment(Assignment assignment);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<void> deleteAssignment(int id);
+  Future<Result<void, ApiException>> deleteAssignment(int id);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<Advice> createAdvice(Advice advice);
+  Future<Result<Advice, ApiException>> createAdvice(Advice advice);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<Advice> updateAdvice(Advice advice);
+  Future<Result<Advice, ApiException>> updateAdvice(Advice advice);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<void> deleteAdvice(int id);
+  Future<Result<void, ApiException>> deleteAdvice(int id);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<Schedule> createSchedule(Schedule schedule);
+  Future<Result<Schedule, ApiException>> createSchedule(Schedule schedule);
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<void> deleteSchedule(int id);
+  Future<Result<void, ApiException>> deleteSchedule(int id);
 }
 
 final apiServiceProvider = Provider<ApiService>((ref) {
@@ -211,7 +102,7 @@ class ApiServiceImpl implements ApiService {
   final Dio _dio;
 
   @override
-  Future<void> sendVerificationCode(String phoneNumber) async {
+  Future<Result<void, ApiException>> sendVerificationCode(String phoneNumber) async {
     return await request(
       method: "POST",
       endpoint: "verification-code",
@@ -223,7 +114,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<User> login(String phoneNumber, String code) async {
+  Future<Result<User, ApiException>> login(String phoneNumber, String code) async {
     return await request(
       method: "POST",
       endpoint: "login",
@@ -236,14 +127,15 @@ class ApiServiceImpl implements ApiService {
       },
       parseFailure: (response) {
         if (response.statusCode == 406) {
-          throw const ApiUserNotRegisteredException();
+          return const Failure(ApiUserNotRegisteredException());
         }
+        return null;
       },
     );
   }
 
   @override
-  Future<User> signUp(String userName, UserRole role) async {
+  Future<Result<User, ApiException>> signUp(String userName, UserRole role) async {
     return await request(
       method: "POST",
       endpoint: "signup",
@@ -256,14 +148,15 @@ class ApiServiceImpl implements ApiService {
       },
       parseFailure: (response) {
         if (response.statusCode == 406) {
-          throw const ApiUserAlreadyRegisteredException();
+          return const Failure(ApiUserAlreadyRegisteredException());
         }
+        return null;
       },
     );
   }
 
   @override
-  Future<Invite> createInvite(String phoneNumber) async {
+  Future<Result<Invite, ApiException>> createInvite(String phoneNumber) async {
     return await request(
       method: "POST",
       endpoint: "invites",
@@ -276,23 +169,27 @@ class ApiServiceImpl implements ApiService {
       parseFailure: (response) {
         switch (response.statusCode) {
           case 404:
-            throw const ApiPatientNotRegisteredException();
+            return const Failure(ApiPatientNotRegisteredException());
           case 409:
             final errorBody = json.decode(response.data) as Map<String, dynamic>;
             final errorCode = errorBody['code'] as String;
             switch (errorCode) {
               case "invite_already_sent":
-                throw const ApiInviteAlreadySentException();
+                return const Failure(ApiInviteAlreadySentException());
               case "patient_already_with_doctor":
-                throw const ApiPatientAlreadyWithDoctorException();
+                return const Failure(ApiPatientAlreadyWithDoctorException());
+              default:
+                return null;
             }
+          default:
+            return null;
         }
       },
     );
   }
 
   @override
-  Future<List<Invite>> getInvites() async {
+  Future<Result<List<Invite>, ApiException>> getInvites() async {
     return await request(
       method: "GET",
       endpoint: "invites",
@@ -302,14 +199,15 @@ class ApiServiceImpl implements ApiService {
       },
       parseFailure: (response) {
         if (response.statusCode == 404) {
-          throw const ApiInvitesNotFoundException();
+          return const Failure(ApiInvitesNotFoundException());
         }
+        return null;
       },
     );
   }
 
   @override
-  Future<void> deleteInvite(int id) async {
+  Future<Result<void, ApiException>> deleteInvite(int id) async {
     return await request(
       method: "DELETE",
       endpoint: "invites/$id",
@@ -318,7 +216,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<void> acceptInvite(int id) async {
+  Future<Result<void, ApiException>> acceptInvite(int id) async {
     return await request(
       method: "POST",
       endpoint: "invites/$id/accept",
@@ -327,7 +225,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<User> getUser(String uuid) async {
+  Future<Result<User, ApiException>> getUser(String uuid) async {
     return await request(
       method: "GET",
       endpoint: "users/$uuid",
@@ -338,7 +236,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<User> updateUser(User user) async {
+  Future<Result<User, ApiException>> updateUser(User user) async {
     return await request(
       method: "PUT",
       endpoint: "users/${user.uuid}",
@@ -352,7 +250,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<User>> getDoctorPatients(String doctorUuid) async {
+  Future<Result<List<User>, ApiException>> getDoctorPatients(String doctorUuid) async {
     return await request(
       method: "GET",
       endpoint: "patients",
@@ -367,7 +265,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<Session>> getDoctorSessions(
+  Future<Result<List<Session>, ApiException>> getDoctorSessions(
     String doctorUuid, {
     DateTime? date,
   }) async {
@@ -390,7 +288,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<Advice>> getDoctorAdvices(String doctorUuid) async {
+  Future<Result<List<Advice>, ApiException>> getDoctorAdvices(String doctorUuid) async {
     return await request(
       method: "GET",
       endpoint: "advices",
@@ -405,7 +303,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<Schedule>> getDoctorSchedule(String doctorUuid) async {
+  Future<Result<List<Schedule>, ApiException>> getDoctorSchedule(String doctorUuid) async {
     return await request(
       method: "GET",
       endpoint: "schedule",
@@ -420,7 +318,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<User>> getPatientDoctors(String patientId) async {
+  Future<Result<List<User>, ApiException>> getPatientDoctors(String patientId) async {
     return await request(
       method: "GET",
       endpoint: "doctors",
@@ -435,7 +333,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<Session>> getPatientSessions(
+  Future<Result<List<Session>, ApiException>> getPatientSessions(
     String patientId, {
     bool? upcoming,
   }) async {
@@ -454,7 +352,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<Assignment>> getPatientAssignments(
+  Future<Result<List<Assignment>, ApiException>> getPatientAssignments(
     String patientId, {
     bool? pending,
   }) async {
@@ -473,7 +371,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<Advice>> getPatientAdvices(String patientId) async {
+  Future<Result<List<Advice>, ApiException>> getPatientAdvices(String patientId) async {
     return await request(
       method: "GET",
       endpoint: "advices",
@@ -488,7 +386,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<Session> getSession(int id) async {
+  Future<Result<Session, ApiException>> getSession(int id) async {
     return await request(
       method: "GET",
       endpoint: "sessions/$id",
@@ -499,7 +397,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<Session> createSession(Session session) async {
+  Future<Result<Session, ApiException>> createSession(Session session) async {
     return await request(
       method: "POST",
       endpoint: "sessions",
@@ -511,14 +409,15 @@ class ApiServiceImpl implements ApiService {
       },
       parseFailure: (response) {
         if (response.statusCode == 409) {
-          throw const ApiSessionAlreadyBookedException();
+          return const Failure(ApiSessionAlreadyBookedException());
         }
+        return null;
       },
     );
   }
 
   @override
-  Future<Session> updateSession(Session session) async {
+  Future<Result<Session, ApiException>> updateSession(Session session) async {
     return await request(
       method: "PUT",
       endpoint: "sessions/${session.id}",
@@ -530,14 +429,15 @@ class ApiServiceImpl implements ApiService {
       },
       parseFailure: (response) {
         if (response.statusCode == 409) {
-          throw const ApiSessionAlreadyBookedException();
+          return const Failure(ApiSessionAlreadyBookedException());
         }
+        return null;
       },
     );
   }
 
   @override
-  Future<Assignment> createAssignment(Assignment assignment) async {
+  Future<Result<Assignment, ApiException>> createAssignment(Assignment assignment) async {
     return await request(
       method: "POST",
       endpoint: "assignments",
@@ -551,7 +451,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<Assignment> updateAssignment(Assignment assignment) async {
+  Future<Result<Assignment, ApiException>> updateAssignment(Assignment assignment) async {
     return await request(
       method: "PUT",
       endpoint: "assignments/${assignment.id}",
@@ -565,7 +465,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<void> deleteAssignment(int id) async {
+  Future<Result<void, ApiException>> deleteAssignment(int id) async {
     return await request(
       method: "DELETE",
       endpoint: "assignments/$id",
@@ -574,7 +474,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<Advice> createAdvice(Advice advice) async {
+  Future<Result<Advice, ApiException>> createAdvice(Advice advice) async {
     return await request(
       method: "POST",
       endpoint: "advices",
@@ -588,7 +488,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<Advice> updateAdvice(Advice advice) async {
+  Future<Result<Advice, ApiException>> updateAdvice(Advice advice) async {
     return await request(
       method: "PUT",
       endpoint: "assignments/${advice.id}",
@@ -602,7 +502,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<void> deleteAdvice(int id) async {
+  Future<Result<void, ApiException>> deleteAdvice(int id) async {
     return await request(
       method: "DELETE",
       endpoint: "advices/$id",
@@ -611,7 +511,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<Schedule> createSchedule(Schedule schedule) async {
+  Future<Result<Schedule, ApiException>> createSchedule(Schedule schedule) async {
     return await request(
       method: "POST",
       endpoint: "schedule",
@@ -625,7 +525,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<void> deleteSchedule(int id) async {
+  Future<Result<void, ApiException>> deleteSchedule(int id) async {
     return await request(
       method: "DELETE",
       endpoint: "schedule/$id",
@@ -633,15 +533,12 @@ class ApiServiceImpl implements ApiService {
     );
   }
 
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   @visibleForTesting
-  Future<T> request<T>({
+  Future<Result<T, ApiException>> request<T>({
     required String method,
     required String endpoint,
     required T Function(Response response) parseSuccess,
-    Never? Function(Response response)? parseFailure,
+    Failure<T, ApiException>? Function(Response response)? parseFailure,
     Object? Function()? requestBody,
     Map<String, dynamic>? Function()? buildQueryParameters,
   }) async {
@@ -654,32 +551,40 @@ class ApiServiceImpl implements ApiService {
       );
 
       switch (response.statusCode) {
+        case 400:
+          return const Failure(ApiBadRequestException());
         case 401:
         case 403:
-          throw const ApiUnauthorizedException();
+          return const Failure(ApiUnauthorizedException());
       }
 
       if (response.statusCode == null ||
           !(response.statusCode! >= 200 && response.statusCode! < 300)) {
-        parseFailure?.call(response);
+        final failure = parseFailure?.call(response);
+        if (failure != null) {
+          return failure;
+        }
+
         final nullData = response.data == null;
         final errorBody = nullData ? null : json.decode(response.data) as Map<dynamic, dynamic>;
-        throw ApiException(
-          message: nullData ? "Empty response data" : errorBody.toString(),
-          code: "Status: ${response.statusCode}",
+        return Failure(
+          ApiException(
+            message: nullData ? "Empty response data" : errorBody.toString(),
+            code: "Status: ${response.statusCode}",
+          ),
         );
       }
 
-      return parseSuccess(response);
-    } on DioException catch (e, stackTrace) {
-      if (e.error is ApiException) throw e.error!;
+      return Success(parseSuccess(response));
+    } on DioException catch (e) {
+      if (e.error is ApiException) return Failure(e.error as ApiException);
       switch (e.type) {
         case DioExceptionType.connectionTimeout:
         case DioExceptionType.sendTimeout:
         case DioExceptionType.receiveTimeout:
         case DioExceptionType.connectionError:
         default:
-          ApiConnectionException(message: e.message).throwWithStackTrace(stackTrace);
+          return Failure(ApiConnectionException(message: e.message));
       }
     }
   }

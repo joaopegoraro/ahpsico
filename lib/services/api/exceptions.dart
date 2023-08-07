@@ -29,6 +29,14 @@ class ApiConnectionException extends ApiException {
         );
 }
 
+class ApiBadRequestException extends ApiException {
+  const ApiBadRequestException({String? message})
+      : super(
+          message: "Something is not right with the request: $message",
+          code: "api_bad_request",
+        );
+}
+
 class ApiUserNotRegisteredException extends ApiException {
   const ApiUserNotRegisteredException({String? message})
       : super(

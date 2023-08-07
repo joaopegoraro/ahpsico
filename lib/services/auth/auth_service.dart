@@ -4,6 +4,12 @@ import 'package:ahpsico/services/api/api_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 abstract interface class AuthService {
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
+  /// - [ApiBadRequestException] when the response returns a status of 400;
+  ///
+  /// Sends the verification code to the provided [phoneNumber]
   Future<void> sendVerificationCode(String phoneNumber);
   Future<User> login(String phoneNumber, String code);
   Future<void> signOut();
