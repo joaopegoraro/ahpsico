@@ -1,9 +1,7 @@
 import 'dart:convert';
 
 import 'package:ahpsico/constants/app_constants.dart';
-import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/invite.dart';
-import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/schedule.dart';
 import 'package:ahpsico/models/session/session.dart';
@@ -39,7 +37,7 @@ abstract interface class ApiService {
   /// already registered.
 
   /// Returns the user data
-  Future<User> signUp(User user);
+  Future<User> signUp(String userName, UserRole role);
 
   /// throws:
   /// - [ApiPatientNotRegisteredException] when there is not patient registered
@@ -73,17 +71,17 @@ abstract interface class ApiService {
   /// throws:
   /// - [ApiConnectionException] when the request suffers any connection problems;
   /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<Doctor> getDoctor(String uuid);
+  Future<User> getUser(String uuid);
 
   /// throws:
   /// - [ApiConnectionException] when the request suffers any connection problems;
   /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<Doctor> updateDoctor(Doctor doctor);
+  Future<User> updateUser(User user);
 
   /// throws:
   /// - [ApiConnectionException] when the request suffers any connection problems;
   /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<List<Patient>> getDoctorPatients(String doctorId);
+  Future<List<User>> getDoctorPatients(String doctorId);
 
   /// throws:
   /// - [ApiConnectionException] when the request suffers any connection problems;
@@ -106,17 +104,7 @@ abstract interface class ApiService {
   /// throws:
   /// - [ApiConnectionException] when the request suffers any connection problems;
   /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<Patient> getPatient(String uuid);
-
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<Patient> updatePatient(Patient patient);
-
-  /// throws:
-  /// - [ApiConnectionException] when the request suffers any connection problems;
-  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
-  Future<List<Doctor>> getPatientDoctors(String patientId);
+  Future<List<User>> getPatientDoctors(String patientId);
 
   /// throws:
   /// - [ApiConnectionException] when the request suffers any connection problems;
@@ -236,12 +224,13 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<User> signUp(User user) async {
+  Future<User> signUp(String userName, UserRole role) async {
     return await request(
       method: "POST",
-      endpoint: "register",
-      requestBody: () {
-        return user.toMap();
+      endpoint: "signup",
+      requestBody: () => {
+        "name": userName,
+        "role": role,
       },
       parseSuccess: (response) {
         return User.fromJson(response.data);
@@ -319,32 +308,32 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<Doctor> getDoctor(String uuid) async {
+  Future<User> getUser(String uuid) async {
     return await request(
       method: "GET",
-      endpoint: "doctors/$uuid",
+      endpoint: "users/$uuid",
       parseSuccess: (response) {
-        return Doctor.fromJson(response.data);
+        return User.fromJson(response.data);
       },
     );
   }
 
   @override
-  Future<Doctor> updateDoctor(Doctor doctor) async {
+  Future<User> updateUser(User user) async {
     return await request(
       method: "PUT",
-      endpoint: "doctors/${doctor.uuid}",
+      endpoint: "users/${user.uuid}",
       requestBody: () {
-        return doctor.toMap();
+        return user.toMap();
       },
       parseSuccess: (response) {
-        return Doctor.fromJson(response.data);
+        return User.fromJson(response.data);
       },
     );
   }
 
   @override
-  Future<List<Patient>> getDoctorPatients(String doctorUuid) async {
+  Future<List<User>> getDoctorPatients(String doctorUuid) async {
     return await request(
       method: "GET",
       endpoint: "patients",
@@ -353,7 +342,7 @@ class ApiServiceImpl implements ApiService {
       },
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
-        return jsonList.map((e) => Patient.fromMap(e)).toList();
+        return jsonList.map((e) => User.fromMap(e)).toList();
       },
     );
   }
@@ -412,32 +401,7 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<Patient> getPatient(String uuid) async {
-    return await request(
-      method: "GET",
-      endpoint: "patients/$uuid",
-      parseSuccess: (response) {
-        return Patient.fromJson(response.data);
-      },
-    );
-  }
-
-  @override
-  Future<Patient> updatePatient(Patient patient) async {
-    return await request(
-      method: "PUT",
-      endpoint: "patients/${patient.uuid}",
-      requestBody: () {
-        return patient.toMap();
-      },
-      parseSuccess: (response) {
-        return Patient.fromJson(response.data);
-      },
-    );
-  }
-
-  @override
-  Future<List<Doctor>> getPatientDoctors(String patientId) async {
+  Future<List<User>> getPatientDoctors(String patientId) async {
     return await request(
       method: "GET",
       endpoint: "doctors",
@@ -446,7 +410,7 @@ class ApiServiceImpl implements ApiService {
       },
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
-        return jsonList.map((e) => Doctor.fromMap(e)).toList();
+        return jsonList.map((e) => User.fromMap(e)).toList();
       },
     );
   }
