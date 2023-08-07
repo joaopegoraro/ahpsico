@@ -1,5 +1,4 @@
-import 'package:ahpsico/data/database/entities/doctor_entity.dart';
-import 'package:ahpsico/data/database/entities/patient_entity.dart';
+import 'package:ahpsico/data/database/entities/user_entity.dart';
 
 class SessionEntity {
   SessionEntity({
@@ -38,8 +37,8 @@ class SessionEntity {
      $statusColumn TEXT,
      $typeColumn TEXT,
      $dateColumn INTEGER,
-     FOREIGN KEY ($doctorIdColumn) REFERENCES ${DoctorEntity.tableName} (${DoctorEntity.uuidColumn}) ON DELETE CASCADE, 
-     FOREIGN KEY ($patientIdColumn) REFERENCES ${PatientEntity.tableName} (${PatientEntity.uuidColumn}) ON DELETE CASCADE)
+     FOREIGN KEY ($doctorIdColumn) REFERENCES ${UserEntity.tableName} (${UserEntity.uuidColumn}) ON DELETE CASCADE, 
+     FOREIGN KEY ($patientIdColumn) REFERENCES ${UserEntity.tableName} (${UserEntity.uuidColumn}) ON DELETE CASCADE)
 """;
 
   SessionEntity copyWith({
@@ -59,7 +58,8 @@ class SessionEntity {
       groupIndex: groupIndex ?? this.groupIndex,
       status: status ?? this.status,
       type: type ?? this.type,
-      dateInMillisecondsSinceEpoch: dateInMillisecondsSinceEpoch ?? this.dateInMillisecondsSinceEpoch,
+      dateInMillisecondsSinceEpoch:
+          dateInMillisecondsSinceEpoch ?? this.dateInMillisecondsSinceEpoch,
     );
   }
 

@@ -1,5 +1,5 @@
 import 'package:ahpsico/data/database/ahpsico_database.dart';
-import 'package:ahpsico/data/database/entities/doctor_entity.dart';
+import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/entities/invite_entity.dart';
 import 'package:ahpsico/data/database/mappers/invite_mapper.dart';
 import 'package:ahpsico/models/invite.dart';

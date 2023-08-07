@@ -4,19 +4,26 @@ import 'package:ahpsico/models/user.dart';
 abstract class UserMapper {
   static User toUser(UserEntity entity) {
     return User(
-      uid: entity.uid,
+      uuid: entity.uuid,
       name: entity.name,
       phoneNumber: entity.phoneNumber,
-      isDoctor: entity.isDoctor,
+      description: entity.description,
+      crp: entity.crp,
+      pixKey: entity.pixKey,
+      paymentDetails: entity.paymentDetails,
+      role: UserRole.fromValue(entity.role),
     );
   }
 
   static UserEntity toEntity(User user) {
     return UserEntity(
-      uid: user.uid,
-      name: user.name,
-      phoneNumber: user.phoneNumber,
-      isDoctor: user.isDoctor,
-    );
+        uuid: user.uuid,
+        name: user.name,
+        phoneNumber: user.phoneNumber,
+        description: user.description,
+        crp: user.crp,
+        pixKey: user.pixKey,
+        paymentDetails: user.paymentDetails,
+        role: user.role.value);
   }
 }

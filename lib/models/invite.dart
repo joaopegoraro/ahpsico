@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:ahpsico/models/doctor.dart';
+import 'package:ahpsico/models/user.dart';
 
 class Invite {
   const Invite({
@@ -11,13 +11,13 @@ class Invite {
   });
 
   final int id;
-  final Doctor doctor;
+  final User doctor;
   final String patientId;
   final String phoneNumber;
 
   Invite copyWith({
     int? id,
-    Doctor? doctor,
+    User? doctor,
     String? patientId,
     String? phoneNumber,
   }) {
@@ -41,7 +41,7 @@ class Invite {
   factory Invite.fromMap(Map<String, dynamic> map) {
     return Invite(
       id: map['id'] as int,
-      doctor: Doctor.fromMap(map['doctor'] as Map<String, dynamic>),
+      doctor: User.fromMap(map['doctor'] as Map<String, dynamic>),
       patientId: map['patient'] as String,
       phoneNumber: map['phone_number'] as String,
     );
@@ -64,7 +64,10 @@ class Invite {
   bool operator ==(covariant Invite other) {
     if (identical(this, other)) return true;
 
-    return other.id == id && other.doctor == doctor && other.patientId == patientId && other.phoneNumber == phoneNumber;
+    return other.id == id &&
+        other.doctor == doctor &&
+        other.patientId == patientId &&
+        other.phoneNumber == phoneNumber;
   }
 
   @override

@@ -1,8 +1,7 @@
 import 'dart:convert';
 
+import 'package:ahpsico/models/user.dart';
 import 'package:flutter/foundation.dart';
-
-import 'package:ahpsico/models/doctor.dart';
 
 class Advice {
   const Advice({
@@ -14,13 +13,13 @@ class Advice {
 
   final int id;
   final String message;
-  final Doctor doctor;
+  final User doctor;
   final List<String> patientIds;
 
   Advice copyWith({
     int? id,
     String? message,
-    Doctor? doctor,
+    User? doctor,
     List<String>? patientIds,
   }) {
     return Advice(
@@ -44,7 +43,7 @@ class Advice {
     return Advice(
       id: map['id'] as int,
       message: map['message'] as String,
-      doctor: Doctor.fromMap(map['doctor'] as Map<String, dynamic>),
+      doctor: User.fromMap(map['doctor'] as Map<String, dynamic>),
       patientIds: List<String>.from((map['patients'])),
     );
   }

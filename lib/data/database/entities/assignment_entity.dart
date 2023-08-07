@@ -1,5 +1,4 @@
-import 'package:ahpsico/data/database/entities/doctor_entity.dart';
-import 'package:ahpsico/data/database/entities/patient_entity.dart';
+import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/entities/session_entity.dart';
 
 class AssignmentEntity {
@@ -39,8 +38,8 @@ class AssignmentEntity {
      $patientIdColumn TEXT,
      $statusColumn TEXT,
      $deliverySessionIdColumn INTEGER,
-     FOREIGN KEY ($doctorIdColumn) REFERENCES ${DoctorEntity.tableName} (${DoctorEntity.uuidColumn}) ON DELETE CASCADE, 
-     FOREIGN KEY ($patientIdColumn) REFERENCES ${PatientEntity.tableName} (${PatientEntity.uuidColumn}) ON DELETE CASCADE, 
+     FOREIGN KEY ($doctorIdColumn) REFERENCES ${UserEntity.tableName} (${UserEntity.uuidColumn}) ON DELETE CASCADE, 
+     FOREIGN KEY ($patientIdColumn) REFERENCES ${UserEntity.tableName} (${UserEntity.uuidColumn}) ON DELETE CASCADE, 
      FOREIGN KEY ($deliverySessionIdColumn) REFERENCES ${SessionEntity.tableName} (${SessionEntity.idColumn}) ON DELETE CASCADE)
 """;
 

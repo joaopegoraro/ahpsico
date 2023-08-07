@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:ahpsico/models/assignment/assignment_status.dart';
-import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/user.dart';
 
 class Assignment {
   const Assignment({
@@ -18,7 +18,7 @@ class Assignment {
   final int id;
   final String title;
   final String description;
-  final Doctor doctor;
+  final User doctor;
   final String patientId;
   final AssignmentStatus status;
   final Session deliverySession;
@@ -27,7 +27,7 @@ class Assignment {
     int? id,
     String? title,
     String? description,
-    Doctor? doctor,
+    User? doctor,
     String? patientId,
     AssignmentStatus? status,
     Session? deliverySession,
@@ -60,7 +60,7 @@ class Assignment {
       id: map['id'] as int,
       title: map['title'] as String,
       description: map['description'] as String,
-      doctor: Doctor.fromMap(map['doctor'] as Map<String, dynamic>),
+      doctor: User.fromMap(map['doctor'] as Map<String, dynamic>),
       patientId: map['patient'] as String,
       status: AssignmentStatus.fromValue(map['status']),
       deliverySession: Session.fromMap(map['delivery_session'] as Map<String, dynamic>),

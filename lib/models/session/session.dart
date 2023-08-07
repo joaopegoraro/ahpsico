@@ -1,10 +1,9 @@
 import 'dart:convert';
 
 import 'package:ahpsico/constants/app_constants.dart';
-import 'package:ahpsico/models/doctor.dart';
-import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/session/session_status.dart';
 import 'package:ahpsico/models/session/session_type.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/utils/time_utils.dart';
 import 'package:intl/intl.dart';
 
@@ -20,8 +19,8 @@ class Session {
   });
 
   final int id;
-  final Doctor doctor;
-  final Patient patient;
+  final User doctor;
+  final User patient;
   final int groupIndex;
   final SessionStatus status;
   final SessionType type;
@@ -37,8 +36,8 @@ class Session {
 
   Session copyWith({
     int? id,
-    Doctor? doctor,
-    Patient? patient,
+    User? doctor,
+    User? patient,
     int? groupIndex,
     SessionStatus? status,
     SessionType? type,
@@ -70,8 +69,8 @@ class Session {
   factory Session.fromMap(Map<String, dynamic> map) {
     return Session(
       id: map['id'] as int,
-      doctor: Doctor.fromMap(map['doctor'] as Map<String, dynamic>),
-      patient: Patient.fromMap(map['patient'] as Map<String, dynamic>),
+      doctor: User.fromMap(map['doctor'] as Map<String, dynamic>),
+      patient: User.fromMap(map['patient'] as Map<String, dynamic>),
       groupIndex: map['group_index'] as int,
       status: SessionStatus.fromValue(map['status']),
       type: SessionType.fromValue(map['type']),

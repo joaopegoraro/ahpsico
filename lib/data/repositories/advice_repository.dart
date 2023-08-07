@@ -1,7 +1,7 @@
 import 'package:ahpsico/data/database/ahpsico_database.dart';
 import 'package:ahpsico/data/database/entities/advice_entity.dart';
 import 'package:ahpsico/data/database/entities/advice_with_patient.dart';
-import 'package:ahpsico/data/database/entities/doctor_entity.dart';
+import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/entities/patient_entity.dart';
 import 'package:ahpsico/data/database/mappers/advice_mapper.dart';
 import 'package:ahpsico/models/advice.dart';

@@ -1,12 +1,10 @@
 import 'package:ahpsico/data/database/entities/advice_entity.dart';
 import 'package:ahpsico/data/database/entities/advice_with_patient.dart';
 import 'package:ahpsico/data/database/entities/assignment_entity.dart';
-import 'package:ahpsico/data/database/entities/doctor_entity.dart';
+import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/entities/invite_entity.dart';
-import 'package:ahpsico/data/database/entities/patient_entity.dart';
 import 'package:ahpsico/data/database/entities/patient_with_doctor.dart';
 import 'package:ahpsico/data/database/entities/session_entity.dart';
-import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
@@ -33,8 +31,6 @@ abstract class AhpsicoDatabase {
       version: _dbVersion,
       onCreate: (db, version) async {
         await db.execute(UserEntity.creationStatement);
-        await db.execute(DoctorEntity.creationStatement);
-        await db.execute(PatientEntity.creationStatement);
         await db.execute(PatientWithDoctor.creationStatement);
         await db.execute(SessionEntity.creationStatement);
         await db.execute(AdviceEntity.creationStatement);

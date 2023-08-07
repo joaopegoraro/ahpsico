@@ -1,8 +1,6 @@
-import 'package:ahpsico/data/database/entities/doctor_entity.dart';
-import 'package:ahpsico/data/database/entities/patient_entity.dart';
+import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/entities/session_entity.dart';
-import 'package:ahpsico/data/database/mappers/doctor_mapper.dart';
-import 'package:ahpsico/data/database/mappers/patient_mapper.dart';
+import 'package:ahpsico/data/database/mappers/user_mapper.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/models/session/session_status.dart';
 import 'package:ahpsico/models/session/session_type.dart';
@@ -10,13 +8,13 @@ import 'package:ahpsico/models/session/session_type.dart';
 abstract class SessionMapper {
   static Session toSession(
     SessionEntity entity, {
-    required DoctorEntity doctorEntity,
-    required PatientEntity patientEntity,
+    required UserEntity doctorEntity,
+    required UserEntity patientEntity,
   }) {
     return Session(
       id: entity.id,
-      doctor: DoctorMapper.toDoctor(doctorEntity),
-      patient: PatientMapper.toPatient(patientEntity),
+      doctor: UserMapper.toUser(doctorEntity),
+      patient: UserMapper.toUser(patientEntity),
       groupIndex: entity.groupIndex,
       status: SessionStatus.fromValue(entity.status),
       type: SessionType.fromValue(entity.type),

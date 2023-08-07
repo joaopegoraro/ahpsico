@@ -1,5 +1,5 @@
 import 'package:ahpsico/data/database/entities/advice_entity.dart';
-import 'package:ahpsico/data/database/entities/patient_entity.dart';
+import 'package:ahpsico/data/database/entities/user_entity.dart';
 
 class AdviceWithPatient {
   AdviceWithPatient({
@@ -21,7 +21,7 @@ class AdviceWithPatient {
      $adviceIdColumn INTEGER, 
      $patientIdColumn TEXT,
      FOREIGN KEY ($adviceIdColumn) REFERENCES ${AdviceEntity.tableName} (${AdviceEntity.idColumn}) ON DELETE CASCADE, 
-     FOREIGN KEY ($patientIdColumn) REFERENCES ${PatientEntity.tableName} (${PatientEntity.uuidColumn}) ON DELETE CASCADE)
+     FOREIGN KEY ($patientIdColumn) REFERENCES ${UserEntity.tableName} (${UserEntity.uuidColumn}) ON DELETE CASCADE)
 """;
 
   AdviceWithPatient copyWith({
