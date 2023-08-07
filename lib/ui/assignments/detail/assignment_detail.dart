@@ -171,7 +171,7 @@ class AssignmentDetail extends StatelessWidget {
                         SessionDetail.route,
                         extra: session,
                       ),
-                      isUserDoctor: model.user!.isDoctor,
+                      isUserDoctor: model.user!.role.isDoctor,
                     ),
                     const Expanded(child: AhpsicoSpacing.verticalSpaceMassive),
                     Row(
@@ -193,7 +193,7 @@ class AssignmentDetail extends StatelessWidget {
                         ),
                       ],
                     ),
-                    if (model.user!.isDoctor) ...[
+                    if (model.user!.role.isDoctor) ...[
                       AhpsicoSpacing.verticalSpaceSmall,
                       HomeButton(
                         text: "EXCLUIR TAREFA",

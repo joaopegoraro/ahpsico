@@ -85,12 +85,12 @@ class ScheduleScreen extends StatelessWidget {
         return FloatingActionButton.extended(
           backgroundColor: AhpsicoColors.blue,
           label: Text(
-            model.user!.isDoctor ? "BLOQUEAR HORÁRIOS" : "AGENDAR SESSÃO",
+            model.user!.role.isDoctor ? "BLOQUEAR HORÁRIOS" : "AGENDAR SESSÃO",
             style: AhpsicoText.tinyStyle,
           ),
-          icon: Icon(model.user!.isDoctor ? Icons.block : Icons.schedule),
+          icon: Icon(model.user!.role.isDoctor ? Icons.block : Icons.schedule),
           onPressed: () {
-            if (model.user!.isDoctor) {
+            if (model.user!.role.isDoctor) {
               context.push(BookingScreen.route).then((_) => model.fetchScreenData());
             } else {
               context.push(DoctorList.route).then((_) => model.fetchScreenData());
@@ -104,7 +104,7 @@ class ScheduleScreen extends StatelessWidget {
           weekDays: const ['Dom', 'Seg', 'Ter', "Qua", "Qui", "Sex", "Sab"],
           eventsList: model.sessions.mapToList((session) {
             return NeatCleanCalendarEvent(
-              model.user!.isDoctor ? session.patient.name : session.doctor.name,
+              model.user!.role.isDoctor ? session.patient.name : session.doctor.name,
               description: "Status: ${_getSessionStatus(session)}",
               startTime: session.date,
               endTime: session.date.add(const Duration(hours: 1)),
@@ -142,7 +142,7 @@ class ScheduleScreen extends StatelessWidget {
                       onTap: (session) {
                         context.push(SessionDetail.route, extra: session);
                       },
-                      isUserDoctor: model.user!.isDoctor,
+                      isUserDoctor: model.user!.role.isDoctor,
                     ),
                   );
                 },

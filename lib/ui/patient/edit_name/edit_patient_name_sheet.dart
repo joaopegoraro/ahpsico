@@ -1,4 +1,4 @@
-import 'package:ahpsico/models/patient.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
@@ -15,7 +15,7 @@ import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 class EditPatientNameSheet extends StatefulWidget {
   const EditPatientNameSheet({super.key, required this.patient});
 
-  final Patient patient;
+  final User patient;
 
   @override
   State<EditPatientNameSheet> createState() => _EditPatientNameSheetState();

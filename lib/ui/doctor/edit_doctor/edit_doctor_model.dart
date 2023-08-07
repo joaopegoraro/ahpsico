@@ -1,5 +1,5 @@
 import 'package:ahpsico/data/database/exceptions.dart';
-import 'package:ahpsico/data/repositories/doctor_repository.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
@@ -16,11 +16,11 @@ enum EditDoctorEvent {
 final editDoctorModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
-  final doctorRepository = ref.watch(doctorRepositoryProvider);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return EditDoctorModel(
     authService,
     userRepository,
-    doctorRepository,
+    preferencesRepository,
   );
 });
 
@@ -28,15 +28,13 @@ class EditDoctorModel extends BaseViewModel<EditDoctorEvent> {
   EditDoctorModel(
     super.authService,
     super.userRepository,
-    this._doctorRepository,
+    super.preferencesRepository,
   ) : super(
           errorEvent: EditDoctorEvent.showSnackbarError,
           navigateToLoginEvent: EditDoctorEvent.navigateToLoginScreen,
         );
 
   /* Services */
-
-  final DoctorRepository _doctorRepository;
 
   /* Fields */
 
@@ -94,8 +92,7 @@ class EditDoctorModel extends BaseViewModel<EditDoctorEvent> {
 
     try {
       await getUserData();
-      final doctor = await _doctorRepository.get(user!.uid);
-      await _doctorRepository.update(doctor.copyWith(
+      await userRepository.update(user!.copyWith(
         name: name,
         description: description,
         crp: crp,
@@ -103,7 +100,7 @@ class EditDoctorModel extends BaseViewModel<EditDoctorEvent> {
         paymentDetails: paymentDetails,
       ));
       showSnackbar(
-        "Mensagem enviada com sucesso!",
+        "Perfil editado com sucesso!",
         EditDoctorEvent.showSnackbarMessage,
       );
       emitEvent(EditDoctorEvent.closeSheet);

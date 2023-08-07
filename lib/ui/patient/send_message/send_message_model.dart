@@ -1,6 +1,6 @@
 import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/repositories/advice_repository.dart';
-import 'package:ahpsico/data/repositories/doctor_repository.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/advice.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
@@ -20,21 +20,21 @@ final sendMessageModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final adviceRepository = ref.watch(adviceRepositoryProvider);
-  final doctorRepository = ref.watch(doctorRepositoryProvider);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return SendMessageModel(
-    adviceRepository,
-    doctorRepository,
     authService,
     userRepository,
+    preferencesRepository,
+    adviceRepository,
   );
 });
 
 class SendMessageModel extends BaseViewModel<SendMessageEvent> {
   SendMessageModel(
-    this._adviceRepository,
-    this._doctorRepository,
     super.authService,
     super.userRepository,
+    super.preferencesRepository,
+    this._adviceRepository,
   ) : super(
           errorEvent: SendMessageEvent.showSnackbarError,
           navigateToLoginEvent: SendMessageEvent.navigateToLoginScreen,
@@ -43,7 +43,6 @@ class SendMessageModel extends BaseViewModel<SendMessageEvent> {
   /* Services */
 
   final AdviceRepository _adviceRepository;
-  final DoctorRepository _doctorRepository;
 
   /* Fields */
 
@@ -77,11 +76,10 @@ class SendMessageModel extends BaseViewModel<SendMessageEvent> {
 
     try {
       await getUserData();
-      final doctor = await _doctorRepository.get(user!.uid);
       final advice = Advice(
         id: 0,
         message: message,
-        doctor: doctor,
+        doctor: user!,
         patientIds: patientIds,
       );
       await _adviceRepository.create(advice);

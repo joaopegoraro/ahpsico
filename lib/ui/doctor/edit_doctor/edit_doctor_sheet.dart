@@ -1,4 +1,4 @@
-import 'package:ahpsico/models/doctor.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
@@ -18,7 +18,7 @@ class EditDoctorSheet extends StatefulWidget {
     required this.doctor,
   });
 
-  final Doctor doctor;
+  final User doctor;
 
   @override
   State<EditDoctorSheet> createState() => _EditDoctorSheetState();

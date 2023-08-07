@@ -2,17 +2,17 @@ import 'dart:async';
 
 import 'package:ahpsico/constants/app_constants.dart';
 import 'package:ahpsico/data/database/exceptions.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
-import 'package:ahpsico/services/auth/credentials.dart';
-import 'package:ahpsico/services/auth/exceptions.dart';
-import 'package:ahpsico/services/logger/logging_service.dart';
+import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:ahpsico/utils/mask_formatters.dart';
 import 'package:meta/meta.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum LoginEvent {
+  refresh,
   navigateToSignUp,
   navigateToDoctorHome,
   navigateToPatientHome,
@@ -26,22 +26,24 @@ enum LoginEvent {
 final loginModelProvider = ViewModelProviderFactory.create((ref) {
   final userRepository = ref.watch(userRepositoryProvider);
   final authService = ref.watch(authServiceProvider);
-  final loggingService = ref.watch(loggerProvider);
-  return LoginModel(userRepository, authService, loggingService);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
+  return LoginModel(
+    authService,
+    userRepository,
+    preferencesRepository,
+  );
 });
 
-class LoginModel extends ViewModel<LoginEvent> {
+class LoginModel extends BaseViewModel<LoginEvent> {
   LoginModel(
-    this._userRepository,
-    this._authService,
-    this._loggingService,
-  );
-
-  /* Services */
-
-  final UserRepository _userRepository;
-  final AuthService _authService;
-  final LoggingService? _loggingService;
+    super.authService,
+    super.userRepository,
+    super.preferencesRepository,
+  ) : super(
+          errorEvent: LoginEvent.showSnackbarError,
+          messageEvent: LoginEvent.showSnackbarMessage,
+          navigateToLoginEvent: LoginEvent.refresh,
+        );
 
   /* Utils */
 
@@ -103,12 +105,7 @@ class LoginModel extends ViewModel<LoginEvent> {
 
   void confirmText() {
     if (!isLoadingSignIn && hasCodeBeenSent && isCodeValid) {
-      final phoneCredential = AuthPhoneCredential(
-        phoneNumber: phoneNumber,
-        verificationId: codeVerificationId,
-        smsCode: _verificationCode,
-      );
-      signIn(phoneCredential);
+      _signIn(phoneNumber, verificationCode);
     } else if (!isLoadingSendindCode && !hasCodeBeenSent && isPhoneValid) {
       sendVerificationCode();
     }
@@ -150,45 +147,45 @@ class LoginModel extends ViewModel<LoginEvent> {
     updateUi(() => _isLoadingSendingCode = true);
     final unmaskedPhone = "+55${MaskFormatters.phoneMaskFormatter.unmaskText(phoneNumber)}";
 
-    await _authService.sendPhoneVerificationCode(
-      phoneNumber: unmaskedPhone,
-      onCodeSent: (verificationId) {
-        updateUi(() {
-          emitEvent(LoginEvent.startCodeTimer);
-          _isLoadingSendingCode = false;
-          codeVerificationId = verificationId;
-        });
-      },
-      onFailed: (err) {
-        updateUi(() => _isLoadingSendingCode = false);
-        if (err is AuthInvalidSignInCodeException) {
-          showSnackbar(
-            "O código digitado não é válido. Certifique-se de que o código informado é o mesmo código de seis dígitos recebido por SMS",
-            LoginEvent.showSnackbarError,
-          );
-        } else {
-          showSnackbar(
-            "Ocorreu um erro ao tentar enviar um SMS para o seu telefone. Tente novamente mais tarde ou entre em contato com o desenvolvedor",
-            LoginEvent.showSnackbarError,
-          );
-          _loggingService?.e(err);
-        }
-      },
-      onAutoRetrievalCompleted: (credential) {
-        updateUi(() => _verificationCode = credential.smsCode);
-        signIn(credential);
-      },
-    );
+    await authService.sendVerificationCode(unmaskedPhone);
+    // TODO
+//      onCodeSent: (verificationId) {
+//        updateUi(() {
+//          emitEvent(LoginEvent.startCodeTimer);
+//          _isLoadingSendingCode = false;
+//          codeVerificationId = verificationId;
+//        });
+//      },
+//      onFailed: (err) {
+//        updateUi(() => _isLoadingSendingCode = false);
+//        if (err is AuthInvalidSignInCodeException) {
+//          showSnackbar(
+//            "O código digitado não é válido. Certifique-se de que o código informado é o mesmo código de seis dígitos recebido por SMS",
+//            LoginEvent.showSnackbarError,
+//          );
+//        } else {
+//          showSnackbar(
+//            "Ocorreu um erro ao tentar enviar um SMS para o seu telefone. Tente novamente mais tarde ou entre em contato com o desenvolvedor",
+//            LoginEvent.showSnackbarError,
+//          );
+//          _loggingService?.e(err);
+//        }
+//      },
+//      onAutoRetrievalCompleted: (credential) {
+//        updateUi(() => _verificationCode = credential.smsCode);
+//        signIn(credential);
+//      },
+//    );
   }
 
-  Future<void> signIn(AuthPhoneCredential phoneCredential) async {
+  Future<void> _signIn(String phoneNumber, String code) async {
     updateUi(() => _isLoadingSignIn = true);
     try {
-      await _authService.signInWithCredential(phoneCredential);
-      await _userRepository.sync();
-      final user = await _userRepository.get();
+      final user = await authService.login(phoneNumber, code);
+      // TODO
+      await userRepository.sync(user.uuid);
       showSnackbar("Login bem sucedido!", LoginEvent.showSnackbarMessage);
-      if (user.isDoctor) {
+      if (user.role.isDoctor) {
         emitEvent(LoginEvent.navigateToDoctorHome);
       } else {
         emitEvent(LoginEvent.navigateToPatientHome);
@@ -202,11 +199,6 @@ class LoginModel extends ViewModel<LoginEvent> {
         "Ocorreu um erro ao tentar se conectar ao servidor. Certifique-se de que seu dispositivo esteja conectado corretamente com a internet",
         LoginEvent.showSnackbarError,
       );
-    } on AuthInvalidSignInCodeException catch (_) {
-      showSnackbar(
-        "O código digitado não é válido. Certifique-se de que o código informado é o mesmo código de seis dígitos recebido por SMS",
-        LoginEvent.showSnackbarError,
-      );
     }
     updateUi(() => _isLoadingSignIn = false);
   }
@@ -214,22 +206,18 @@ class LoginModel extends ViewModel<LoginEvent> {
   Future<void> autoSignIn() async {
     updateUi(() => _isLoadingAutoSignIn = true);
 
-    final token = await _authService.getUserToken();
+    final token = await preferencesRepository.findToken();
 
-    final isUserAuthenticated = token?.idToken.isNotEmpty == true;
+    final isUserAuthenticated = token?.isNotEmpty == true;
     if (!isUserAuthenticated) {
       return updateUi(() => _isLoadingAutoSignIn = false);
     }
 
-    try {
-      final user = await _userRepository.get();
-      if (user.isDoctor) {
-        emitEvent(LoginEvent.navigateToDoctorHome);
-      } else {
-        emitEvent(LoginEvent.navigateToPatientHome);
-      }
-    } on DatabaseNotFoundException catch (_) {
-      emitEvent(LoginEvent.navigateToSignUp);
+    await getUserData(sync: true);
+    if (user!.role.isDoctor) {
+      emitEvent(LoginEvent.navigateToDoctorHome);
+    } else {
+      emitEvent(LoginEvent.navigateToPatientHome);
     }
 
     updateUi(() => _isLoadingAutoSignIn = false);

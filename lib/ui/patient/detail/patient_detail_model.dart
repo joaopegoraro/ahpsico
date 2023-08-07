@@ -1,5 +1,6 @@
 import 'package:ahpsico/data/repositories/advice_repository.dart';
 import 'package:ahpsico/data/repositories/assignment_repository.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/advice.dart';
@@ -24,9 +25,11 @@ final patientDetailModelProvider = ViewModelProviderFactory.create((ref) {
   final sessionRepository = ref.watch(sessionRepositoryProvider);
   final assignmentRepository = ref.watch(assignmentRepositoryProvider);
   final adviceRepository = ref.watch(adviceRepositoryProvider);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return PatientDetailModel(
     authService,
     userRepository,
+    preferencesRepository,
     sessionRepository,
     assignmentRepository,
     adviceRepository,
@@ -37,6 +40,7 @@ class PatientDetailModel extends BaseViewModel<PatientDetailEvent> {
   PatientDetailModel(
     super.authService,
     super.userRepository,
+    super.preferencesRepository,
     this._sessionRepository,
     this._assignmentRepository,
     this._adviceRepository,

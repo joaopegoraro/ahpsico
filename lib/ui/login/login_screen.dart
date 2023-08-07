@@ -77,6 +77,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         context.go(PatientHome.route);
       case LoginEvent.navigateToSignUp:
         context.go(SignUpScreen.route);
+      case LoginEvent.refresh:
+        context.go(LoginScreen.route);
     }
   }
 

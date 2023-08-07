@@ -1,6 +1,7 @@
 import 'package:ahpsico/data/repositories/doctor_repository.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
-import 'package:ahpsico/models/doctor.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
@@ -15,9 +16,11 @@ final doctorListModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final doctorRepository = ref.watch(doctorRepositoryProvider);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return DoctorListModel(
     authService,
     userRepository,
+    preferencesRepository,
     doctorRepository,
   );
 });
@@ -26,6 +29,7 @@ class DoctorListModel extends BaseViewModel<DoctorListEvent> {
   DoctorListModel(
     super.authService,
     super.userRepository,
+    super.preferencesRepository,
     this._doctorRepository,
   ) : super(
           errorEvent: DoctorListEvent.showSnackbarError,
@@ -41,8 +45,8 @@ class DoctorListModel extends BaseViewModel<DoctorListEvent> {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  List<Doctor> _doctors = [];
-  List<Doctor> get doctors => _doctors;
+  List<User> _doctors = [];
+  List<User> get doctors => _doctors;
 
   /* Calls */
 
@@ -55,13 +59,13 @@ class DoctorListModel extends BaseViewModel<DoctorListEvent> {
 
   Future<void> _fetchDoctors() async {
     try {
-      await _doctorRepository.syncPatientDoctors(user!.uid);
+      await _doctorRepository.syncPatientDoctors(user!.uuid);
     } on ApiUnauthorizedException catch (_) {
       logout(showError: true);
     } on ApiConnectionException catch (_) {
       showConnectionError();
     }
 
-    _doctors = await _doctorRepository.getPatientDoctors(user!.uid);
+    _doctors = await _doctorRepository.getPatientDoctors(user!.uuid);
   }
 }

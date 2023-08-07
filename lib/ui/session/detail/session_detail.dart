@@ -148,13 +148,13 @@ class SessionDetail extends StatelessWidget {
                     ),
                     AhpsicoSpacing.verticalSpaceLarge,
                     Text(
-                      model.user!.isDoctor ? "Paciente" : "Psicólogo",
+                      model.user!.role.isDoctor ? "Paciente" : "Psicólogo",
                       style: AhpsicoText.title3Style.copyWith(
                         color: AhpsicoColors.dark25,
                       ),
                     ),
                     AhpsicoSpacing.verticalSpaceRegular,
-                    model.user!.isDoctor
+                    model.user!.role.isDoctor
                         ? PatientCard(
                             patient: session.patient,
                             onTap: (patient) => context.push(

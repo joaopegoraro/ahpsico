@@ -1,6 +1,6 @@
-import 'package:ahpsico/data/repositories/patient_repository.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
-import 'package:ahpsico/models/patient.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
@@ -16,11 +16,11 @@ enum EditPatientNameEvent {
 final editPatientNameModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
-  final patientRepository = ref.watch(patientRepositoryProvider);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return EditPatientNameModel(
     authService,
     userRepository,
-    patientRepository,
+    preferencesRepository,
   );
 });
 
@@ -28,15 +28,11 @@ class EditPatientNameModel extends BaseViewModel<EditPatientNameEvent> {
   EditPatientNameModel(
     super.authService,
     super.userRepository,
-    this._patientRepository,
+    super.preferencesRepository,
   ) : super(
           errorEvent: EditPatientNameEvent.showSnackbarError,
           navigateToLoginEvent: EditPatientNameEvent.navigateToLoginScreen,
         );
-
-  /* Services */
-
-  final PatientRepository _patientRepository;
 
   /* Fields */
 
@@ -54,7 +50,7 @@ class EditPatientNameModel extends BaseViewModel<EditPatientNameEvent> {
 
   /* Calls */
 
-  Future<void> confirmUpdateName({required Patient patient}) async {
+  Future<void> confirmUpdateName({required User patient}) async {
     if (patient.name == name) {
       return emitEvent(EditPatientNameEvent.closeSheet);
     }
@@ -69,7 +65,7 @@ class EditPatientNameModel extends BaseViewModel<EditPatientNameEvent> {
     }
 
     try {
-      await _patientRepository.update(patient.copyWith(name: name));
+      await userRepository.update(patient.copyWith(name: name));
       showSnackbar(
         "Nome alterado com sucesso!",
         EditPatientNameEvent.showSnackbarMessage,

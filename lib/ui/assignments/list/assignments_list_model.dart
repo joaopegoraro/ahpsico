@@ -1,4 +1,5 @@
 import 'package:ahpsico/data/repositories/assignment_repository.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
@@ -15,9 +16,11 @@ final assignmentListModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final assignmentRepository = ref.watch(assignmentRepositoryProvider);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return AssignmentListModel(
     authService,
     userRepository,
+    preferencesRepository,
     assignmentRepository,
   );
 });
@@ -26,6 +29,7 @@ class AssignmentListModel extends BaseViewModel<AssignmentListEvent> {
   AssignmentListModel(
     super.authService,
     super.userRepository,
+    super.preferencesRepository,
     this._assignmentRepository,
   ) : super(
           errorEvent: AssignmentListEvent.showSnackbarError,
@@ -55,13 +59,13 @@ class AssignmentListModel extends BaseViewModel<AssignmentListEvent> {
 
   Future<void> _fetchAssignments({required String? patientUuid}) async {
     try {
-      await _assignmentRepository.syncPatientAssignments(patientUuid ?? user!.uid);
+      await _assignmentRepository.syncPatientAssignments(patientUuid ?? user!.uuid);
     } on ApiUnauthorizedException catch (_) {
       logout(showError: true);
     } on ApiConnectionException catch (_) {
       showConnectionError();
     }
 
-    _assignments = await _assignmentRepository.getPatientAssignments(patientUuid ?? user!.uid);
+    _assignments = await _assignmentRepository.getPatientAssignments(patientUuid ?? user!.uuid);
   }
 }

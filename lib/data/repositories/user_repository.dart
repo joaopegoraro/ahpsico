@@ -22,7 +22,7 @@ abstract interface class UserRepository {
   ///
   /// returns:
   /// - the [User] tied to this account;
-  Future<User> get();
+  Future<User> get(String uuid);
 
   /// Creates remotely an [User] and then saves it to the local database;
   ///
@@ -34,6 +34,16 @@ abstract interface class UserRepository {
   /// returns:
   /// - the created [User];
   Future<User> create(String userName, UserRole role);
+
+  /// Updates remotely an [User] and then saves it to the local database;
+  ///
+  /// throws:
+  /// - [ApiConnectionException] when the request suffers any connection problems;
+  /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
+  ///
+  /// returns:
+  /// - the created [User];
+  Future<User> update(User user);
 
   /// Clears the table;
   Future<void> clear();
@@ -67,6 +77,17 @@ final class UserRepositoryImpl implements UserRepository {
   }
 
   @override
+  Future<User> update(User user) async {
+    final updatedUser = await _api.updateUser(user);
+    await _db.insert(
+      UserEntity.tableName,
+      UserMapper.toEntity(updatedUser).toMap(),
+      conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
+    );
+    return updatedUser;
+  }
+
+  @override
   Future<void> sync(String uuid) async {
     final user = await _api.getUser(uuid);
     final batch = _db.batch();
@@ -80,8 +101,12 @@ final class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<User> get() async {
-    final usersMap = await _db.query(UserEntity.tableName);
+  Future<User> get(String uuid) async {
+    final usersMap = await _db.query(
+      UserEntity.tableName,
+      where: "${UserEntity.uuidColumn} = ?",
+      whereArgs: [uuid],
+    );
 
     if (usersMap.isEmpty) {
       throw const DatabaseNotFoundException(message: "No user found");

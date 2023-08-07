@@ -1,8 +1,6 @@
-import 'package:ahpsico/data/database/exceptions.dart';
-import 'package:ahpsico/data/repositories/doctor_repository.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
-import 'package:ahpsico/models/doctor.dart';
-import 'package:ahpsico/services/api/exceptions.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:flutter/services.dart';
@@ -18,11 +16,11 @@ enum DoctorDetailEvent {
 final doctorDetailModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
-  final doctorRepository = ref.watch(doctorRepositoryProvider);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return DoctorDetailModel(
     authService,
     userRepository,
-    doctorRepository,
+    preferencesRepository,
   );
 });
 
@@ -30,21 +28,17 @@ class DoctorDetailModel extends BaseViewModel<DoctorDetailEvent> {
   DoctorDetailModel(
     super.authService,
     super.userRepository,
-    this._doctorRepository,
+    super.preferencesRepository,
   ) : super(
           errorEvent: DoctorDetailEvent.showSnackbarError,
           messageEvent: DoctorDetailEvent.showSnackbarMessage,
           navigateToLoginEvent: DoctorDetailEvent.navigateToLoginScreen,
         );
 
-  /* Services */
-
-  final DoctorRepository _doctorRepository;
-
   /* Fields */
 
-  Doctor? _doctor;
-  Doctor? get doctor => _doctor;
+  User? _doctor;
+  User? get doctor => _doctor;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -84,30 +78,14 @@ class DoctorDetailModel extends BaseViewModel<DoctorDetailEvent> {
 
   /* Calls */
 
-  Future<void> fetchScreenData({required Doctor? doctor}) async {
+  Future<void> fetchScreenData({required User? doctor}) async {
     updateUi(() => _isLoading = true);
     await getUserData();
     if (doctor != null) {
       _doctor = doctor;
     } else {
-      await _getDoctorData();
+      _doctor = user;
     }
     updateUi(() => _isLoading = false);
-  }
-
-  Future<void> _getDoctorData() async {
-    try {
-      await _doctorRepository.sync(user!.uid);
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
-    }
-
-    try {
-      _doctor = await _doctorRepository.get(user!.uid);
-    } on DatabaseNotFoundException catch (_) {
-      await logout(showError: true);
-    }
   }
 }

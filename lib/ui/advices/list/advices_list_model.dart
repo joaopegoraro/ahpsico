@@ -1,4 +1,5 @@
 import 'package:ahpsico/data/repositories/advice_repository.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/advice.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
@@ -16,9 +17,11 @@ final adviceListModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final adviceRepository = ref.watch(adviceRepositoryProvider);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return AdviceListModel(
     authService,
     userRepository,
+    preferencesRepository,
     adviceRepository,
   );
 });
@@ -27,6 +30,7 @@ class AdviceListModel extends BaseViewModel<AdviceListEvent> {
   AdviceListModel(
     super.authService,
     super.userRepository,
+    super.preferencesRepository,
     this._adviceRepository,
   ) : super(
           errorEvent: AdviceListEvent.showSnackbarError,
@@ -86,7 +90,7 @@ class AdviceListModel extends BaseViewModel<AdviceListEvent> {
       if (patientUuid != null) {
         await _adviceRepository.syncPatientAdvices(patientUuid);
       } else {
-        await _adviceRepository.syncDoctorAdvices(user!.uid);
+        await _adviceRepository.syncDoctorAdvices(user!.uuid);
       }
     } on ApiUnauthorizedException catch (_) {
       logout(showError: true);
@@ -97,7 +101,7 @@ class AdviceListModel extends BaseViewModel<AdviceListEvent> {
     if (patientUuid != null) {
       _advices = await _adviceRepository.getPatientAdvices(patientUuid);
     } else {
-      _advices = await _adviceRepository.getDoctorAdvices(user!.uid);
+      _advices = await _adviceRepository.getDoctorAdvices(user!.uuid);
     }
   }
 

@@ -1,14 +1,12 @@
-import 'package:ahpsico/data/database/exceptions.dart';
-import 'package:ahpsico/data/repositories/patient_repository.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/schedule_repository.dart';
 import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
-import 'package:ahpsico/models/doctor.dart';
-import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/schedule.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/models/session/session_status.dart';
 import 'package:ahpsico/models/session/session_type.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
@@ -29,14 +27,14 @@ final bookingModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final sessionRepository = ref.watch(sessionRepositoryProvider);
-  final patientRepository = ref.watch(patientRepositoryProvider);
   final scheduleRepository = ref.watch(scheduleRepositoryProvider);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return BookingModel(
     authService,
     userRepository,
+    preferencesRepository,
     sessionRepository,
     scheduleRepository,
-    patientRepository,
   );
 });
 
@@ -44,9 +42,9 @@ class BookingModel extends BaseViewModel<BookingEvent> {
   BookingModel(
     super.authService,
     super.userRepository,
+    super.preferencesRepository,
     this._sessionRepository,
     this._scheduleRepository,
-    this._patientRepository,
   ) : super(
           errorEvent: BookingEvent.showSnackbarError,
           messageEvent: BookingEvent.showSnackbarMessage,
@@ -57,7 +55,6 @@ class BookingModel extends BaseViewModel<BookingEvent> {
 
   final SessionRepository _sessionRepository;
   final ScheduleRepository _scheduleRepository;
-  final PatientRepository _patientRepository;
 
   /* Utils */
 
@@ -90,8 +87,8 @@ class BookingModel extends BaseViewModel<BookingEvent> {
 
   /* Fields */
 
-  Patient? _patient;
-  Patient? get patient => _patient;
+  User? _patient;
+  User? get patient => _patient;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -133,7 +130,7 @@ class BookingModel extends BaseViewModel<BookingEvent> {
   /* Calls */
 
   Future<void> scheduleSession({
-    required Doctor doctor,
+    required User doctor,
     required bool monthly,
   }) async {
     updateUi(() => _isLoading = true);
@@ -222,7 +219,7 @@ class BookingModel extends BaseViewModel<BookingEvent> {
 
     final newBlockedSchedule = Schedule(
       id: 0,
-      doctorUuid: user!.uid,
+      doctorUuid: user!.uuid,
       date: blockTime,
       isSession: false,
     );
@@ -271,23 +268,12 @@ class BookingModel extends BaseViewModel<BookingEvent> {
   Future<void> fetchScreenData({required String? doctorUuid}) async {
     updateUi(() => _isLoading = true);
     await getUserData();
-    if (doctorUuid != null) {
-      _getPatientData();
-    }
     await _getSchedules(doctorUuid: doctorUuid);
     updateUi(() => _isLoading = false);
   }
 
-  Future<void> _getPatientData() async {
-    try {
-      _patient = await _patientRepository.get(user!.uid);
-    } on DatabaseNotFoundException catch (_) {
-      await logout(showError: true);
-    }
-  }
-
   Future<void> _getSchedules({required String? doctorUuid}) async {
-    final userUid = user!.uid;
+    final userUid = user!.uuid;
     try {
       _schedule = await _scheduleRepository.getDoctorSchedule(doctorUuid ?? userUid);
     } on ApiUnauthorizedException catch (_) {

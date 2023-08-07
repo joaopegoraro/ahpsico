@@ -1,6 +1,7 @@
 import 'package:ahpsico/data/repositories/patient_repository.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
-import 'package:ahpsico/models/patient.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
@@ -17,9 +18,11 @@ final patientListModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final patientRepository = ref.watch(patientRepositoryProvider);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return PatientListModel(
     authService,
     userRepository,
+    preferencesRepository,
     patientRepository,
   );
 });
@@ -28,6 +31,7 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
   PatientListModel(
     super.authService,
     super.userRepository,
+    super.preferencesRepository,
     this._patientRepository,
   ) : super(
           errorEvent: PatientListEvent.showSnackbarError,
@@ -43,8 +47,8 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  List<Patient> _patients = [];
-  List<Patient> get patients => _patients;
+  List<User> _patients = [];
+  List<User> get patients => _patients;
 
   bool _selectMode = false;
 
@@ -61,7 +65,7 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
     updateUi(() => _selectMode = true);
   }
 
-  void selectPatient(Patient patient) {
+  void selectPatient(User patient) {
     updateUi(() {
       if (!_selectedPatientIds.remove(patient.uuid)) {
         _selectedPatientIds.add(patient.uuid);
@@ -109,13 +113,13 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
 
   Future<void> _fetchPatients() async {
     try {
-      await _patientRepository.syncDoctorPatients(user!.uid);
+      await _patientRepository.syncDoctorPatients(user!.uuid);
     } on ApiUnauthorizedException catch (_) {
       logout(showError: true);
     } on ApiConnectionException catch (_) {
       showConnectionError();
     }
 
-    _patients = await _patientRepository.getDoctorPatients(user!.uid);
+    _patients = await _patientRepository.getDoctorPatients(user!.uuid);
   }
 }

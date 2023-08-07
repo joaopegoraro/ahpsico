@@ -1,5 +1,5 @@
-import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
@@ -21,7 +21,7 @@ class CreateAssignmentSheet extends StatefulWidget {
     required this.patient,
   });
 
-  final Patient patient;
+  final User patient;
 
   @override
   State<CreateAssignmentSheet> createState() => _CreateAssignmentSheetState();

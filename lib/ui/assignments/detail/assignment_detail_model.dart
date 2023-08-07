@@ -1,4 +1,5 @@
 import 'package:ahpsico/data/repositories/assignment_repository.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/assignment/assignment_status.dart';
@@ -20,9 +21,11 @@ final assignmentDetailModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final assignmentRepository = ref.watch(assignmentRepositoryProvider);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return AssignmentDetailModel(
     authService,
     userRepository,
+    preferencesRepository,
     assignmentRepository,
   );
 });
@@ -31,6 +34,7 @@ class AssignmentDetailModel extends BaseViewModel<AssignmentDetailEvent> {
   AssignmentDetailModel(
     super.authService,
     super.userRepository,
+    super.preferencesRepository,
     this._assignmentRepository,
   ) : super(
           errorEvent: AssignmentDetailEvent.showSnackbarError,

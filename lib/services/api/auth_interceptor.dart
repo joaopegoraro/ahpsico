@@ -1,16 +1,16 @@
-import 'package:ahpsico/data/repositories/token_repository.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AuthInterceptor extends Interceptor {
-  AuthInterceptor(this._tokenRepository);
+  AuthInterceptor(this._preferencesRepository);
 
-  final TokenRepository _tokenRepository;
+  final PreferencesRepository _preferencesRepository;
 
   @override
   Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-    final token = await _tokenRepository.retrieve();
+    final token = await _preferencesRepository.findToken();
     if (token == null || token.isEmpty) {
       final message = "Invalid AuthToken: $token";
       final error = DioException(
@@ -30,7 +30,7 @@ class AuthInterceptor extends Interceptor {
   Future<void> onResponse(Response response, ResponseInterceptorHandler handler) async {
     try {
       final token = response.headers["token"] as String?;
-      await _tokenRepository.save(token ?? "");
+      await _preferencesRepository.saveToken(token ?? "");
     } catch (_) {}
 
     handler.next(response);
@@ -38,6 +38,6 @@ class AuthInterceptor extends Interceptor {
 }
 
 final authInterceptorProvider = Provider((ref) {
-  final tokenRepository = ref.watch(tokenRepositoryProvider);
-  return AuthInterceptor(tokenRepository);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
+  return AuthInterceptor(preferencesRepository);
 });

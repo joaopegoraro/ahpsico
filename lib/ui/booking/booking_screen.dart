@@ -1,6 +1,6 @@
-import 'package:ahpsico/models/doctor.dart';
 import 'package:ahpsico/models/schedule.dart';
 import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
@@ -29,7 +29,7 @@ class BookingScreen extends StatelessWidget {
   static const sessionArgkey = "session";
 
   static Map<String, dynamic> buildArgs({
-    Doctor? doctor,
+    User? doctor,
     Session? session,
   }) {
     return {
@@ -38,7 +38,7 @@ class BookingScreen extends StatelessWidget {
     };
   }
 
-  final Doctor? doctor;
+  final User? doctor;
   final Session? session;
 
   static const _scheduleMetadata = "schedule";
@@ -60,7 +60,8 @@ class BookingScreen extends StatelessWidget {
       case BookingEvent.openScheduleAlreadyBookedDialog:
         AhpsicoDialog.show(
           context: context,
-          content: "Já existe uma sessão agendada nesse horário, por isso não é possível desbloqueá-lo",
+          content:
+              "Já existe uma sessão agendada nesse horário, por isso não é possível desbloqueá-lo",
           firstButtonText: "Ok",
         );
       case BookingEvent.openRescheduleSessionDialog:
@@ -141,7 +142,8 @@ class BookingScreen extends StatelessWidget {
             );
             final now = DateTime.now();
 
-            if (!TimeUtils.areDatesSameDay(selectedDay, now) && selectedDay.isBefore(DateTime.now())) {
+            if (!TimeUtils.areDatesSameDay(selectedDay, now) &&
+                selectedDay.isBefore(DateTime.now())) {
               return Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(32.0),
@@ -154,7 +156,8 @@ class BookingScreen extends StatelessWidget {
               );
             }
 
-            final Map<int, DateTimeRange> blockedTimeRanges = Map.fromEntries(events.mapToList((event) {
+            final Map<int, DateTimeRange> blockedTimeRanges =
+                Map.fromEntries(events.mapToList((event) {
               final schedule = event.metadata![_scheduleMetadata] as Schedule;
               final range = DateTimeRange(
                 start: schedule.date,

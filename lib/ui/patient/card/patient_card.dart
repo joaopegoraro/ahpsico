@@ -1,4 +1,4 @@
-import 'package:ahpsico/models/patient.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
@@ -16,11 +16,11 @@ class PatientCard extends StatelessWidget {
     this.onLongPress,
   });
 
-  final Patient patient;
+  final User patient;
   final bool isSelected;
   final bool? showSelected;
-  final void Function(Patient)? onTap;
-  final void Function(Patient)? onLongPress;
+  final void Function(User)? onTap;
+  final void Function(User)? onLongPress;
 
   @override
   Widget build(BuildContext context) {

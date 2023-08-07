@@ -1,4 +1,4 @@
-import 'package:ahpsico/models/doctor.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
@@ -23,7 +23,7 @@ class DoctorDetail extends StatelessWidget {
 
   static const route = "/doctor/detail";
 
-  final Doctor? doctor;
+  final User? doctor;
 
   void _onEventEmitted(
     BuildContext context,
@@ -176,8 +176,9 @@ class DoctorDetail extends StatelessWidget {
                 ),
                 AhpsicoSpacing.verticalSpaceSmall,
                 TextButton(
-                  onPressed:
-                      model.doctor!.pixKey.isEmpty ? null : () => model.addPixKeyToClipboard(model.doctor!.pixKey),
+                  onPressed: model.doctor!.pixKey.isEmpty
+                      ? null
+                      : () => model.addPixKeyToClipboard(model.doctor!.pixKey),
                   style: const ButtonStyle(
                     shape: MaterialStatePropertyAll(RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(28)),
@@ -239,7 +240,9 @@ class DoctorDetail extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              model.doctor!.paymentDetails.isEmpty ? "Não informado" : model.doctor!.paymentDetails,
+                              model.doctor!.paymentDetails.isEmpty
+                                  ? "Não informado"
+                                  : model.doctor!.paymentDetails,
                               style: AhpsicoText.regular1Style.copyWith(
                                 color: AhpsicoColors.dark25,
                               ),

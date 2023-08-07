@@ -86,27 +86,23 @@ class SignUpModel extends ViewModel<SignUpEvent> {
     updateUi(() => _isLoadingSignUp = true);
 
     try {
-      final user = User(
-        uid: "Not necessary for the sign up proccess, "
-            "the backend picks this up from the authorization token sent in the request header",
-        phoneNumber: "Not necessary for the sign up proccess, "
-            "the backend picks this up from the authorization token sent in the request header",
-        name: name.trim(),
-        isDoctor: isDoctor,
+      final newUser = await _userRepository.create(
+        name.trim(),
+        isDoctor ? UserRole.doctor : UserRole.patient,
       );
-      final newUser = await _userRepository.create(user);
       showSnackbar(
         "Cadastro bem sucedido! Bem vindo(a) ${newUser.name}!",
         SignUpEvent.showSnackbarMessage,
       );
-      if (newUser.isDoctor) {
+      if (newUser.role.isDoctor) {
         emitEvent(SignUpEvent.navigateToDoctorHome);
       } else {
         emitEvent(SignUpEvent.navigateToPatientHome);
       }
       updateUi(() => _isLoadingSignUp = true);
     } on ApiUserAlreadyRegisteredException catch (_) {
-      await cancelSignUp(message: "Ops! Parece que você já possui uma conta. Tente fazer login novamente");
+      await cancelSignUp(
+          message: "Ops! Parece que você já possui uma conta. Tente fazer login novamente");
     } on ApiConnectionException catch (_) {
       showSnackbar(
         "Ocorreu um erro ao tentar se conectar ao servidor. Certifique-se de que seu dispositivo esteja conectado corretamente com a internet",

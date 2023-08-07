@@ -1,4 +1,4 @@
-import 'package:ahpsico/models/patient.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
@@ -23,7 +23,7 @@ class SessionList extends StatelessWidget {
   static const navigateBackOnTapArgsKey = "navigateBackOnTap";
 
   static Map<String, dynamic> buildArgs({
-    Patient? patient,
+    User? patient,
     bool navigateBackOnTap = false,
   }) {
     return {
@@ -32,7 +32,7 @@ class SessionList extends StatelessWidget {
     };
   }
 
-  final Patient? patient;
+  final User? patient;
   final bool navigateBackOnTap;
 
   void _onEventEmitted(
@@ -85,7 +85,7 @@ class SessionList extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SessionCard(
                 session: session,
-                isUserDoctor: model.user!.isDoctor,
+                isUserDoctor: model.user!.role.isDoctor,
                 onTap: (session) {
                   if (navigateBackOnTap) {
                     return context.pop(session);

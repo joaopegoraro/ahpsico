@@ -1,4 +1,4 @@
-import 'package:ahpsico/models/patient.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
@@ -32,7 +32,7 @@ class PatientDetail extends StatelessWidget {
 
   static const route = "/patient/detail";
 
-  final Patient patient;
+  final User patient;
 
   void _onEventEmitted(
     BuildContext context,
@@ -88,7 +88,8 @@ class PatientDetail extends StatelessWidget {
               borderRadius: const BorderRadius.all(Radius.circular(30)),
               child: Material(
                 clipBehavior: Clip.antiAlias,
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30))),
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30))),
                 color: AhpsicoColors.green,
                 elevation: 4,
                 child: Padding(
@@ -120,7 +121,8 @@ class PatientDetail extends StatelessWidget {
               onTap: model.openCreateAssignmentSheet,
               child: Material(
                 clipBehavior: Clip.antiAlias,
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30))),
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30))),
                 color: AhpsicoColors.blue,
                 elevation: 4,
                 child: Padding(

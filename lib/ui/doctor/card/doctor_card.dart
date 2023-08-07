@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:ahpsico/models/doctor.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
@@ -14,8 +14,8 @@ class DoctorCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final Doctor doctor;
-  final void Function(Doctor)? onTap;
+  final User doctor;
+  final void Function(User)? onTap;
 
   @override
   Widget build(BuildContext context) {

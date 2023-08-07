@@ -1,5 +1,6 @@
 import 'package:ahpsico/constants/app_constants.dart';
 import 'package:ahpsico/data/repositories/invite_repository.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
@@ -18,18 +19,21 @@ final invitePatientModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final inviteRepository = ref.watch(inviteRepositoryProvider);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return InvitePatientModel(
-    inviteRepository,
     authService,
     userRepository,
+    preferencesRepository,
+    inviteRepository,
   );
 });
 
 class InvitePatientModel extends BaseViewModel<InvitePatientEvent> {
   InvitePatientModel(
-    this._inviteRepository,
     super.authService,
     super.userRepository,
+    super.preferencesRepository,
+    this._inviteRepository,
   ) : super(
           errorEvent: InvitePatientEvent.showSnackbarError,
           navigateToLoginEvent: InvitePatientEvent.navigateToLoginScreen,

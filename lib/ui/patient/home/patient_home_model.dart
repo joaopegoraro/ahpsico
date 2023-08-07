@@ -1,15 +1,14 @@
-import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/repositories/advice_repository.dart';
 import 'package:ahpsico/data/repositories/assignment_repository.dart';
 import 'package:ahpsico/data/repositories/invite_repository.dart';
-import 'package:ahpsico/data/repositories/patient_repository.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/advice.dart';
 import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/invite.dart';
-import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
@@ -30,12 +29,12 @@ final patientHomeModelProvider = ViewModelProviderFactory.create((ref) {
   final sessionRepository = ref.watch(sessionRepositoryProvider);
   final assignmentRepository = ref.watch(assignmentRepositoryProvider);
   final adviceRepository = ref.watch(adviceRepositoryProvider);
-  final patientRepository = ref.watch(patientRepositoryProvider);
   final inviteRepository = ref.watch(inviteRepositoryProvider);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return PatientHomeModel(
     authService,
     userRepository,
-    patientRepository,
+    preferencesRepository,
     sessionRepository,
     assignmentRepository,
     adviceRepository,
@@ -47,7 +46,7 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
   PatientHomeModel(
     super.authService,
     super.userRepository,
-    this._patientRepository,
+    super.preferencesRepository,
     this._sessionRepository,
     this._assignmentRepository,
     this._adviceRepository,
@@ -60,7 +59,6 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
 
   /* Services */
 
-  final PatientRepository _patientRepository;
   final SessionRepository _sessionRepository;
   final AssignmentRepository _assignmentRepository;
   final AdviceRepository _adviceRepository;
@@ -68,8 +66,8 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
 
   /* Fields */
 
-  Patient? _patient;
-  Patient? get patient => _patient;
+  User? _patient;
+  User? get patient => _patient;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -109,7 +107,6 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
   Future<void> fetchScreenData() async {
     updateUi(() => _isLoading = true);
     await getUserData(sync: true);
-    await _getPatientData();
     await _getUpcomingSessions();
     await _getPendingAssignments();
     await _getReceivedAdvices();
@@ -117,24 +114,8 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
     updateUi(() => _isLoading = false);
   }
 
-  Future<void> _getPatientData() async {
-    try {
-      await _patientRepository.sync(user!.uid);
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
-    }
-
-    try {
-      _patient = await _patientRepository.get(user!.uid);
-    } on DatabaseNotFoundException catch (_) {
-      await logout(showError: true);
-    }
-  }
-
   Future<void> _getUpcomingSessions() async {
-    final userUid = user!.uid;
+    final userUid = user!.uuid;
     try {
       await _sessionRepository.syncPatientSessions(userUid, upcoming: true);
     } on ApiUnauthorizedException catch (_) {
@@ -149,7 +130,7 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
   }
 
   Future<void> _getPendingAssignments() async {
-    final userUid = user!.uid;
+    final userUid = user!.uuid;
     try {
       await _assignmentRepository.syncPatientAssignments(userUid, pending: true);
     } on ApiUnauthorizedException catch (_) {
@@ -164,7 +145,7 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
   }
 
   Future<void> _getReceivedAdvices() async {
-    final userUid = user!.uid;
+    final userUid = user!.uuid;
     try {
       await _adviceRepository.syncPatientAdvices(userUid);
     } on ApiUnauthorizedException catch (_) {

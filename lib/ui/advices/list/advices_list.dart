@@ -1,4 +1,4 @@
-import 'package:ahpsico/models/patient.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/ui/advices/list/advices_list_model.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
@@ -16,7 +16,7 @@ class AdvicesList extends StatelessWidget {
 
   static const route = "/advices";
 
-  final Patient? patient;
+  final User? patient;
 
   void _onEventEmitted(
     BuildContext context,

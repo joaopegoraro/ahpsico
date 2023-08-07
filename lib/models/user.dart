@@ -17,6 +17,14 @@ enum UserRole {
         }) ??
         UserRole.patient;
   }
+
+  bool get isPatient {
+    return this == patient;
+  }
+
+  bool get isDoctor {
+    return this == doctor;
+  }
 }
 
 class User {

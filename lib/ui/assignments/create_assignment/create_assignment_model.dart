@@ -1,11 +1,11 @@
 import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/repositories/assignment_repository.dart';
-import 'package:ahpsico/data/repositories/doctor_repository.dart';
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/assignment/assignment_status.dart';
-import 'package:ahpsico/models/patient.dart';
 import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/exceptions.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
@@ -22,12 +22,12 @@ final createAssignmentModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final assignmentRepository = ref.watch(assignmentRepositoryProvider);
-  final doctorRepository = ref.watch(doctorRepositoryProvider);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return CreateAssignmentModel(
     authService,
     userRepository,
+    preferencesRepository,
     assignmentRepository,
-    doctorRepository,
   );
 });
 
@@ -35,8 +35,8 @@ class CreateAssignmentModel extends BaseViewModel<CreateAssignmentEvent> {
   CreateAssignmentModel(
     super.authService,
     super.userRepository,
+    super.preferencesRepository,
     this._assignmentRepository,
-    this._doctorRepository,
   ) : super(
           errorEvent: CreateAssignmentEvent.showSnackbarError,
           navigateToLoginEvent: CreateAssignmentEvent.navigateToLoginScreen,
@@ -45,7 +45,6 @@ class CreateAssignmentModel extends BaseViewModel<CreateAssignmentEvent> {
   /* Services */
 
   final AssignmentRepository _assignmentRepository;
-  final DoctorRepository _doctorRepository;
 
   /* Fields */
 
@@ -71,7 +70,7 @@ class CreateAssignmentModel extends BaseViewModel<CreateAssignmentEvent> {
   /* Calls */
 
   Future<void> createAssignment({
-    required Patient patient,
+    required User patient,
     required Session? session,
   }) async {
     if (session == null) {
@@ -98,7 +97,7 @@ class CreateAssignmentModel extends BaseViewModel<CreateAssignmentEvent> {
     updateUi(() => _isLoading = true);
     try {
       await getUserData();
-      final doctor = await _doctorRepository.get(user!.uid);
+      final doctor = await userRepository.get(user!.uuid);
       final assignment = Assignment(
         id: 0,
         title: title,

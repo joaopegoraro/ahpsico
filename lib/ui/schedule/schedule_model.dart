@@ -1,3 +1,4 @@
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/session/session.dart';
@@ -16,9 +17,11 @@ final scheduleModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final sessionRepository = ref.watch(sessionRepositoryProvider);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return ScheduleModel(
     authService,
     userRepository,
+    preferencesRepository,
     sessionRepository,
   );
 });
@@ -27,6 +30,7 @@ class ScheduleModel extends BaseViewModel<ScheduleEvent> {
   ScheduleModel(
     super.authService,
     super.userRepository,
+    super.preferencesRepository,
     this._sessionRepository,
   ) : super(
           errorEvent: ScheduleEvent.showSnackbarError,
@@ -57,8 +61,8 @@ class ScheduleModel extends BaseViewModel<ScheduleEvent> {
   }
 
   Future<void> _getSessions() async {
-    final userUid = user!.uid;
-    final isDoctor = user!.isDoctor;
+    final userUid = user!.uuid;
+    final isDoctor = user!.role.isDoctor;
     try {
       if (isDoctor) {
         await _sessionRepository.syncDoctorSessions(userUid);
