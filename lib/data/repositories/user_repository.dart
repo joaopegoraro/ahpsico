@@ -15,7 +15,7 @@ abstract interface class UserRepository {
   /// - [ApiConnectionException] when the request suffers any connection problems;
   /// - [ApiUnauthorizedException] when the response returns a status of 401 or 403;
   /// the fetched [User];
-  Future<void> sync();
+  Future<void> sync(String uuid);
 
   /// throws:
   /// - [DatabaseNotFoundException] when there are no users to retrieve;
@@ -33,7 +33,7 @@ abstract interface class UserRepository {
   ///
   /// returns:
   /// - the created [User];
-  Future<User> create(User user);
+  Future<User> create(String userName, UserRole role);
 
   /// Clears the table;
   Future<void> clear();
@@ -56,8 +56,8 @@ final class UserRepositoryImpl implements UserRepository {
   final sqflite.Database _db;
 
   @override
-  Future<User> create(User user) async {
-    final createdUser = await _api.signUp(user);
+  Future<User> create(String userName, UserRole role) async {
+    final createdUser = await _api.signUp(userName, role);
     await _db.insert(
       UserEntity.tableName,
       UserMapper.toEntity(createdUser).toMap(),
@@ -67,8 +67,8 @@ final class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<void> sync() async {
-    final user = await _api.login();
+  Future<void> sync(String uuid) async {
+    final user = await _api.getUser(uuid);
     final batch = _db.batch();
     batch.delete(UserEntity.tableName);
     batch.insert(

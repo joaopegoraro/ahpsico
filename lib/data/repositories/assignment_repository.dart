@@ -1,7 +1,6 @@
 import 'package:ahpsico/data/database/ahpsico_database.dart';
 import 'package:ahpsico/data/database/entities/assignment_entity.dart';
 import 'package:ahpsico/data/database/entities/user_entity.dart';
-import 'package:ahpsico/data/database/entities/patient_entity.dart';
 import 'package:ahpsico/data/database/entities/session_entity.dart';
 import 'package:ahpsico/data/database/mappers/assignment_mapper.dart';
 import 'package:ahpsico/models/assignment/assignment.dart';
@@ -151,18 +150,18 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
       final entity = AssignmentEntity.fromMap(assignmentMap);
 
       final doctorsMap = await _db.query(
-        DoctorEntity.tableName,
-        where: "${DoctorEntity.uuidColumn} = ?",
+        UserEntity.tableName,
+        where: "${UserEntity.uuidColumn} = ?",
         whereArgs: [entity.doctorId],
       );
-      final doctorEntity = DoctorEntity.fromMap(doctorsMap.first);
+      final doctorEntity = UserEntity.fromMap(doctorsMap.first);
 
       final patientsMap = await _db.query(
-        PatientEntity.tableName,
-        where: "${PatientEntity.uuidColumn} = ?",
+        UserEntity.tableName,
+        where: "${UserEntity.uuidColumn} = ?",
         whereArgs: [entity.patientId],
       );
-      final patientEntity = PatientEntity.fromMap(patientsMap.first);
+      final patientEntity = UserEntity.fromMap(patientsMap.first);
 
       final sessionsMap = await _db.query(
         SessionEntity.tableName,

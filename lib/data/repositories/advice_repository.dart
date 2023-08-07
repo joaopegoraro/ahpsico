@@ -2,7 +2,6 @@ import 'package:ahpsico/data/database/ahpsico_database.dart';
 import 'package:ahpsico/data/database/entities/advice_entity.dart';
 import 'package:ahpsico/data/database/entities/advice_with_patient.dart';
 import 'package:ahpsico/data/database/entities/user_entity.dart';
-import 'package:ahpsico/data/database/entities/patient_entity.dart';
 import 'package:ahpsico/data/database/mappers/advice_mapper.dart';
 import 'package:ahpsico/models/advice.dart';
 import 'package:ahpsico/services/api/api_service.dart';
@@ -128,19 +127,19 @@ final class AdviceRepositoryImpl implements AdviceRepository {
       final entity = AdviceEntity.fromMap(adviceMap);
 
       final doctorsMap = await _db.query(
-        DoctorEntity.tableName,
-        where: "${DoctorEntity.uuidColumn} = ?",
+        UserEntity.tableName,
+        where: "${UserEntity.uuidColumn} = ?",
         whereArgs: [entity.doctorId],
       );
-      final doctorEntity = DoctorEntity.fromMap(doctorsMap.first);
+      final doctorEntity = UserEntity.fromMap(doctorsMap.first);
 
       final patientsMap = await _db.query(
-        PatientEntity.tableName,
-        where: "${PatientEntity.uuidColumn} = ?",
+        UserEntity.tableName,
+        where: "${UserEntity.uuidColumn} = ?",
         whereArgs: [patientId],
       );
       final patientIds = patientsMap.map((patient) {
-        final patientEntity = PatientEntity.fromMap(patientsMap.first);
+        final patientEntity = UserEntity.fromMap(patientsMap.first);
         return patientEntity.uuid;
       });
       return AdviceMapper.toAdvice(
@@ -195,22 +194,22 @@ final class AdviceRepositoryImpl implements AdviceRepository {
       final entity = AdviceEntity.fromMap(adviceMap);
 
       final doctorsMap = await _db.query(
-        DoctorEntity.tableName,
-        where: "${DoctorEntity.uuidColumn} = ?",
+        UserEntity.tableName,
+        where: "${UserEntity.uuidColumn} = ?",
         whereArgs: [doctorId],
       );
-      final doctorEntity = DoctorEntity.fromMap(doctorsMap.first);
+      final doctorEntity = UserEntity.fromMap(doctorsMap.first);
 
       final patientsMap = await _db.rawQuery(
         """
-          SELECT  p.* FROM ${PatientEntity.tableName} p  
-            LEFT JOIN ${AdviceWithPatient.tableName} ad ON ad.${AdviceWithPatient.patientIdColumn} = p.${PatientEntity.uuidColumn}  
+          SELECT  p.* FROM ${UserEntity.tableName} p  
+            LEFT JOIN ${AdviceWithPatient.tableName} ad ON ad.${AdviceWithPatient.patientIdColumn} = p.${UserEntity.uuidColumn}  
             WHERE ad.${AdviceWithPatient.adviceIdColumn} = ?
           """,
         [entity.id],
       );
       final patientIds = patientsMap.map((patient) {
-        final patientEntity = PatientEntity.fromMap(patientsMap.first);
+        final patientEntity = UserEntity.fromMap(patientsMap.first);
         return patientEntity.uuid;
       });
 

@@ -106,11 +106,11 @@ final class InviteRepositoryImpl implements InviteRepository {
       invitesMap.map((inviteMap) async {
         final entity = InviteEntity.fromMap(inviteMap);
         final doctorsMap = await _db.query(
-          DoctorEntity.tableName,
-          where: "${DoctorEntity.uuidColumn} = ?",
+          UserEntity.tableName,
+          where: "${UserEntity.uuidColumn} = ?",
           whereArgs: [entity.doctorId],
         );
-        final doctorEntity = DoctorEntity.fromMap(doctorsMap.first);
+        final doctorEntity = UserEntity.fromMap(doctorsMap.first);
         return InviteMapper.toInvite(entity, doctorEntity: doctorEntity);
       }).toList(),
     );
