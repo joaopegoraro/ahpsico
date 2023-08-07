@@ -164,7 +164,8 @@ final class SessionRepositoryImpl implements SessionRepository {
 
     batch.delete(
       SessionEntity.tableName,
-      where: "${SessionEntity.patientIdColumn} = ?${upcoming == true ? " AND ${SessionEntity.dateColumn} >= ?" : ""}",
+      where:
+          "${SessionEntity.patientIdColumn} = ?${upcoming == true ? " AND ${SessionEntity.dateColumn} >= ?" : ""}",
       whereArgs: [patientId, if (upcoming == true) now],
     );
 
@@ -183,11 +184,11 @@ final class SessionRepositoryImpl implements SessionRepository {
     String doctorId, {
     DateTime? date,
   }) async {
-    final today = DateTime.now();
-    final startOfToday = DateTime(today.year, today.month, today.day);
+    final startOfToday = date != null ? DateTime(date.year, date.month, date.day) : null;
 
-    final tomorrow = today.add(const Duration(days: 1));
-    final startOfTomorrow = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
+    final tomorrow = date?.add(const Duration(days: 1));
+    final startOfTomorrow =
+        tomorrow != null ? DateTime(tomorrow.year, tomorrow.month, tomorrow.day) : null;
 
     final sessionsMap = await _db.query(
       SessionEntity.tableName,
@@ -195,7 +196,7 @@ final class SessionRepositoryImpl implements SessionRepository {
           "${date == null ? "" : " AND ${SessionEntity.dateColumn} >= ? AND ${SessionEntity.dateColumn} <= ?"} ORDER BY ${SessionEntity.dateColumn} DESC",
       whereArgs: [
         doctorId,
-        if (date != null) ...[
+        if (startOfToday != null && startOfTomorrow != null) ...[
           startOfToday.millisecondsSinceEpoch,
           startOfTomorrow.millisecondsSinceEpoch,
         ]

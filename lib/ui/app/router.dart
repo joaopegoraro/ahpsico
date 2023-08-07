@@ -24,7 +24,7 @@ final class AhpsicoRouter {
   AhpsicoRouter._();
 
   static final router = GoRouter(
-    initialLocation: ScheduleScreen.route,
+    initialLocation: LoginScreen.route,
     routes: [
       GoRoute(
         path: '/',

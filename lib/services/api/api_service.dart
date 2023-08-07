@@ -30,7 +30,7 @@ abstract interface class ApiService {
   /// in the headers.
 
   /// Returns the user data
-  Future<User> login();
+  Future<User> login(String phoneNumber, String code);
 
   /// throws:
   /// - [ApiUserAlreadyRegisteredException] when the user trying to sign up is
@@ -216,10 +216,14 @@ class ApiServiceImpl implements ApiService {
   final Dio _dio;
 
   @override
-  Future<User> login() async {
+  Future<User> login(String phoneNumber, String code) async {
     return await request(
       method: "POST",
       endpoint: "login",
+      requestBody: () => {
+        "phoneNumber": phoneNumber,
+        "code": code,
+      },
       parseSuccess: (response) {
         return User.fromJson(response.data);
       },
@@ -235,7 +239,7 @@ class ApiServiceImpl implements ApiService {
   Future<User> signUp(User user) async {
     return await request(
       method: "POST",
-      endpoint: "signup",
+      endpoint: "register",
       requestBody: () {
         return user.toMap();
       },
@@ -340,10 +344,13 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<Patient>> getDoctorPatients(String doctorId) async {
+  Future<List<Patient>> getDoctorPatients(String doctorUuid) async {
     return await request(
       method: "GET",
-      endpoint: "doctors/$doctorId/patients",
+      endpoint: "patients",
+      buildQueryParameters: () => {
+        "doctorUuid": doctorUuid,
+      },
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Patient.fromMap(e)).toList();
@@ -353,16 +360,19 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<List<Session>> getDoctorSessions(
-    String doctorId, {
+    String doctorUuid, {
     DateTime? date,
   }) async {
     return await request(
       method: "GET",
-      endpoint: "doctors/$doctorId/sessions",
+      endpoint: "sessions",
       buildQueryParameters: () {
-        if (date == null) return null;
+        if (date == null) return {"doctorUuid": doctorUuid};
         final formatter = DateFormat(AppConstants.datePattern);
-        return {"date": formatter.format(date)};
+        return {
+          "date": formatter.format(date),
+          "doctorUuid": doctorUuid,
+        };
       },
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
@@ -372,10 +382,13 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<Advice>> getDoctorAdvices(String doctorId) async {
+  Future<List<Advice>> getDoctorAdvices(String doctorUuid) async {
     return await request(
       method: "GET",
-      endpoint: "doctors/$doctorId/advices",
+      endpoint: "advices",
+      buildQueryParameters: () => {
+        "doctorUuid": doctorUuid,
+      },
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Advice.fromMap(e)).toList();
@@ -384,10 +397,13 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<List<Schedule>> getDoctorSchedule(String doctorId) async {
+  Future<List<Schedule>> getDoctorSchedule(String doctorUuid) async {
     return await request(
       method: "GET",
-      endpoint: "doctors/$doctorId/schedule",
+      endpoint: "schedule",
+      buildQueryParameters: () => {
+        "doctorUuid": doctorUuid,
+      },
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Schedule.fromMap(e)).toList();
@@ -424,7 +440,10 @@ class ApiServiceImpl implements ApiService {
   Future<List<Doctor>> getPatientDoctors(String patientId) async {
     return await request(
       method: "GET",
-      endpoint: "patients/$patientId/doctors",
+      endpoint: "doctors",
+      buildQueryParameters: () => {
+        "patientUuid": patientId,
+      },
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Doctor.fromMap(e)).toList();
@@ -439,8 +458,11 @@ class ApiServiceImpl implements ApiService {
   }) async {
     return await request(
       method: "GET",
-      endpoint: "patients/$patientId/sessions",
-      buildQueryParameters: upcoming != true ? null : () => {"upcoming": upcoming},
+      endpoint: "sessions",
+      buildQueryParameters: () => {
+        "patientUuid": patientId,
+        "upcoming": upcoming,
+      },
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Session.fromMap(e)).toList();
@@ -455,8 +477,11 @@ class ApiServiceImpl implements ApiService {
   }) async {
     return await request(
       method: "GET",
-      endpoint: "patients/$patientId/assignments",
-      buildQueryParameters: pending != true ? null : () => {"pending": pending},
+      endpoint: "assignments",
+      buildQueryParameters: () => {
+        "patientUuid": patientId,
+        "pending": pending,
+      },
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Assignment.fromMap(e)).toList();
@@ -468,7 +493,10 @@ class ApiServiceImpl implements ApiService {
   Future<List<Advice>> getPatientAdvices(String patientId) async {
     return await request(
       method: "GET",
-      endpoint: "patients/$patientId/advices",
+      endpoint: "advices",
+      buildQueryParameters: () => {
+        "patientUuid": patientId,
+      },
       parseSuccess: (response) {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Advice.fromMap(e)).toList();
@@ -648,7 +676,8 @@ class ApiServiceImpl implements ApiService {
           throw const ApiUnauthorizedException();
       }
 
-      if (response.statusCode == null || !(response.statusCode! >= 200 && response.statusCode! < 300)) {
+      if (response.statusCode == null ||
+          !(response.statusCode! >= 200 && response.statusCode! < 300)) {
         parseFailure?.call(response);
         final nullData = response.data == null;
         final errorBody = nullData ? null : json.decode(response.data) as Map<dynamic, dynamic>;
