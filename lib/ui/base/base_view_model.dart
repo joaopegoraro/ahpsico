@@ -62,16 +62,25 @@ abstract class BaseViewModel<T> extends ViewModel<T> {
 
     if (sync) {
       final err = await userRepository.sync(uuid);
-      if (err is ApiUnauthorizedException) {
-        return await logout(showError: true);
-      } else if (err is ApiConnectionException) {
-        return showConnectionError();
+      if (err != null) {
+        return await handleDefaultErrors(err);
       }
     }
 
     _user = await userRepository.get(uuid);
     if (_user == null) {
       return await logout(showError: true);
+    }
+  }
+
+  @protected
+  Future<void> handleDefaultErrors(ApiError err, {String? defaultErrorMessage}) async {
+    if (err is ApiUnauthorizedError) {
+      return await logout(showError: true);
+    } else if (err is ApiConnectionError) {
+      return showConnectionError();
+    } else if (defaultErrorMessage != null) {
+      return showSnackbar(defaultErrorMessage, errorEvent);
     }
   }
 

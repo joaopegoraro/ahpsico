@@ -163,25 +163,26 @@ class BookingModel extends BaseViewModel<BookingEvent> {
       newSessions.add(newSession);
     }
 
-    try {
-      for (final session in newSessions) {
-        await _sessionRepository.create(session);
+    ApiError? err;
+    for (final session in newSessions) {
+      (_, err) = await _sessionRepository.create(session);
+      if (err is ApiSessionAlreadyBookedError) {
+        showSnackbar(
+          "Ops! Parece que o horário escolhido não está mais disponível",
+          BookingEvent.showSnackbarError,
+        );
+        return updateUi(() => _isLoading = false);
+      } else if (err != null) {
+        await handleDefaultErrors(err);
+        return updateUi(() => _isLoading = false);
       }
-      showSnackbar(
-        monthly ? "Sessões agendadas com sucesso!" : "Sessão agendada com sucesso!",
-        BookingEvent.showSnackbarMessage,
-      );
-      emitEvent(BookingEvent.navigateBack);
-    } on ApiSessionAlreadyBookedException catch (_) {
-      showSnackbar(
-        "Ops! Parece que o horário escolhido não está mais disponível",
-        BookingEvent.showSnackbarError,
-      );
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
     }
+
+    showSnackbar(
+      monthly ? "Sessões agendadas com sucesso!" : "Sessão agendada com sucesso!",
+      BookingEvent.showSnackbarMessage,
+    );
+    emitEvent(BookingEvent.navigateBack);
 
     updateUi(() => _isLoading = false);
   }
@@ -191,27 +192,26 @@ class BookingModel extends BaseViewModel<BookingEvent> {
 
     final updatedSession = session.copyWith(date: _newSessionTime!);
 
-    try {
-      final result = await _sessionRepository.update(updatedSession);
-      showSnackbar(
-        "Sessão remarcada com sucesso!",
-        BookingEvent.showSnackbarMessage,
-      );
-      updateUi(() => _isLoading = false);
-      return result;
-    } on ApiSessionAlreadyBookedException catch (_) {
+    final (result, err) = await _sessionRepository.update(updatedSession);
+    if (err is ApiSessionAlreadyBookedError) {
       showSnackbar(
         "Ops! Parece que o horário escolhido não está mais disponível",
         BookingEvent.showSnackbarError,
       );
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+      updateUi(() => _isLoading = false);
+      return null;
+    } else if (err != null) {
+      await handleDefaultErrors(err);
+      updateUi(() => _isLoading = false);
+      return null;
     }
 
+    showSnackbar(
+      "Sessão remarcada com sucesso!",
+      BookingEvent.showSnackbarMessage,
+    );
     updateUi(() => _isLoading = false);
-    return null;
+    return result;
   }
 
   Future<void> blockSchedule(DateTime blockTime) async {
@@ -224,17 +224,16 @@ class BookingModel extends BaseViewModel<BookingEvent> {
       isSession: false,
     );
 
-    try {
-      await _scheduleRepository.create(newBlockedSchedule);
-      showSnackbar(
-        "Horário bloqueado com sucesso!",
-        BookingEvent.showSnackbarMessage,
-      );
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final (_, err) = await _scheduleRepository.create(newBlockedSchedule);
+    if (err != null) {
+      await handleDefaultErrors(err);
+      return updateUi(() => _isLoading = false);
     }
+
+    showSnackbar(
+      "Horário bloqueado com sucesso!",
+      BookingEvent.showSnackbarMessage,
+    );
 
     updateUi(() => _isLoading = false);
   }
@@ -250,17 +249,16 @@ class BookingModel extends BaseViewModel<BookingEvent> {
       return emitEvent(BookingEvent.openScheduleAlreadyBookedDialog);
     }
 
-    try {
-      await _scheduleRepository.delete(blockedScheduleId);
-      showSnackbar(
-        "Horário desbloqueado com sucesso!",
-        BookingEvent.showSnackbarMessage,
-      );
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final err = await _scheduleRepository.delete(blockedScheduleId);
+    if (err != null) {
+      await handleDefaultErrors(err);
+      return updateUi(() => _isLoading = false);
     }
+
+    showSnackbar(
+      "Horário desbloqueado com sucesso!",
+      BookingEvent.showSnackbarMessage,
+    );
 
     updateUi(() => _isLoading = false);
   }
@@ -274,13 +272,11 @@ class BookingModel extends BaseViewModel<BookingEvent> {
 
   Future<void> _getSchedules({required String? doctorUuid}) async {
     final userUid = user!.uuid;
-    try {
-      _schedule = await _scheduleRepository.getDoctorSchedule(doctorUuid ?? userUid);
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
-      emitEvent(BookingEvent.navigateBack);
+    final (schedule, err) = await _scheduleRepository.getDoctorSchedule(doctorUuid ?? userUid);
+    if (err != null) {
+      await handleDefaultErrors(err);
+      return updateUi(() => _isLoading = false);
     }
+    _schedule = schedule ?? [];
   }
 }

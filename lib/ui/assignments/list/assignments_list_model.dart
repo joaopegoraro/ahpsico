@@ -2,7 +2,6 @@ import 'package:ahpsico/data/repositories/assignment_repository.dart';
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/assignment/assignment.dart';
-import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
@@ -58,12 +57,9 @@ class AssignmentListModel extends BaseViewModel<AssignmentListEvent> {
   }
 
   Future<void> _fetchAssignments({required String? patientUuid}) async {
-    try {
-      await _assignmentRepository.syncPatientAssignments(patientUuid ?? user!.uuid);
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final err = await _assignmentRepository.syncPatientAssignments(patientUuid ?? user!.uuid);
+    if (err != null) {
+      return await handleDefaultErrors(err);
     }
 
     _assignments = await _assignmentRepository.getPatientAssignments(patientUuid ?? user!.uuid);

@@ -5,7 +5,6 @@ import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/assignment/assignment_status.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/models/user.dart';
-import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
@@ -94,31 +93,33 @@ class CreateAssignmentModel extends BaseViewModel<CreateAssignmentEvent> {
     }
 
     updateUi(() => _isLoading = true);
-    try {
-      await getUserData();
-      final doctor = await userRepository.get(user!.uuid);
-      final assignment = Assignment(
-        id: 0,
-        title: title,
-        description: description,
-        doctor: doctor,
-        patientId: patient.uuid,
-        status: AssignmentStatus.pending,
-        deliverySession: session,
+
+    await getUserData();
+    final assignment = Assignment(
+      id: 0,
+      title: title,
+      description: description,
+      doctor: user!,
+      patientId: patient.uuid,
+      status: AssignmentStatus.pending,
+      deliverySession: session,
+    );
+
+    final (_, err) = await _assignmentRepository.create(assignment);
+    if (err != null) {
+      updateUi(() => _isLoading = false);
+      return await handleDefaultErrors(
+        err,
+        defaultErrorMessage: "Ocorreu um erro desconhecido ao tentar criar a tarefa. "
+            "Tente novamente mais tarde ou entre em contato com o suporte",
       );
-      await _assignmentRepository.create(assignment);
-      showSnackbar(
-        "Tarefa criada com sucesso!",
-        CreateAssignmentEvent.showSnackbarMessage,
-      );
-      emitEvent(CreateAssignmentEvent.closeSheet);
-    } on DatabaseNotFoundException catch (_) {
-      await logout(showError: true);
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
     }
+
+    showSnackbar(
+      "Tarefa criada com sucesso!",
+      CreateAssignmentEvent.showSnackbarMessage,
+    );
+    emitEvent(CreateAssignmentEvent.closeSheet);
 
     updateUi(() => _isLoading = false);
   }

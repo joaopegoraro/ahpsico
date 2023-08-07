@@ -86,16 +86,14 @@ class AdviceListModel extends BaseViewModel<AdviceListEvent> {
   }
 
   Future<void> _fetchAdvices({required String? patientUuid}) async {
-    try {
-      if (patientUuid != null) {
-        await _adviceRepository.syncPatientAdvices(patientUuid);
-      } else {
-        await _adviceRepository.syncDoctorAdvices(user!.uuid);
-      }
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    ApiError? err;
+    if (patientUuid != null) {
+      err = await _adviceRepository.syncPatientAdvices(patientUuid);
+    } else {
+      err = await _adviceRepository.syncDoctorAdvices(user!.uuid);
+    }
+    if (err != null) {
+      return await handleDefaultErrors(err);
     }
 
     if (patientUuid != null) {
@@ -107,16 +105,15 @@ class AdviceListModel extends BaseViewModel<AdviceListEvent> {
 
   Future<void> deleteSelectedAdvices() async {
     updateUi(() => _isLoading = true);
-    try {
-      for (final adviceId in _selectedAdvicesIds) {
-        await _adviceRepository.delete(adviceId);
+
+    for (final adviceId in _selectedAdvicesIds) {
+      final err = await _adviceRepository.delete(adviceId);
+      if (err != null) {
+        await handleDefaultErrors(err);
       }
-      clearSelection();
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
     }
+
+    clearSelection();
     updateUi(() => _isLoading = false);
   }
 }

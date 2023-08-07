@@ -1,4 +1,3 @@
-import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/services/api/errors.dart';
