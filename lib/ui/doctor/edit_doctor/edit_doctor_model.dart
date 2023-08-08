@@ -91,11 +91,11 @@ class EditDoctorModel extends BaseViewModel<EditDoctorEvent> {
     await getUserData();
 
     final (_, err) = await userRepository.update(user!.copyWith(
-      name: name,
-      description: description,
-      crp: crp,
-      pixKey: pixKey,
-      paymentDetails: paymentDetails,
+      name: name.trim(),
+      description: description.trim(),
+      crp: crp.trim(),
+      pixKey: pixKey.trim(),
+      paymentDetails: paymentDetails.trim(),
     ));
     if (err != null) {
       await handleDefaultErrors(err);

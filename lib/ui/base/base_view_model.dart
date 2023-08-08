@@ -63,7 +63,7 @@ abstract class BaseViewModel<T> extends ViewModel<T> {
     if (sync) {
       final err = await userRepository.sync(uuid);
       if (err != null) {
-        return await handleDefaultErrors(err);
+        await handleDefaultErrors(err);
       }
     }
 

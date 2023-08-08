@@ -10,10 +10,10 @@ import 'package:ahpsico/models/advice.dart';
 import 'package:ahpsico/services/api/auth_interceptor.dart';
 import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/logger/logging_service.dart';
+import 'package:ahpsico/utils/time_utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
@@ -85,7 +85,13 @@ abstract interface class ApiService {
 }
 
 final apiServiceProvider = Provider<ApiService>((ref) {
-  final options = BaseOptions(baseUrl: dotenv.env['BASE_URL']!);
+  const timeout = Duration(seconds: 30);
+  final options = BaseOptions(
+      baseUrl: dotenv.env['BASE_URL']!,
+      sendTimeout: timeout,
+      connectTimeout: timeout,
+      receiveTimeout: timeout,
+      contentType: "application/json");
   final authInterceptor = ref.watch(authInterceptorProvider);
   final loggerInterceptor = PrettyDioLogger(
     requestHeader: true,
@@ -197,6 +203,7 @@ class ApiServiceImpl implements ApiService {
       method: "GET",
       endpoint: "invites",
       parseSuccess: (response) {
+        if (response.data == null) return [];
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Invite.fromMap(e)).toList();
       },
@@ -257,6 +264,7 @@ class ApiServiceImpl implements ApiService {
         "doctorUuid": doctorUuid,
       },
       parseSuccess: (response) {
+        if (response.data == null) return [];
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => User.fromMap(e)).toList();
       },
@@ -273,13 +281,13 @@ class ApiServiceImpl implements ApiService {
       endpoint: "sessions",
       buildQueryParameters: () {
         if (date == null) return {"doctorUuid": doctorUuid};
-        final formatter = DateFormat(AppConstants.datePattern);
         return {
-          "date": formatter.format(date),
+          "date": TimeUtils.formatDateWithOffset(date, AppConstants.datePattern),
           "doctorUuid": doctorUuid,
         };
       },
       parseSuccess: (response) {
+        if (response.data == null) return [];
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Session.fromMap(e)).toList();
       },
@@ -295,6 +303,7 @@ class ApiServiceImpl implements ApiService {
         "doctorUuid": doctorUuid,
       },
       parseSuccess: (response) {
+        if (response.data == null) return [];
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Advice.fromMap(e)).toList();
       },
@@ -310,6 +319,7 @@ class ApiServiceImpl implements ApiService {
         "doctorUuid": doctorUuid,
       },
       parseSuccess: (response) {
+        if (response.data == null) return [];
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Schedule.fromMap(e)).toList();
       },
@@ -325,6 +335,7 @@ class ApiServiceImpl implements ApiService {
         "patientUuid": patientId,
       },
       parseSuccess: (response) {
+        if (response.data == null) return [];
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => User.fromMap(e)).toList();
       },
@@ -344,6 +355,7 @@ class ApiServiceImpl implements ApiService {
         "upcoming": upcoming,
       },
       parseSuccess: (response) {
+        if (response.data == null) return [];
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Session.fromMap(e)).toList();
       },
@@ -363,6 +375,7 @@ class ApiServiceImpl implements ApiService {
         "pending": pending,
       },
       parseSuccess: (response) {
+        if (response.data == null) return [];
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Assignment.fromMap(e)).toList();
       },
@@ -378,6 +391,7 @@ class ApiServiceImpl implements ApiService {
         "patientUuid": patientId,
       },
       parseSuccess: (response) {
+        if (response.data == null) return [];
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Advice.fromMap(e)).toList();
       },
@@ -578,8 +592,8 @@ class ApiServiceImpl implements ApiService {
         default:
           return (null, ApiConnectionError(message: e.message));
       }
-    } catch (e) {
-      _logger.e("Unknown error", e);
+    } catch (e, stackTrace) {
+      _logger.e("Unknown error", e, stackTrace);
       return (null, ApiError(message: e.toString()));
     }
   }
