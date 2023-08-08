@@ -1,20 +1,24 @@
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/services/api/errors.dart';
+import 'package:ahpsico/services/logger/logging_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AuthInterceptor extends Interceptor {
-  AuthInterceptor(this._preferencesRepository);
+  AuthInterceptor(this._preferencesRepository, this._logger);
 
   final PreferencesRepository _preferencesRepository;
+  final LoggingService _logger;
 
   @override
   Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     if (["verification-code", "login"].contains(options.path)) {
+      _logger.w("Non auth endpoint ${options.path}");
       return handler.next(options);
     }
     final token = await _preferencesRepository.findToken();
     if (token == null || token.isEmpty) {
+      _logger.w("Empty or null token: $token");
       final message = "Invalid AuthToken: $token";
       final error = DioException(
         requestOptions: options,
@@ -26,6 +30,7 @@ class AuthInterceptor extends Interceptor {
     }
 
     options.headers.addAll({'Authorization': 'Bearer $token'});
+    _logger.w("Sending token $token");
     handler.next(options);
   }
 
@@ -34,7 +39,10 @@ class AuthInterceptor extends Interceptor {
     try {
       final token = response.headers.value("token");
       await _preferencesRepository.saveToken(token ?? "");
-    } catch (_) {}
+      _logger.w("Saving token $token");
+    } catch (e) {
+      _logger.e("onResponse token retrieving error", e);
+    }
 
     handler.next(response);
   }
@@ -47,7 +55,10 @@ class AuthInterceptor extends Interceptor {
       try {
         final token = response.headers.value("token");
         await _preferencesRepository.saveToken(token ?? "");
-      } catch (_) {}
+        _logger.w("Saving token $token");
+      } catch (e) {
+        _logger.e("onError token retrieving error", e);
+      }
     }
     super.onError(err, handler);
   }
@@ -55,5 +66,6 @@ class AuthInterceptor extends Interceptor {
 
 final authInterceptorProvider = Provider((ref) {
   final preferencesRepository = ref.watch(preferencesRepositoryProvider);
-  return AuthInterceptor(preferencesRepository);
+  final logger = ref.watch(loggerProvider);
+  return AuthInterceptor(preferencesRepository, logger);
 });

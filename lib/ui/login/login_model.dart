@@ -186,6 +186,8 @@ class LoginModel extends BaseViewModel<LoginEvent> {
       return updateUi(() => _isLoadingSignIn = false);
     }
 
+    await preferencesRepository.saveUuid(user.uuid);
+
     showSnackbar("Login bem sucedido!", LoginEvent.showSnackbarMessage);
     if (user.role.isDoctor) {
       emitEvent(LoginEvent.navigateToDoctorHome);

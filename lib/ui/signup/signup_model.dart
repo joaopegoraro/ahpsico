@@ -107,8 +107,11 @@ class SignUpModel extends BaseViewModel<SignUpEvent> {
       }
       return updateUi(() => _isLoadingSignUp = false);
     }
+
+    await preferencesRepository.saveUuid(newUser!.uuid);
+
     showSnackbar(
-      "Cadastro bem sucedido! Bem vindo(a) ${newUser!.name}!",
+      "Cadastro bem sucedido! Bem vindo(a) ${newUser.name}!",
       SignUpEvent.showSnackbarMessage,
     );
     if (newUser.role.isDoctor) {
