@@ -60,18 +60,17 @@ class SessionListModel extends BaseViewModel<SessionListEvent> {
   Future<void> _fetchSessions({String? patientUuid}) async {
     final isDoctor = user!.role.isDoctor;
     final userUid = user!.uuid;
-    try {
-      if (patientUuid != null) {
-        await _sessionRepository.syncPatientSessions(patientUuid);
-      } else if (isDoctor) {
-        await _sessionRepository.syncDoctorSessions(userUid);
-      } else {
-        await _sessionRepository.syncPatientSessions(userUid);
-      }
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+
+    ApiError? err;
+    if (patientUuid != null) {
+      err = await _sessionRepository.syncPatientSessions(patientUuid);
+    } else if (isDoctor) {
+      err = await _sessionRepository.syncDoctorSessions(userUid);
+    } else {
+      err = await _sessionRepository.syncPatientSessions(userUid);
+    }
+    if (err != null) {
+      return await handleDefaultErrors(err);
     }
 
     if (patientUuid != null) {

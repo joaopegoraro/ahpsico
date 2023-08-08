@@ -3,7 +3,6 @@ import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/models/session/session_status.dart';
-import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
@@ -75,16 +74,15 @@ class SessionDetailModel extends BaseViewModel<SessionDetailEvent> {
 
   Future<Session?> confirmSession(Session session) async {
     updateUi(() => _isLoading = true);
-    Session? newSession;
-    try {
-      newSession = await _sessionRepository.update(
-        session.copyWith(status: SessionStatus.confirmed),
-      );
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final (newSession, err) = await _sessionRepository.update(
+      session.copyWith(status: SessionStatus.confirmed),
+    );
+    if (err != null) {
+      await handleDefaultErrors(err);
+      updateUi(() => _isLoading = false);
+      return null;
     }
+
     updateUi(() => _isLoading = false);
     showSnackbar(
       "Sessão confirmada com sucesso!",
@@ -95,16 +93,15 @@ class SessionDetailModel extends BaseViewModel<SessionDetailEvent> {
 
   Future<Session?> cancelSession(Session session) async {
     updateUi(() => _isLoading = true);
-    Session? newSession;
-    try {
-      newSession = await _sessionRepository.update(
-        session.copyWith(status: SessionStatus.canceled),
-      );
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final (newSession, err) = await _sessionRepository.update(
+      session.copyWith(status: SessionStatus.canceled),
+    );
+    if (err != null) {
+      await handleDefaultErrors(err);
+      updateUi(() => _isLoading = false);
+      return null;
     }
+
     updateUi(() => _isLoading = false);
     showSnackbar(
       "Sessão cancelada com sucesso!",
@@ -115,15 +112,13 @@ class SessionDetailModel extends BaseViewModel<SessionDetailEvent> {
 
   Future<Session?> concludeSession(Session session) async {
     updateUi(() => _isLoading = true);
-    Session? newSession;
-    try {
-      newSession = await _sessionRepository.update(
-        session.copyWith(status: SessionStatus.concluded),
-      );
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final (newSession, err) = await _sessionRepository.update(
+      session.copyWith(status: SessionStatus.concluded),
+    );
+    if (err != null) {
+      await handleDefaultErrors(err);
+      updateUi(() => _isLoading = false);
+      return null;
     }
     updateUi(() => _isLoading = false);
     showSnackbar(

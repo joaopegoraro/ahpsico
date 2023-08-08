@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:ahpsico/constants/app_constants.dart';
-import 'package:ahpsico/data/database/exceptions.dart';
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/services/api/errors.dart';
@@ -147,66 +146,40 @@ class LoginModel extends BaseViewModel<LoginEvent> {
     updateUi(() => _isLoadingSendingCode = true);
     final unmaskedPhone = "+55${MaskFormatters.phoneMaskFormatter.unmaskText(phoneNumber)}";
 
-    try {
-      await authService.sendVerificationCode(unmaskedPhone);
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-      return;
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
-      return;
+    final err = await authService.sendVerificationCode(unmaskedPhone);
+    if (err != null) {
+      await handleDefaultErrors(
+        err,
+        defaultErrorMessage: "Ocorreu um erro ao tentar enviar um SMS para o seu telefone. "
+            "Tente novamente mais tarde ou entre em contato com o desenvolvedor",
+      );
+      return updateUi(() => _isLoadingSendingCode = false);
     }
-    // TODO
-//      onCodeSent: (verificationId) {
-//        updateUi(() {
-//          emitEvent(LoginEvent.startCodeTimer);
-//          _isLoadingSendingCode = false;
-//          codeVerificationId = verificationId;
-//        });
-//      },
-//      onFailed: (err) {
-//        updateUi(() => _isLoadingSendingCode = false);
-//        if (err is AuthInvalidSignInCodeException) {
-//          showSnackbar(
-//            "O código digitado não é válido. Certifique-se de que o código informado é o mesmo código de seis dígitos recebido por SMS",
-//            LoginEvent.showSnackbarError,
-//          );
-//        } else {
-//          showSnackbar(
-//            "Ocorreu um erro ao tentar enviar um SMS para o seu telefone. Tente novamente mais tarde ou entre em contato com o desenvolvedor",
-//            LoginEvent.showSnackbarError,
-//          );
-//          _loggingService?.e(err);
-//        }
-//      },
-//      onAutoRetrievalCompleted: (credential) {
-//        updateUi(() => _verificationCode = credential.smsCode);
-//        signIn(credential);
-//      },
-//    );
   }
 
   Future<void> _signIn(String phoneNumber, String code) async {
     updateUi(() => _isLoadingSignIn = true);
-    try {
-      final user = await authService.login(phoneNumber, code);
-      // TODO
-      await userRepository.sync(user.uuid);
-      showSnackbar("Login bem sucedido!", LoginEvent.showSnackbarMessage);
-      if (user.role.isDoctor) {
-        emitEvent(LoginEvent.navigateToDoctorHome);
+    var (user, err) = await authService.login(phoneNumber, code);
+    if (err != null) {
+      if (err is ApiUserNotRegisteredError) {
+        emitEvent(LoginEvent.navigateToSignUp);
       } else {
-        emitEvent(LoginEvent.navigateToPatientHome);
+        await handleDefaultErrors(err);
       }
-    } on DatabaseNotFoundException catch (_) {
-      emitEvent(LoginEvent.navigateToSignUp);
-    } on ApiUserNotRegisteredException catch (_) {
-      emitEvent(LoginEvent.navigateToSignUp);
-    } on ApiConnectionException catch (_) {
-      showSnackbar(
-        "Ocorreu um erro ao tentar se conectar ao servidor. Certifique-se de que seu dispositivo esteja conectado corretamente com a internet",
-        LoginEvent.showSnackbarError,
-      );
+      return updateUi(() => _isLoadingSignIn = false);
+    }
+
+    err = await userRepository.sync(user!.uuid);
+    if (err != null) {
+      await handleDefaultErrors(err);
+      return updateUi(() => _isLoadingSignIn = false);
+    }
+
+    showSnackbar("Login bem sucedido!", LoginEvent.showSnackbarMessage);
+    if (user.role.isDoctor) {
+      emitEvent(LoginEvent.navigateToDoctorHome);
+    } else {
+      emitEvent(LoginEvent.navigateToPatientHome);
     }
     updateUi(() => _isLoadingSignIn = false);
   }

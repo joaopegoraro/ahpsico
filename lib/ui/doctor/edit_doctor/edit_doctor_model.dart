@@ -1,6 +1,5 @@
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
-import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
@@ -89,27 +88,25 @@ class EditDoctorModel extends BaseViewModel<EditDoctorEvent> {
 
     updateUi(() => _isLoading = true);
 
-    try {
-      await getUserData();
-      await userRepository.update(user!.copyWith(
-        name: name,
-        description: description,
-        crp: crp,
-        pixKey: pixKey,
-        paymentDetails: paymentDetails,
-      ));
-      showSnackbar(
-        "Perfil editado com sucesso!",
-        EditDoctorEvent.showSnackbarMessage,
-      );
-      emitEvent(EditDoctorEvent.closeSheet);
-    } on DatabaseNotFoundException catch (_) {
-      await logout(showError: true);
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    await getUserData();
+
+    final (_, err) = await userRepository.update(user!.copyWith(
+      name: name,
+      description: description,
+      crp: crp,
+      pixKey: pixKey,
+      paymentDetails: paymentDetails,
+    ));
+    if (err != null) {
+      await handleDefaultErrors(err);
+      return updateUi(() => _isLoading = false);
     }
+
+    showSnackbar(
+      "Perfil editado com sucesso!",
+      EditDoctorEvent.showSnackbarMessage,
+    );
+    emitEvent(EditDoctorEvent.closeSheet);
 
     updateUi(() => _isLoading = false);
   }

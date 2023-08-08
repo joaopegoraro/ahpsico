@@ -197,12 +197,6 @@ class ApiServiceImpl implements ApiService {
         final List jsonList = json.decode(response.data);
         return jsonList.map((e) => Invite.fromMap(e)).toList();
       },
-      parseFailure: (response) {
-        if (response.statusCode == 404) {
-          return const ApiInvitesNotFoundError();
-        }
-        return null;
-      },
     );
   }
 

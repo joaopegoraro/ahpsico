@@ -6,7 +6,6 @@ import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/advice.dart';
 import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/session/session.dart';
-import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:flutter/services.dart';
@@ -97,13 +96,11 @@ class PatientDetailModel extends BaseViewModel<PatientDetailEvent> {
   }
 
   Future<void> _getUpcomingSessions({required String patientUuid}) async {
-    try {
-      await _sessionRepository.syncPatientSessions(patientUuid, upcoming: true);
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final err = await _sessionRepository.syncPatientSessions(patientUuid, upcoming: true);
+    if (err != null) {
+      return await handleDefaultErrors(err);
     }
+
     _sessions = await _sessionRepository.getPatientSessions(
       patientUuid,
       upcoming: true,
@@ -111,13 +108,11 @@ class PatientDetailModel extends BaseViewModel<PatientDetailEvent> {
   }
 
   Future<void> _getPendingAssignments({required String patientUuid}) async {
-    try {
-      await _assignmentRepository.syncPatientAssignments(patientUuid, pending: true);
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final err = await _assignmentRepository.syncPatientAssignments(patientUuid, pending: true);
+    if (err != null) {
+      return await handleDefaultErrors(err);
     }
+
     _assignments = await _assignmentRepository.getPatientAssignments(
       patientUuid,
       pending: true,
@@ -125,13 +120,11 @@ class PatientDetailModel extends BaseViewModel<PatientDetailEvent> {
   }
 
   Future<void> _getReceivedAdvices({required String patientUuid}) async {
-    try {
-      await _adviceRepository.syncPatientAdvices(patientUuid);
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final err = await _adviceRepository.syncPatientAdvices(patientUuid);
+    if (err != null) {
+      return await handleDefaultErrors(err);
     }
+
     _advices = await _adviceRepository.getPatientAdvices(patientUuid);
   }
 }

@@ -63,16 +63,14 @@ class ScheduleModel extends BaseViewModel<ScheduleEvent> {
   Future<void> _getSessions() async {
     final userUid = user!.uuid;
     final isDoctor = user!.role.isDoctor;
-    try {
-      if (isDoctor) {
-        await _sessionRepository.syncDoctorSessions(userUid);
-      } else {
-        await _sessionRepository.syncPatientSessions(userUid);
-      }
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    ApiError? err;
+    if (isDoctor) {
+      err = await _sessionRepository.syncDoctorSessions(userUid);
+    } else {
+      err = await _sessionRepository.syncPatientSessions(userUid);
+    }
+    if (err != null) {
+      return await handleDefaultErrors(err);
     }
 
     if (isDoctor) {

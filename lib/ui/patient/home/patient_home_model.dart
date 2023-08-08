@@ -9,7 +9,6 @@ import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/invite.dart';
 import 'package:ahpsico/models/session/session.dart';
 import 'package:ahpsico/models/user.dart';
-import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
@@ -116,13 +115,11 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
 
   Future<void> _getUpcomingSessions() async {
     final userUid = user!.uuid;
-    try {
-      await _sessionRepository.syncPatientSessions(userUid, upcoming: true);
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final err = await _sessionRepository.syncPatientSessions(userUid, upcoming: true);
+    if (err != null) {
+      return await handleDefaultErrors(err);
     }
+
     _sessions = await _sessionRepository.getPatientSessions(
       userUid,
       upcoming: true,
@@ -131,13 +128,11 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
 
   Future<void> _getPendingAssignments() async {
     final userUid = user!.uuid;
-    try {
-      await _assignmentRepository.syncPatientAssignments(userUid, pending: true);
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final err = await _assignmentRepository.syncPatientAssignments(userUid, pending: true);
+    if (err != null) {
+      return await handleDefaultErrors(err);
     }
+
     _assignments = await _assignmentRepository.getPatientAssignments(
       userUid,
       pending: true,
@@ -146,53 +141,39 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
 
   Future<void> _getReceivedAdvices() async {
     final userUid = user!.uuid;
-    try {
-      await _adviceRepository.syncPatientAdvices(userUid);
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final err = await _adviceRepository.syncPatientAdvices(userUid);
+    if (err != null) {
+      return await handleDefaultErrors(err);
     }
+
     _advices = await _adviceRepository.getPatientAdvices(userUid);
   }
 
   Future<void> _getReceivedInvites() async {
-    try {
-      await _inviteRepository.sync();
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
-    } on ApiInvitesNotFoundException catch (_) {
-      _invites = [];
-      return;
+    final err = await _inviteRepository.sync();
+    if (err != null) {
+      return await handleDefaultErrors(err);
     }
     _invites = await _inviteRepository.get();
   }
 
   Future<void> acceptInvite(Invite invite) async {
     updateUi(() => _isLoading = true);
-    try {
-      await _inviteRepository.accept(invite.id);
-      fetchScreenData();
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final err = await _inviteRepository.accept(invite.id);
+    if (err != null) {
+      await handleDefaultErrors(err);
     }
+    fetchScreenData();
     updateUi(() => _isLoading = false);
   }
 
   Future<void> denyInvite(Invite invite) async {
     updateUi(() => _isLoading = true);
-    try {
-      await _inviteRepository.delete(invite.id);
-      fetchScreenData();
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final err = await _inviteRepository.delete(invite.id);
+    if (err != null) {
+      await handleDefaultErrors(err);
     }
+    fetchScreenData();
     updateUi(() => _isLoading = false);
   }
 }

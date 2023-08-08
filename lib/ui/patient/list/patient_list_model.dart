@@ -2,7 +2,6 @@ import 'package:ahpsico/data/repositories/patient_repository.dart';
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/user.dart';
-import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
@@ -112,12 +111,9 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
   }
 
   Future<void> _fetchPatients() async {
-    try {
-      await _patientRepository.syncDoctorPatients(user!.uuid);
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final err = await _patientRepository.syncDoctorPatients(user!.uuid);
+    if (err != null) {
+      return await handleDefaultErrors(err);
     }
 
     _patients = await _patientRepository.getDoctorPatients(user!.uuid);

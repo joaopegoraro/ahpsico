@@ -1,7 +1,9 @@
+import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
+import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum SignUpEvent {
@@ -17,19 +19,26 @@ enum SignUpEvent {
 final signUpModelProvider = ViewModelProviderFactory.create((ref) {
   final userRepository = ref.watch(userRepositoryProvider);
   final authService = ref.watch(authServiceProvider);
-  return SignUpModel(userRepository, authService);
+  final preferencesRepository = ref.watch(preferencesRepositoryProvider);
+  return SignUpModel(
+    authService,
+    userRepository,
+    preferencesRepository,
+  );
 });
 
-class SignUpModel extends ViewModel<SignUpEvent> {
+class SignUpModel extends BaseViewModel<SignUpEvent> {
   SignUpModel(
-    this._userRepository,
-    this._authService,
-  );
+    super.userRepository,
+    super.authService,
+    super.preferencesRepository,
+  ) : super(
+          errorEvent: SignUpEvent.showSnackbarError,
+          messageEvent: SignUpEvent.showSnackbarMessage,
+          navigateToLoginEvent: SignUpEvent.navigateToLogin,
+        );
 
   /* Services */
-
-  final UserRepository _userRepository;
-  final AuthService _authService;
 
   /* Fields */
 
@@ -73,8 +82,8 @@ class SignUpModel extends ViewModel<SignUpEvent> {
   /* Calls */
 
   Future<void> cancelSignUp({String? message}) async {
-    await _userRepository.clear();
-    await _authService.signOut();
+    await userRepository.clear();
+    await authService.signOut();
     showSnackbar(
       message ?? "Cadastro cancelado :(",
       SignUpEvent.showSnackbarMessage,
@@ -85,29 +94,27 @@ class SignUpModel extends ViewModel<SignUpEvent> {
   Future<void> completeSignUp() async {
     updateUi(() => _isLoadingSignUp = true);
 
-    try {
-      final newUser = await _userRepository.create(
-        name.trim(),
-        isDoctor ? UserRole.doctor : UserRole.patient,
-      );
-      showSnackbar(
-        "Cadastro bem sucedido! Bem vindo(a) ${newUser.name}!",
-        SignUpEvent.showSnackbarMessage,
-      );
-      if (newUser.role.isDoctor) {
-        emitEvent(SignUpEvent.navigateToDoctorHome);
+    final (newUser, err) = await userRepository.create(
+      name.trim(),
+      isDoctor ? UserRole.doctor : UserRole.patient,
+    );
+    if (err != null) {
+      if (err is ApiUserAlreadyRegisteredError) {
+        await cancelSignUp(
+            message: "Ops! Parece que você já possui uma conta. Tente fazer login novamente");
       } else {
-        emitEvent(SignUpEvent.navigateToPatientHome);
+        await handleDefaultErrors(err);
       }
-      updateUi(() => _isLoadingSignUp = true);
-    } on ApiUserAlreadyRegisteredException catch (_) {
-      await cancelSignUp(
-          message: "Ops! Parece que você já possui uma conta. Tente fazer login novamente");
-    } on ApiConnectionException catch (_) {
-      showSnackbar(
-        "Ocorreu um erro ao tentar se conectar ao servidor. Certifique-se de que seu dispositivo esteja conectado corretamente com a internet",
-        SignUpEvent.showSnackbarError,
-      );
+      return updateUi(() => _isLoadingSignUp = false);
+    }
+    showSnackbar(
+      "Cadastro bem sucedido! Bem vindo(a) ${newUser!.name}!",
+      SignUpEvent.showSnackbarMessage,
+    );
+    if (newUser.role.isDoctor) {
+      emitEvent(SignUpEvent.navigateToDoctorHome);
+    } else {
+      emitEvent(SignUpEvent.navigateToPatientHome);
     }
 
     updateUi(() => _isLoadingSignUp = false);

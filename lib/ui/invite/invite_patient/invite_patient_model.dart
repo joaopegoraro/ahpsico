@@ -80,27 +80,28 @@ class InvitePatientModel extends BaseViewModel<InvitePatientEvent> {
 
     updateUi(() => _isLoading = true);
 
-    try {
-      await _inviteRepository.create(phoneNumber);
-      showSnackbar(
-        "Convite enviado com sucesso!",
-        InvitePatientEvent.showSnackbarMessage,
-      );
-      emitEvent(InvitePatientEvent.closeSheet);
-    } on ApiPatientNotRegisteredException catch (_) {
-      emitEvent(InvitePatientEvent.openPatientNotRegisteredDialog);
-    } on ApiPatientAlreadyWithDoctorException catch (_) {
-      showSnackbar(
-        "O paciente com o número informado já é seu paciente, portanto não precisa de convite",
-        errorEvent,
-      );
-    } on ApiInviteAlreadySentException catch (_) {
-      showSnackbar("Você já enviou um convite para esse paciente", errorEvent);
-    } on ApiUnauthorizedException catch (_) {
-      logout(showError: true);
-    } on ApiConnectionException catch (_) {
-      showConnectionError();
+    final (_, err) = await _inviteRepository.create(phoneNumber);
+    if (err != null) {
+      if (err is ApiPatientAlreadyWithDoctorError) {
+        showSnackbar(
+          "O paciente com o número informado já é seu paciente, portanto não precisa de convite",
+          errorEvent,
+        );
+      } else if (err is ApiPatientNotRegisteredError) {
+        emitEvent(InvitePatientEvent.openPatientNotRegisteredDialog);
+      } else if (err is ApiInviteAlreadySentError) {
+        showSnackbar("Você já enviou um convite para esse paciente", errorEvent);
+      } else {
+        handleDefaultErrors(err);
+      }
+      return updateUi(() => _isLoading = false);
     }
+
+    showSnackbar(
+      "Convite enviado com sucesso!",
+      InvitePatientEvent.showSnackbarMessage,
+    );
+    emitEvent(InvitePatientEvent.closeSheet);
 
     updateUi(() => _isLoading = false);
   }

@@ -61,14 +61,6 @@ class ApiInviteAlreadySentError extends ApiError {
         );
 }
 
-class ApiInvitesNotFoundError extends ApiError {
-  const ApiInvitesNotFoundError({String? message})
-      : super(
-          message: "No invites were found for this account: $message",
-          code: "api_invites_not_found",
-        );
-}
-
 class ApiPatientNotRegisteredError extends ApiError {
   const ApiPatientNotRegisteredError({String? message})
       : super(
