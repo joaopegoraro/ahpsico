@@ -17,6 +17,7 @@ extension ObjectsExtensions on Object {
   Never throwWithStackTrace(StackTrace stackTrace) {
     return Error.throwWithStackTrace(this, stackTrace);
   }
+
 }
 
 extension IterableExtension<E> on Iterable<E> {
@@ -24,12 +25,15 @@ extension IterableExtension<E> on Iterable<E> {
 }
 
 extension StringExtension on String {
-  static const diacritics = 'ÀÁÂÃÄÅàáâãäåÒÓÔÕÕÖØòóôõöøÈÉÊËĚèéêëěðČÇçčÐĎďÌÍÎÏìíîïĽľÙÚÛÜŮùúûüůŇÑñňŘřŠšŤťŸÝÿýŽž';
-  static const nonDiacritics = 'AAAAAAaaaaaaOOOOOOOooooooEEEEEeeeeeeCCccDDdIIIIiiiiLlUUUUUuuuuuNNnnRrSsTtYYyyZz';
+  static const diacritics =
+      'ÀÁÂÃÄÅàáâãäåÒÓÔÕÕÖØòóôõöøÈÉÊËĚèéêëěðČÇçčÐĎďÌÍÎÏìíîïĽľÙÚÛÜŮùúûüůŇÑñňŘřŠšŤťŸÝÿýŽž';
+  static const nonDiacritics =
+      'AAAAAAaaaaaaOOOOOOOooooooEEEEEeeeeeeCCccDDdIIIIiiiiLlUUUUUuuuuuNNnnRrSsTtYYyyZz';
 
   String get withoutDiacriticalMarks => splitMapJoin(
         '',
-        onNonMatch: (char) =>
-            char.isNotEmpty && diacritics.contains(char) ? nonDiacritics[diacritics.indexOf(char)] : char,
+        onNonMatch: (char) => char.isNotEmpty && diacritics.contains(char)
+            ? nonDiacritics[diacritics.indexOf(char)]
+            : char,
       );
 }

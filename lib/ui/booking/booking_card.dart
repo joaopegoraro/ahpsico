@@ -36,10 +36,10 @@ class _BookingCardState extends State<BookingCard> {
     final bookingTimeEnd = widget.booking.value.add(const Duration(hours: 1));
 
     _blockedScheduleId = widget.blockedTimeRanges.entries.firstWhereOrNull((range) {
-      final isStartAfterStart = bookingTimeStart.isAfter(range.value.start);
-      final isStartBeforeEnd = bookingTimeStart.isBefore(range.value.end);
-      final isEndAfterStart = bookingTimeEnd.isAfter(range.value.start);
-      final isEndBeforeEnd = bookingTimeEnd.isBefore(range.value.end);
+      final isStartAfterStart = bookingTimeStart.compareTo(range.value.start) >= 0;
+      final isStartBeforeEnd = bookingTimeStart.compareTo(range.value.end) < 0;
+      final isEndAfterStart = bookingTimeEnd.compareTo(range.value.start) >= 0;
+      final isEndBeforeEnd = bookingTimeEnd.compareTo(range.value.end) < 0;
       return (isStartAfterStart && isStartBeforeEnd) || (isEndAfterStart && isEndBeforeEnd);
     })?.key;
 

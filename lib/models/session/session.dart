@@ -59,7 +59,7 @@ class Session {
       'id': id,
       'doctor': doctor.toMap(),
       'patient': patient.toMap(),
-      'group_index': groupIndex,
+      'groupIndex': groupIndex,
       'status': status.value,
       'type': type.value,
       'date': TimeUtils.formatDateWithOffset(date, AppConstants.datePattern),
@@ -68,13 +68,13 @@ class Session {
 
   factory Session.fromMap(Map<String, dynamic> map) {
     return Session(
-      id: map['id'] as int,
-      doctor: User.fromMap(map['doctor'] as Map<String, dynamic>),
-      patient: User.fromMap(map['patient'] as Map<String, dynamic>),
-      groupIndex: map['group_index'] as int,
-      status: SessionStatus.fromValue(map['status']),
-      type: SessionType.fromValue(map['type']),
-      date: DateFormat(AppConstants.datePattern).parse(map['date']),
+      id: map['id'] as int? ?? -1,
+      doctor: User.fromMap(map['doctor'] as Map<String, dynamic>? ?? {}),
+      patient: User.fromMap(map['patient'] as Map<String, dynamic>? ?? {}),
+      groupIndex: map['groupIndex'] as int? ?? 0,
+      status: SessionStatus.fromValue(map['status'] as int? ?? -1),
+      type: SessionType.fromValue(map['type'] as int? ?? -1),
+      date: DateFormat(AppConstants.datePattern).parse(map['date'] as String? ?? ""),
     );
   }
 

@@ -34,18 +34,19 @@ class Schedule {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
-      'doctor': doctorUuid,
+      'doctorUuid': doctorUuid,
       'date': TimeUtils.formatDateWithOffset(date, AppConstants.datePattern),
-      'is_session': isSession,
+      'isSession': isSession,
     };
   }
 
   factory Schedule.fromMap(Map<String, dynamic> map) {
     return Schedule(
-        id: map['id'] as int,
-        doctorUuid: map['doctor'],
-        date: DateFormat(AppConstants.datePattern).parse(map['date']),
-        isSession: map['is_session']);
+      id: map['id'] as int? ?? -1,
+      doctorUuid: map['doctorUuid'] ?? "",
+      date: DateFormat(AppConstants.datePattern).parse(map['date'] ?? ""),
+      isSession: map['isSession'] ?? false,
+    );
   }
 
   String toJson() {
@@ -65,7 +66,10 @@ class Schedule {
   bool operator ==(covariant Schedule other) {
     if (identical(this, other)) return true;
 
-    return other.id == id && other.doctorUuid == doctorUuid && other.date == date && other.isSession == isSession;
+    return other.id == id &&
+        other.doctorUuid == doctorUuid &&
+        other.date == date &&
+        other.isSession == isSession;
   }
 
   @override

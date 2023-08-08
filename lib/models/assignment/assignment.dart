@@ -49,21 +49,21 @@ class Assignment {
       'title': title,
       'description': description,
       'doctor': doctor.toMap(),
-      'patient': patientId,
+      'patientUuid': patientId,
       'status': status.value,
-      'delivery_session': deliverySession.toMap(),
+      'deliverySession': deliverySession.toMap(),
     };
   }
 
   factory Assignment.fromMap(Map<String, dynamic> map) {
     return Assignment(
-      id: map['id'] as int,
-      title: map['title'] as String,
-      description: map['description'] as String,
-      doctor: User.fromMap(map['doctor'] as Map<String, dynamic>),
-      patientId: map['patient'] as String,
-      status: AssignmentStatus.fromValue(map['status']),
-      deliverySession: Session.fromMap(map['delivery_session'] as Map<String, dynamic>),
+      id: map['id'] as int? ?? -1,
+      title: map['title'] as String? ?? "",
+      description: map['description'] as String? ?? "",
+      doctor: User.fromMap(map['doctor'] as Map<String, dynamic>? ?? {}),
+      patientId: map['patientUuid'] as String? ?? "",
+      status: AssignmentStatus.fromValue(map['status'] as int? ?? -1),
+      deliverySession: Session.fromMap(map['deliverySession'] as Map<String, dynamic>? ?? {}),
     );
   }
 

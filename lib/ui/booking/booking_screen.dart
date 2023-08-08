@@ -169,7 +169,7 @@ class BookingScreen extends StatelessWidget {
             return Expanded(
               child: GridView.count(
                 padding: const EdgeInsets.all(16),
-                key: Key(model.selectedDate.toString()),
+                key: Key(model.selectedDate.toString() + model.isLoading.toString()),
                 crossAxisCount: 4,
                 addAutomaticKeepAlives: false,
                 children: [

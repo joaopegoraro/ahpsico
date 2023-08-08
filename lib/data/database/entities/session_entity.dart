@@ -15,8 +15,8 @@ class SessionEntity {
   final String doctorId;
   final String patientId;
   final int groupIndex;
-  final String status;
-  final String type;
+  final int status;
+  final int type;
   final int dateInMillisecondsSinceEpoch;
 
   static const tableName = "sessions";
@@ -34,8 +34,8 @@ class SessionEntity {
      $doctorIdColumn TEXT,
      $patientIdColumn TEXT,
      $groupIndexColumn INTEGER,
-     $statusColumn TEXT,
-     $typeColumn TEXT,
+     $statusColumn INTEGER,
+     $typeColumn INTEGER,
      $dateColumn INTEGER,
      FOREIGN KEY ($doctorIdColumn) REFERENCES ${UserEntity.tableName} (${UserEntity.uuidColumn}) ON DELETE CASCADE, 
      FOREIGN KEY ($patientIdColumn) REFERENCES ${UserEntity.tableName} (${UserEntity.uuidColumn}) ON DELETE CASCADE)
@@ -47,8 +47,8 @@ class SessionEntity {
     String? patientId,
     int? groupId,
     int? groupIndex,
-    String? status,
-    String? type,
+    int? status,
+    int? type,
     int? dateInMillisecondsSinceEpoch,
   }) {
     return SessionEntity(
@@ -81,8 +81,8 @@ class SessionEntity {
       doctorId: map[doctorIdColumn] as String,
       patientId: map[patientIdColumn] as String,
       groupIndex: map[groupIndexColumn] as int,
-      status: map[statusColumn] as String,
-      type: map[typeColumn] as String,
+      status: map[statusColumn] as int,
+      type: map[typeColumn] as int,
       dateInMillisecondsSinceEpoch: map[dateColumn] as int,
     );
   }

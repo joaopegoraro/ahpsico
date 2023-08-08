@@ -33,17 +33,17 @@ class Invite {
     return <String, dynamic>{
       'id': id,
       'doctor': doctor.toMap(),
-      'patient': patientId,
-      'phone_number': phoneNumber,
+      'patientUuid': patientId,
+      'phoneNumber': phoneNumber,
     };
   }
 
   factory Invite.fromMap(Map<String, dynamic> map) {
     return Invite(
-      id: map['id'] as int,
-      doctor: User.fromMap(map['doctor'] as Map<String, dynamic>),
-      patientId: map['patient'] as String,
-      phoneNumber: map['phone_number'] as String,
+      id: map['id'] as int? ?? -1,
+      doctor: User.fromMap(map['doctor'] as Map<String, dynamic>? ?? {}),
+      patientId: map['patientUuid'] as String? ?? "",
+      phoneNumber: map['phoneNumber'] as String? ?? "",
     );
   }
 

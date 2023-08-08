@@ -35,16 +35,16 @@ class Advice {
       'id': id,
       'message': message,
       'doctor': doctor.toMap(),
-      'patients': patientIds,
+      'patientUuids': patientIds,
     };
   }
 
   factory Advice.fromMap(Map<String, dynamic> map) {
     return Advice(
-      id: map['id'] as int,
-      message: map['message'] as String,
-      doctor: User.fromMap(map['doctor'] as Map<String, dynamic>),
-      patientIds: List<String>.from((map['patients'])),
+      id: map['id'] as int? ?? -1,
+      message: map['message'] as String? ?? "",
+      doctor: User.fromMap(map['doctor'] as Map<String, dynamic>? ?? {}),
+      patientIds: List<String>.from((map['patientUuids'] ?? [])),
     );
   }
 

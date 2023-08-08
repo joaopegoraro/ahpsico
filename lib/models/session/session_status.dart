@@ -1,14 +1,14 @@
 enum SessionStatus {
-  confirmed("CONFIRMED"),
-  notConfirmed("NOT_CONFIRMED"),
-  canceled("CANCELED"),
-  concluded("CONCLUDED");
+  notConfirmed(0),
+  confirmed(1),
+  canceled(2),
+  concluded(3);
 
   const SessionStatus(this.value);
-  final String value;
+  final int value;
 
   factory SessionStatus.fromValue(
-    String value, {
+    int value, {
     SessionStatus fallback = SessionStatus.notConfirmed,
   }) {
     return SessionStatus.values.firstWhere(

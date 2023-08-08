@@ -1,12 +1,12 @@
 enum SessionType {
-  monthly("MONTHLY"),
-  individual("INDIVIDUAL");
+  individual(0),
+  monthly(1);
 
   const SessionType(this.value);
-  final String value;
+  final int value;
 
   factory SessionType.fromValue(
-    String value, {
+    int value, {
     SessionType fallback = SessionType.individual,
   }) {
     return SessionType.values.firstWhere(

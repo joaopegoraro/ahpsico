@@ -67,6 +67,8 @@ class BookingModel extends BaseViewModel<BookingEvent> {
     "10:30": Duration(hours: 10, minutes: 30),
     "11:00": Duration(hours: 11),
     "11:30": Duration(hours: 11, minutes: 30),
+    "12:00": Duration(hours: 12),
+    "12:30": Duration(hours: 12, minutes: 30),
     "13:00": Duration(hours: 13),
     "13:30": Duration(hours: 13, minutes: 30),
     "14:00": Duration(hours: 14),
@@ -218,7 +220,8 @@ class BookingModel extends BaseViewModel<BookingEvent> {
     updateUi(() => _isLoading = true);
 
     final newBlockedSchedule = Schedule(
-      id: 0,
+      // id is created in the server
+      id: -1,
       doctorUuid: user!.uuid,
       date: blockTime,
       isSession: false,
@@ -235,6 +238,7 @@ class BookingModel extends BaseViewModel<BookingEvent> {
       BookingEvent.showSnackbarMessage,
     );
 
+    _schedule.add(newBlockedSchedule);
     updateUi(() => _isLoading = false);
   }
 
@@ -259,6 +263,7 @@ class BookingModel extends BaseViewModel<BookingEvent> {
       "Horário desbloqueado com sucesso!",
       BookingEvent.showSnackbarMessage,
     );
+    _schedule.remove(blockedSchedule);
 
     updateUi(() => _isLoading = false);
   }

@@ -11,6 +11,7 @@ import 'package:ahpsico/services/api/auth_interceptor.dart';
 import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/logger/logging_service.dart';
 import 'package:ahpsico/utils/time_utils.dart';
+import 'package:ahpsico/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -132,7 +133,8 @@ class ApiServiceImpl implements ApiService {
         "code": code,
       },
       parseSuccess: (response) {
-        return User.fromMap(response.data);
+        final map = Utils.castToJsonMap(response.data);
+        return User.fromMap(map);
       },
       parseFailure: (response) {
         if (response?.statusCode == 406) {
@@ -153,7 +155,8 @@ class ApiServiceImpl implements ApiService {
         "role": role.value,
       },
       parseSuccess: (response) {
-        return User.fromMap(response.data);
+        final map = Utils.castToJsonMap(response.data);
+        return User.fromMap(map);
       },
       parseFailure: (response) {
         if (response?.statusCode == 406) {
@@ -173,7 +176,8 @@ class ApiServiceImpl implements ApiService {
         return {"phone_number": phoneNumber};
       },
       parseSuccess: (response) {
-        return Invite.fromMap(response.data);
+        final map = Utils.castToJsonMap(response.data);
+        return Invite.fromMap(map);
       },
       parseFailure: (response) {
         switch (response?.statusCode) {
@@ -203,9 +207,8 @@ class ApiServiceImpl implements ApiService {
       method: "GET",
       endpoint: "invites",
       parseSuccess: (response) {
-        if (response.data == null) return [];
-        final List jsonList = json.decode(response.data);
-        return jsonList.map((e) => Invite.fromMap(e)).toList();
+        final list = Utils.castToJsonList(response.data);
+        return list.map((e) => Invite.fromMap(e)).toList();
       },
     );
   }
@@ -236,7 +239,8 @@ class ApiServiceImpl implements ApiService {
       method: "GET",
       endpoint: "users/$uuid",
       parseSuccess: (response) {
-        return User.fromMap(response.data);
+        final map = Utils.castToJsonMap(response.data);
+        return User.fromMap(map);
       },
     );
   }
@@ -250,7 +254,8 @@ class ApiServiceImpl implements ApiService {
         return user.toMap();
       },
       parseSuccess: (response) {
-        return User.fromMap(response.data);
+        final map = Utils.castToJsonMap(response.data);
+        return User.fromMap(map);
       },
     );
   }
@@ -264,9 +269,8 @@ class ApiServiceImpl implements ApiService {
         "doctorUuid": doctorUuid,
       },
       parseSuccess: (response) {
-        if (response.data == null) return [];
-        final List jsonList = json.decode(response.data);
-        return jsonList.map((e) => User.fromMap(e)).toList();
+        final list = Utils.castToJsonList(response.data);
+        return list.map((e) => User.fromMap(e)).toList();
       },
     );
   }
@@ -287,9 +291,8 @@ class ApiServiceImpl implements ApiService {
         };
       },
       parseSuccess: (response) {
-        if (response.data == null) return [];
-        final List jsonList = json.decode(response.data);
-        return jsonList.map((e) => Session.fromMap(e)).toList();
+        final list = Utils.castToJsonList(response.data);
+        return list.map((e) => Session.fromMap(e)).toList();
       },
     );
   }
@@ -303,9 +306,8 @@ class ApiServiceImpl implements ApiService {
         "doctorUuid": doctorUuid,
       },
       parseSuccess: (response) {
-        if (response.data == null) return [];
-        final List jsonList = json.decode(response.data);
-        return jsonList.map((e) => Advice.fromMap(e)).toList();
+        final list = Utils.castToJsonList(response.data);
+        return list.map((e) => Advice.fromMap(e)).toList();
       },
     );
   }
@@ -319,9 +321,8 @@ class ApiServiceImpl implements ApiService {
         "doctorUuid": doctorUuid,
       },
       parseSuccess: (response) {
-        if (response.data == null) return [];
-        final List jsonList = json.decode(response.data);
-        return jsonList.map((e) => Schedule.fromMap(e)).toList();
+        final list = Utils.castToJsonList(response.data);
+        return list.map((e) => Schedule.fromMap(e)).toList();
       },
     );
   }
@@ -335,9 +336,8 @@ class ApiServiceImpl implements ApiService {
         "patientUuid": patientId,
       },
       parseSuccess: (response) {
-        if (response.data == null) return [];
-        final List jsonList = json.decode(response.data);
-        return jsonList.map((e) => User.fromMap(e)).toList();
+        final list = Utils.castToJsonList(response.data);
+        return list.map((e) => User.fromMap(e)).toList();
       },
     );
   }
@@ -355,9 +355,8 @@ class ApiServiceImpl implements ApiService {
         "upcoming": upcoming,
       },
       parseSuccess: (response) {
-        if (response.data == null) return [];
-        final List jsonList = json.decode(response.data);
-        return jsonList.map((e) => Session.fromMap(e)).toList();
+        final list = Utils.castToJsonList(response.data);
+        return list.map((e) => Session.fromMap(e)).toList();
       },
     );
   }
@@ -375,9 +374,8 @@ class ApiServiceImpl implements ApiService {
         "pending": pending,
       },
       parseSuccess: (response) {
-        if (response.data == null) return [];
-        final List jsonList = json.decode(response.data);
-        return jsonList.map((e) => Assignment.fromMap(e)).toList();
+        final list = Utils.castToJsonList(response.data);
+        return list.map((e) => Assignment.fromMap(e)).toList();
       },
     );
   }
@@ -391,9 +389,8 @@ class ApiServiceImpl implements ApiService {
         "patientUuid": patientId,
       },
       parseSuccess: (response) {
-        if (response.data == null) return [];
-        final List jsonList = json.decode(response.data);
-        return jsonList.map((e) => Advice.fromMap(e)).toList();
+        final list = Utils.castToJsonList(response.data);
+        return list.map((e) => Advice.fromMap(e)).toList();
       },
     );
   }
@@ -404,7 +401,8 @@ class ApiServiceImpl implements ApiService {
       method: "GET",
       endpoint: "sessions/$id",
       parseSuccess: (response) {
-        return Session.fromMap(response.data);
+        final map = Utils.castToJsonMap(response.data);
+        return Session.fromMap(map);
       },
     );
   }
@@ -418,7 +416,8 @@ class ApiServiceImpl implements ApiService {
         return session.toMap();
       },
       parseSuccess: (response) {
-        return Session.fromMap(response.data);
+        final map = Utils.castToJsonMap(response.data);
+        return Session.fromMap(map);
       },
       parseFailure: (response) {
         if (response?.statusCode == 409) {
@@ -438,7 +437,8 @@ class ApiServiceImpl implements ApiService {
         return session.toMap();
       },
       parseSuccess: (response) {
-        return Session.fromMap(response.data);
+        final map = Utils.castToJsonMap(response.data);
+        return Session.fromMap(map);
       },
       parseFailure: (response) {
         if (response?.statusCode == 409) {
@@ -458,7 +458,8 @@ class ApiServiceImpl implements ApiService {
         return assignment.toMap();
       },
       parseSuccess: (response) {
-        return Assignment.fromMap(response.data);
+        final map = Utils.castToJsonMap(response.data);
+        return Assignment.fromMap(map);
       },
     );
   }
@@ -472,7 +473,8 @@ class ApiServiceImpl implements ApiService {
         return assignment.toMap();
       },
       parseSuccess: (response) {
-        return Assignment.fromMap(response.data);
+        final map = Utils.castToJsonMap(response.data);
+        return Assignment.fromMap(map);
       },
     );
   }
@@ -496,7 +498,8 @@ class ApiServiceImpl implements ApiService {
         return advice.toMap();
       },
       parseSuccess: (response) {
-        return Advice.fromMap(response.data);
+        final map = Utils.castToJsonMap(response.data);
+        return Advice.fromMap(map);
       },
     );
   }
@@ -510,7 +513,8 @@ class ApiServiceImpl implements ApiService {
         return advice.toMap();
       },
       parseSuccess: (response) {
-        return Advice.fromMap(response.data);
+        final map = Utils.castToJsonMap(response.data);
+        return Advice.fromMap(map);
       },
     );
   }
@@ -534,7 +538,8 @@ class ApiServiceImpl implements ApiService {
         return schedule.toMap();
       },
       parseSuccess: (response) {
-        return Schedule.fromMap(response.data);
+        final map = Utils.castToJsonMap(response.data);
+        return Schedule.fromMap(map);
       },
     );
   }

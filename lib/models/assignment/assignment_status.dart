@@ -1,13 +1,13 @@
 enum AssignmentStatus {
-  pending("PENDING"),
-  done("DONE"),
-  missed("MISSED");
+  pending(0),
+  done(1),
+  missed(2);
 
   const AssignmentStatus(this.value);
-  final String value;
+  final int value;
 
   factory AssignmentStatus.fromValue(
-    String value, {
+    int value, {
     AssignmentStatus fallback = AssignmentStatus.pending,
   }) {
     return AssignmentStatus.values.firstWhere(
