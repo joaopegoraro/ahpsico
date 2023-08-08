@@ -9,6 +9,7 @@ import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/models/advice.dart';
 import 'package:ahpsico/services/api/auth_interceptor.dart';
 import 'package:ahpsico/services/api/errors.dart';
+import 'package:ahpsico/services/logger/logging_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -89,16 +90,18 @@ final apiServiceProvider = Provider<ApiService>((ref) {
   final loggerInterceptor = PrettyDioLogger(
     requestHeader: true,
     requestBody: true,
-    responseHeader: false,
+    responseHeader: true,
   );
   final dio = Dio(options)..interceptors.addAll([authInterceptor, loggerInterceptor]);
-  return ApiServiceImpl(dio);
+  final logger = ref.watch(loggerProvider);
+  return ApiServiceImpl(dio, logger);
 });
 
 class ApiServiceImpl implements ApiService {
-  ApiServiceImpl(this._dio);
+  ApiServiceImpl(this._dio, this._logger);
 
   final Dio _dio;
+  final LoggingService _logger;
 
   @override
   Future<ApiError?> sendVerificationCode(String phoneNumber) async {
@@ -123,10 +126,10 @@ class ApiServiceImpl implements ApiService {
         "code": code,
       },
       parseSuccess: (response) {
-        return User.fromJson(response.data);
+        return User.fromMap(response.data);
       },
       parseFailure: (response) {
-        if (response.statusCode == 406) {
+        if (response?.statusCode == 406) {
           return const ApiUserNotRegisteredError();
         }
         return null;
@@ -141,13 +144,13 @@ class ApiServiceImpl implements ApiService {
       endpoint: "signup",
       requestBody: () => {
         "name": userName,
-        "role": role,
+        "role": role.value,
       },
       parseSuccess: (response) {
-        return User.fromJson(response.data);
+        return User.fromMap(response.data);
       },
       parseFailure: (response) {
-        if (response.statusCode == 406) {
+        if (response?.statusCode == 406) {
           return const ApiUserAlreadyRegisteredError();
         }
         return null;
@@ -164,14 +167,14 @@ class ApiServiceImpl implements ApiService {
         return {"phone_number": phoneNumber};
       },
       parseSuccess: (response) {
-        return Invite.fromJson(response.data);
+        return Invite.fromMap(response.data);
       },
       parseFailure: (response) {
-        switch (response.statusCode) {
+        switch (response?.statusCode) {
           case 404:
             return const ApiPatientNotRegisteredError();
           case 409:
-            final errorBody = json.decode(response.data) as Map<String, dynamic>;
+            final errorBody = json.decode(response?.data) as Map<String, dynamic>;
             final errorCode = errorBody['code'] as String;
             switch (errorCode) {
               case "invite_already_sent":
@@ -226,7 +229,7 @@ class ApiServiceImpl implements ApiService {
       method: "GET",
       endpoint: "users/$uuid",
       parseSuccess: (response) {
-        return User.fromJson(response.data);
+        return User.fromMap(response.data);
       },
     );
   }
@@ -240,7 +243,7 @@ class ApiServiceImpl implements ApiService {
         return user.toMap();
       },
       parseSuccess: (response) {
-        return User.fromJson(response.data);
+        return User.fromMap(response.data);
       },
     );
   }
@@ -387,7 +390,7 @@ class ApiServiceImpl implements ApiService {
       method: "GET",
       endpoint: "sessions/$id",
       parseSuccess: (response) {
-        return Session.fromJson(response.data);
+        return Session.fromMap(response.data);
       },
     );
   }
@@ -401,10 +404,10 @@ class ApiServiceImpl implements ApiService {
         return session.toMap();
       },
       parseSuccess: (response) {
-        return Session.fromJson(response.data);
+        return Session.fromMap(response.data);
       },
       parseFailure: (response) {
-        if (response.statusCode == 409) {
+        if (response?.statusCode == 409) {
           return const ApiSessionAlreadyBookedError();
         }
         return null;
@@ -421,10 +424,10 @@ class ApiServiceImpl implements ApiService {
         return session.toMap();
       },
       parseSuccess: (response) {
-        return Session.fromJson(response.data);
+        return Session.fromMap(response.data);
       },
       parseFailure: (response) {
-        if (response.statusCode == 409) {
+        if (response?.statusCode == 409) {
           return const ApiSessionAlreadyBookedError();
         }
         return null;
@@ -441,7 +444,7 @@ class ApiServiceImpl implements ApiService {
         return assignment.toMap();
       },
       parseSuccess: (response) {
-        return Assignment.fromJson(response.data);
+        return Assignment.fromMap(response.data);
       },
     );
   }
@@ -455,7 +458,7 @@ class ApiServiceImpl implements ApiService {
         return assignment.toMap();
       },
       parseSuccess: (response) {
-        return Assignment.fromJson(response.data);
+        return Assignment.fromMap(response.data);
       },
     );
   }
@@ -479,7 +482,7 @@ class ApiServiceImpl implements ApiService {
         return advice.toMap();
       },
       parseSuccess: (response) {
-        return Advice.fromJson(response.data);
+        return Advice.fromMap(response.data);
       },
     );
   }
@@ -493,7 +496,7 @@ class ApiServiceImpl implements ApiService {
         return advice.toMap();
       },
       parseSuccess: (response) {
-        return Advice.fromJson(response.data);
+        return Advice.fromMap(response.data);
       },
     );
   }
@@ -517,7 +520,7 @@ class ApiServiceImpl implements ApiService {
         return schedule.toMap();
       },
       parseSuccess: (response) {
-        return Schedule.fromJson(response.data);
+        return Schedule.fromMap(response.data);
       },
     );
   }
@@ -537,7 +540,7 @@ class ApiServiceImpl implements ApiService {
     required String method,
     required String endpoint,
     required T Function(Response response) parseSuccess,
-    ApiError? Function(Response response)? parseFailure,
+    ApiError? Function(Response? response)? parseFailure,
     Object? Function()? requestBody,
     Map<String, dynamic>? Function()? buildQueryParameters,
   }) async {
@@ -549,36 +552,25 @@ class ApiServiceImpl implements ApiService {
         options: Options(method: method),
       );
 
-      switch (response.statusCode) {
-        case 400:
-          return (null, const ApiBadRequestError());
-        case 401:
-        case 403:
-          return (null, const ApiUnauthorizedError());
-      }
-
-      if (response.statusCode == null ||
-          !(response.statusCode! >= 200 && response.statusCode! < 300)) {
-        final failure = parseFailure?.call(response);
-        if (failure != null) {
-          return (null, failure);
-        }
-
-        final nullData = response.data == null;
-        final errorBody = nullData ? null : json.decode(response.data) as Map<dynamic, dynamic>;
-        return (
-          null,
-          ApiError(
-            message: nullData ? "Empty response data" : errorBody.toString(),
-            code: "Status: ${response.statusCode}",
-          ),
-        );
-      }
-
       return (parseSuccess(response), null);
     } on DioException catch (e) {
       if (e.error is ApiError) return (null, e.error as ApiError);
       switch (e.type) {
+        case DioExceptionType.badResponse:
+        case DioExceptionType.unknown:
+          switch (e.response?.statusCode) {
+            case 400:
+              return (null, const ApiBadRequestError());
+            case 401:
+              return (null, const ApiUnauthorizedError());
+          }
+
+          final failure = parseFailure?.call(e.response);
+          if (failure != null) {
+            return (null, failure);
+          }
+
+          return (null, ApiError(code: "Status: ${e.response?.statusCode}"));
         case DioExceptionType.connectionTimeout:
         case DioExceptionType.sendTimeout:
         case DioExceptionType.receiveTimeout:
@@ -586,6 +578,9 @@ class ApiServiceImpl implements ApiService {
         default:
           return (null, ApiConnectionError(message: e.message));
       }
+    } catch (e) {
+      _logger.e("Unknown error", e);
+      return (null, ApiError(message: e.toString()));
     }
   }
 }

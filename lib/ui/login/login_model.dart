@@ -69,9 +69,8 @@ class LoginModel extends BaseViewModel<LoginEvent> {
   String get verificationCode => _verificationCode;
   bool get isCodeValid => verificationCode.length == 6;
 
-  @visibleForTesting
-  String codeVerificationId = "";
-  bool get hasCodeBeenSent => codeVerificationId.isNotEmpty;
+  bool _hasCodeBeenSent = false;
+  bool get hasCodeBeenSent => _hasCodeBeenSent;
 
   /* Methods */
 
@@ -79,7 +78,7 @@ class LoginModel extends BaseViewModel<LoginEvent> {
     if (hasCodeBeenSent) {
       updateUi(() {
         _verificationCode = "";
-        codeVerificationId = "";
+        _hasCodeBeenSent = false;
       });
       return false;
     }
@@ -155,14 +154,26 @@ class LoginModel extends BaseViewModel<LoginEvent> {
       );
       return updateUi(() => _isLoadingSendingCode = false);
     }
+
+    return updateUi(() {
+      emitEvent(LoginEvent.startCodeTimer);
+      _isLoadingSendingCode = false;
+      _hasCodeBeenSent = true;
+    });
   }
 
   Future<void> _signIn(String phoneNumber, String code) async {
     updateUi(() => _isLoadingSignIn = true);
-    var (user, err) = await authService.login(phoneNumber, code);
+    final unmaskedPhone = "+55${MaskFormatters.phoneMaskFormatter.unmaskText(phoneNumber)}";
+    var (user, err) = await authService.login(unmaskedPhone, code);
     if (err != null) {
       if (err is ApiUserNotRegisteredError) {
         emitEvent(LoginEvent.navigateToSignUp);
+      } else if (err is ApiBadRequestError) {
+        showSnackbar(
+          "O código informado não está correto",
+          LoginEvent.showSnackbarError,
+        );
       } else {
         await handleDefaultErrors(err);
       }

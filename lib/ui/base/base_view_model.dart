@@ -79,8 +79,13 @@ abstract class BaseViewModel<T> extends ViewModel<T> {
       return await logout(showError: true);
     } else if (err is ApiConnectionError) {
       return showConnectionError();
-    } else if (defaultErrorMessage != null) {
-      return showSnackbar(defaultErrorMessage, errorEvent);
+    } else {
+      return showSnackbar(
+        defaultErrorMessage ??
+            "Ocorreu um erro desconhecido."
+                " Tente novamente mais tarde ou entre em contato com o suporte",
+        errorEvent,
+      );
     }
   }
 

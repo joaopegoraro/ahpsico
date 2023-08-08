@@ -109,88 +109,85 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           return WillPopScope(
             onWillPop: model.cancelCodeVerification,
             child: SafeArea(
-              child: SingleChildScrollView(
-                child: Container(
-                  padding: const EdgeInsets.all(46),
-                  child: Column(
-                    children: [
-                      Text(
-                        model.hasCodeBeenSent
-                            ? "Digite o código que foi enviado por SMS para ${model.phoneNumber}"
-                            : "Digite seu telefone para entrar ou criar uma conta no aplicativo",
+              child: Container(
+                padding: const EdgeInsets.all(46),
+                child: Column(
+                  children: [
+                    Text(
+                      model.hasCodeBeenSent
+                          ? "Digite o código que foi enviado por SMS para ${model.phoneNumber}"
+                          : "Digite seu telefone para entrar ou criar uma conta no aplicativo",
+                      textAlign: TextAlign.center,
+                      style: AhpsicoText.title3Style.copyWith(color: AhpsicoColors.light80),
+                    ),
+                    const Spacer(),
+                    if (model.hasCodeBeenSent) ...[
+                      AhpsicoInputField(
+                        controller: _codeController,
                         textAlign: TextAlign.center,
-                        style: AhpsicoText.title3Style.copyWith(color: AhpsicoColors.light80),
+                        hint: "Código de seis dígitos",
+                        readOnly: true,
+                        errorText:
+                            _codeController.text.isNotEmpty && !model.isCodeValid ? "" : null,
+                        borderColor: model.isCodeValid ? AhpsicoColors.green : null,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(6),
+                        ],
+                        inputType: TextInputType.number,
+                        maxLenght: 6,
+                        borderWidth: _codeController.text.isEmpty ? null : 2.0,
+                        canRequestFocus: false,
                       ),
-                      AhpsicoSpacing.verticalSpaceRegular,
-                      if (model.hasCodeBeenSent) ...[
-                        AhpsicoInputField(
-                          controller: _codeController,
-                          textAlign: TextAlign.center,
-                          hint: "Código de seis dígitos",
-                          readOnly: true,
-                          errorText:
-                              _codeController.text.isNotEmpty && !model.isCodeValid ? "" : null,
-                          borderColor: model.isCodeValid ? AhpsicoColors.green : null,
-                          inputFormatters: [
-                            LengthLimitingTextInputFormatter(6),
-                          ],
-                          inputType: TextInputType.number,
-                          maxLenght: 6,
-                          borderWidth: _codeController.text.isEmpty ? null : 2.0,
-                          canRequestFocus: false,
-                        ),
-                        AhpsicoSpacing.verticalSpaceRegular,
-                        Row(
-                          children: [
-                            Countdown(
-                              animation: StepTween(
-                                begin: LoginModel.timerDuration.inSeconds,
-                                end: 0,
-                              ).animate(_codeTimercontroller),
+                      Row(
+                        children: [
+                          Countdown(
+                            animation: StepTween(
+                              begin: LoginModel.timerDuration.inSeconds,
+                              end: 0,
+                            ).animate(_codeTimercontroller),
+                          ),
+                          const Spacer(),
+                          if (_codeTimercontroller.isCompleted) ...[
+                            AhpsicoSpacing.horizontalSpaceRegular,
+                            TextButton(
+                              onPressed:
+                                  model.isLoadingSignIn ? null : () => model.sendVerificationCode(),
+                              child: Text(
+                                "Reenviar código",
+                                style:
+                                    AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.blue20),
+                              ),
                             ),
-                            const Spacer(),
-                            if (_codeTimercontroller.isCompleted) ...[
-                              AhpsicoSpacing.horizontalSpaceRegular,
-                              TextButton(
-                                onPressed: model.isLoadingSignIn
-                                    ? null
-                                    : () => model.sendVerificationCode(),
-                                child: Text(
-                                  "Reenviar código",
-                                  style: AhpsicoText.regular1Style
-                                      .copyWith(color: AhpsicoColors.blue20),
-                                ),
-                              ),
-                            ],
                           ],
-                        ),
-                      ] else
-                        PhoneInputField(
-                          controller: _phoneController,
-                          errorColor: AhpsicoColors.red60,
-                          isPhoneValid: model.isPhoneValid,
-                          readOnly: true,
-                        ),
-                      AhpsicoSpacing.verticalSpaceRegular,
-                      NumericKeyboard(
-                        textStyle: AhpsicoText.title1Style.copyWith(color: AhpsicoColors.light80),
-                        leftIcon: const Icon(Icons.backspace, color: AhpsicoColors.light80),
-                        allowLeftLongPress: true,
-                        onTapLeftButton: model.deleteText,
-                        rightIcon: (model.isLoadingSendindCode || model.isLoadingSignIn)
-                            ? const CircularProgressIndicator(color: AhpsicoColors.green80)
-                            : Icon(
-                                Icons.arrow_forward_ios,
-                                color: (!model.hasCodeBeenSent && model.isPhoneValid) ||
-                                        (model.hasCodeBeenSent && model.isCodeValid)
-                                    ? AhpsicoColors.green80
-                                    : AhpsicoColors.light60,
-                              ),
-                        onTapRightButton: model.confirmText,
-                        onKeyboardTap: model.updateText,
+                        ],
                       ),
-                    ],
-                  ),
+                    ] else
+                      PhoneInputField(
+                        controller: _phoneController,
+                        errorColor: AhpsicoColors.red60,
+                        isPhoneValid: model.isPhoneValid,
+                        readOnly: true,
+                      ),
+                    const Spacer(),
+                    AhpsicoSpacing.verticalSpaceRegular,
+                    NumericKeyboard(
+                      textStyle: AhpsicoText.title1Style.copyWith(color: AhpsicoColors.light80),
+                      leftIcon: const Icon(Icons.backspace, color: AhpsicoColors.light80),
+                      allowLeftLongPress: true,
+                      onTapLeftButton: model.deleteText,
+                      rightIcon: (model.isLoadingSendindCode || model.isLoadingSignIn)
+                          ? const CircularProgressIndicator(color: AhpsicoColors.green80)
+                          : Icon(
+                              Icons.arrow_forward_ios,
+                              color: (!model.hasCodeBeenSent && model.isPhoneValid) ||
+                                      (model.hasCodeBeenSent && model.isCodeValid)
+                                  ? AhpsicoColors.green80
+                                  : AhpsicoColors.light60,
+                            ),
+                      onTapRightButton: model.confirmText,
+                      onKeyboardTap: model.updateText,
+                    ),
+                  ],
                 ),
               ),
             ),
