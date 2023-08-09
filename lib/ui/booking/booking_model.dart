@@ -95,6 +95,9 @@ class BookingModel extends BaseViewModel<BookingEvent> {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  bool _isLoadingFetchData = false;
+  bool get isLoadingFetchData => _isLoadingFetchData;
+
   DateTime? _newSessionTime;
   DateTime? get newSessionTime => _newSessionTime;
 
@@ -227,7 +230,7 @@ class BookingModel extends BaseViewModel<BookingEvent> {
       isSession: false,
     );
 
-    final (_, err) = await _scheduleRepository.create(newBlockedSchedule);
+    final (createdSchedule, err) = await _scheduleRepository.create(newBlockedSchedule);
     if (err != null) {
       await handleDefaultErrors(err);
       return updateUi(() => _isLoading = false);
@@ -238,7 +241,7 @@ class BookingModel extends BaseViewModel<BookingEvent> {
       BookingEvent.showSnackbarMessage,
     );
 
-    _schedule.add(newBlockedSchedule);
+    _schedule.add(createdSchedule!);
     updateUi(() => _isLoading = false);
   }
 
@@ -269,10 +272,10 @@ class BookingModel extends BaseViewModel<BookingEvent> {
   }
 
   Future<void> fetchScreenData({required String? doctorUuid}) async {
-    updateUi(() => _isLoading = true);
+    updateUi(() => _isLoadingFetchData = true);
     await getUserData();
     await _getSchedules(doctorUuid: doctorUuid);
-    updateUi(() => _isLoading = false);
+    updateUi(() => _isLoadingFetchData = false);
   }
 
   Future<void> _getSchedules({required String? doctorUuid}) async {
@@ -280,7 +283,7 @@ class BookingModel extends BaseViewModel<BookingEvent> {
     final (schedule, err) = await _scheduleRepository.getDoctorSchedule(doctorUuid ?? userUid);
     if (err != null) {
       await handleDefaultErrors(err);
-      return updateUi(() => _isLoading = false);
+      return updateUi(() => _isLoadingFetchData = false);
     }
     _schedule = schedule ?? [];
   }

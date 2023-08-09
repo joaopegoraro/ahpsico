@@ -13,6 +13,7 @@ import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:ahpsico/ui/session/create_session/create_session_dialog.dart';
 import 'package:ahpsico/utils/extensions.dart';
 import 'package:ahpsico/utils/time_utils.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_neat_and_clean_calendar/flutter_neat_and_clean_calendar.dart';
 import 'package:go_router/go_router.dart';
@@ -107,7 +108,7 @@ class BookingScreen extends StatelessWidget {
         model.fetchScreenData(doctorUuid: doctor?.uuid);
       },
       shouldShowLoading: (context, model) {
-        return model.isLoading || model.user == null;
+        return model.isLoadingFetchData || model.user == null;
       },
       topbarBuilder: (context, model) {
         return Topbar(
@@ -161,45 +162,65 @@ class BookingScreen extends StatelessWidget {
               final schedule = event.metadata![_scheduleMetadata] as Schedule;
               final range = DateTimeRange(
                 start: schedule.date,
-                end: schedule.date.add(const Duration(hours: 1)),
+                end: schedule.date.add(
+                  schedule.isSession ? const Duration(hours: 1) : const Duration(minutes: 30),
+                ),
               );
               return MapEntry(schedule.id, range);
             }));
 
+            print(model.schedule);
+
             return Expanded(
-              child: GridView.count(
-                padding: const EdgeInsets.all(16),
-                key: Key(model.selectedDate.toString() + model.isLoading.toString()),
-                crossAxisCount: 4,
-                addAutomaticKeepAlives: false,
+              child: Stack(
                 children: [
-                  ...model.availableSchedule.entries.map((availableBooking) {
-                    return BookingCard(
-                      booking: MapEntry(
-                        availableBooking.key,
-                        selectedDay.add(availableBooking.value),
-                      ),
-                      blockedTimeRanges: blockedTimeRanges,
-                      onTapAvailable: (bookingTime) {
-                        if (session != null) {
-                          model.openRescheduleSessionDialog(bookingTime);
-                        } else if (doctor != null) {
-                          model.openSessionCreationDialog(bookingTime);
-                        } else {
-                          model.blockSchedule(bookingTime);
-                        }
-                      },
-                      onTapBlocked: (blockedScheduleId) {
-                        if (session != null) {
-                          model.showBookingNotAvailableError();
-                        } else if (doctor != null) {
-                          model.showBookingNotAvailableError();
-                        } else {
-                          model.unblockSchedule(blockedScheduleId);
-                        }
-                      },
-                    );
-                  }),
+                  GridView.count(
+                    padding: const EdgeInsets.all(16),
+                    key: Key(model.selectedDate.toString() + model.schedule.length.toString()),
+                    crossAxisCount: 4,
+                    addAutomaticKeepAlives: false,
+                    children: [
+                      ...model.availableSchedule.entries.whereNot((availableBooking) {
+                        return selectedDay
+                            .add(availableBooking.value)
+                            .isBefore(now.add(const Duration(hours: 3)));
+                      }).map((availableBooking) {
+                        return BookingCard(
+                          booking: MapEntry(
+                            availableBooking.key,
+                            selectedDay.add(availableBooking.value),
+                          ),
+                          isBlockingSchedule: model.user!.role.isDoctor,
+                          blockedTimeRanges: blockedTimeRanges,
+                          onTapAvailable: (bookingTime) {
+                            if (session != null) {
+                              model.openRescheduleSessionDialog(bookingTime);
+                            } else if (doctor != null) {
+                              model.openSessionCreationDialog(bookingTime);
+                            } else {
+                              model.blockSchedule(bookingTime);
+                            }
+                          },
+                          onTapBlocked: (blockedScheduleId) {
+                            if (session != null) {
+                              model.showBookingNotAvailableError();
+                            } else if (doctor != null) {
+                              model.showBookingNotAvailableError();
+                            } else {
+                              model.unblockSchedule(blockedScheduleId);
+                            }
+                          },
+                        );
+                      }),
+                    ],
+                  ),
+                  if (model.isLoading)
+                    Container(
+                      color: Colors.grey.withOpacity(0.8),
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
                 ],
               ),
             );

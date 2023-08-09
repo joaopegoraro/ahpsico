@@ -12,12 +12,14 @@ class BookingCard extends StatefulWidget {
     super.key,
     required this.booking,
     required this.blockedTimeRanges,
+    required this.isBlockingSchedule,
     required this.onTapAvailable,
     required this.onTapBlocked,
   });
 
   final Booking booking;
   final TimeRanges blockedTimeRanges;
+  final bool isBlockingSchedule;
   final void Function(DateTime bookingTime) onTapAvailable;
   final void Function(int blockedScheduleId) onTapBlocked;
 
@@ -33,12 +35,14 @@ class _BookingCardState extends State<BookingCard> {
   void initState() {
     super.initState();
     final bookingTimeStart = widget.booking.value;
-    final bookingTimeEnd = widget.booking.value.add(const Duration(hours: 1));
+    final bookingTimeEnd = widget.booking.value.add(
+      widget.isBlockingSchedule ? const Duration(minutes: 30) : const Duration(hours: 1),
+    );
 
     _blockedScheduleId = widget.blockedTimeRanges.entries.firstWhereOrNull((range) {
       final isStartAfterStart = bookingTimeStart.compareTo(range.value.start) >= 0;
       final isStartBeforeEnd = bookingTimeStart.compareTo(range.value.end) < 0;
-      final isEndAfterStart = bookingTimeEnd.compareTo(range.value.start) >= 0;
+      final isEndAfterStart = bookingTimeEnd.compareTo(range.value.start) > 0;
       final isEndBeforeEnd = bookingTimeEnd.compareTo(range.value.end) < 0;
       return (isStartAfterStart && isStartBeforeEnd) || (isEndAfterStart && isEndBeforeEnd);
     })?.key;
