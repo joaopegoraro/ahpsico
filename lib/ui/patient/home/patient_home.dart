@@ -45,7 +45,8 @@ class PatientHome extends StatelessWidget {
         if (model.selectedInvite == null) return;
         AhpsicoDialog.show(
           context: context,
-          content: "Gostaria de aceitar o convite de terapia com ${model.selectedInvite!.doctor.name}?",
+          content:
+              "Gostaria de aceitar o convite de terapia com ${model.selectedInvite!.doctor.name}?",
           firstButtonText: "Sim, aceitar convite",
           onTapFirstButton: () => model.acceptInvite(model.selectedInvite!),
           secondButtonText: "Não, rejeitar convite",
@@ -115,7 +116,7 @@ class PatientHome extends StatelessWidget {
             Row(
               children: [
                 HomeButton(
-                  text: "VER SESSÕES",
+                  text: "SESSÕES",
                   enableFlex: true,
                   color: AhpsicoColors.violet,
                   icon: Icons.groups,
@@ -123,7 +124,7 @@ class PatientHome extends StatelessWidget {
                 ),
                 AhpsicoSpacing.horizontalSpaceSmall,
                 HomeButton(
-                  text: "VER TAREFAS",
+                  text: "TAREFAS",
                   enableFlex: true,
                   color: AhpsicoColors.green,
                   icon: Icons.home_work,

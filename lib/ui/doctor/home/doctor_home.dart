@@ -124,7 +124,7 @@ class DoctorHome extends StatelessWidget {
             Row(
               children: [
                 HomeButton(
-                  text: "VER PACIENTES",
+                  text: "PACIENTES",
                   enableFlex: true,
                   color: AhpsicoColors.violet,
                   icon: Icons.groups,
@@ -132,10 +132,10 @@ class DoctorHome extends StatelessWidget {
                 ),
                 AhpsicoSpacing.horizontalSpaceSmall,
                 HomeButton(
-                  text: "VER MENSAGENS ENVIADAS",
+                  text: "MENSAGENS",
                   enableFlex: true,
                   color: AhpsicoColors.green,
-                  icon: Icons.tips_and_updates,
+                  icon: Icons.message,
                   onPressed: () => context.push(AdvicesList.route),
                 ),
               ],
