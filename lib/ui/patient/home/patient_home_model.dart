@@ -124,7 +124,7 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
   Future<void> _syncPatientDoctors() async {
     final err = await _doctorRepository.syncPatientDoctors(user!.uuid);
     if (err != null) {
-      return await handleDefaultErrors(err);
+      return await handleDefaultErrors(err, shouldShowConnectionError: false);
     }
   }
 
@@ -134,7 +134,7 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
     if (sync) {
       final err = await _sessionRepository.syncPatientSessions(userUid, upcoming: true);
       if (err != null) {
-        await handleDefaultErrors(err);
+        await handleDefaultErrors(err, shouldShowConnectionError: false);
       }
     }
 
@@ -150,7 +150,7 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
     if (sync) {
       final err = await _assignmentRepository.syncPatientAssignments(userUid, pending: true);
       if (err != null) {
-        await handleDefaultErrors(err);
+        await handleDefaultErrors(err, shouldShowConnectionError: false);
       }
     }
 
@@ -166,7 +166,7 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
     if (sync) {
       final err = await _adviceRepository.syncPatientAdvices(userUid);
       if (err != null) {
-        await handleDefaultErrors(err);
+        await handleDefaultErrors(err, shouldShowConnectionError: false);
       }
     }
 
@@ -177,7 +177,7 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
     if (sync) {
       final err = await _inviteRepository.sync();
       if (err != null) {
-        await handleDefaultErrors(err);
+        await handleDefaultErrors(err, shouldShowConnectionError: false);
       }
     }
 

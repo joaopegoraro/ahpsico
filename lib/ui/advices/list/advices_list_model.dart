@@ -93,7 +93,7 @@ class AdviceListModel extends BaseViewModel<AdviceListEvent> {
       err = await _adviceRepository.syncDoctorAdvices(user!.uuid);
     }
     if (err != null) {
-      await handleDefaultErrors(err);
+      await handleDefaultErrors(err, shouldShowConnectionError: false);
     }
 
     if (patientUuid != null) {
@@ -109,7 +109,9 @@ class AdviceListModel extends BaseViewModel<AdviceListEvent> {
     for (final adviceId in _selectedAdvicesIds) {
       final err = await _adviceRepository.delete(adviceId);
       if (err != null) {
-        await handleDefaultErrors(err);
+        clearSelection();
+        updateUi(() => _isLoading = false);
+        return await handleDefaultErrors(err);
       }
     }
 

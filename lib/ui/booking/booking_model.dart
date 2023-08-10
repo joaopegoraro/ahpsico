@@ -280,7 +280,7 @@ class BookingModel extends BaseViewModel<BookingEvent> {
 
     final (schedule, err) = await _scheduleRepository.getDoctorSchedule(doctorUuid ?? userUid);
     if (err != null) {
-      await handleDefaultErrors(err);
+      await handleDefaultErrors(err, shouldShowConnectionError: false);
     }
 
     _schedule = schedule ?? [];

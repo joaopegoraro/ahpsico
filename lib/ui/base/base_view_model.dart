@@ -54,7 +54,10 @@ abstract class BaseViewModel<T> extends ViewModel<T> {
   }
 
   @protected
-  Future<void> getUserData({bool sync = false}) async {
+  Future<void> getUserData({
+    bool sync = false,
+    bool showConnectionError = false,
+  }) async {
     final uuid = await preferencesRepository.findUuid();
     if (uuid == null) {
       return await logout(showError: true);
@@ -63,7 +66,10 @@ abstract class BaseViewModel<T> extends ViewModel<T> {
     if (sync) {
       final err = await userRepository.sync(uuid);
       if (err != null) {
-        await handleDefaultErrors(err);
+        await handleDefaultErrors(
+          err,
+          shouldShowConnectionError: showConnectionError,
+        );
       }
     }
 
@@ -74,11 +80,15 @@ abstract class BaseViewModel<T> extends ViewModel<T> {
   }
 
   @protected
-  Future<void> handleDefaultErrors(ApiError err, {String? defaultErrorMessage}) async {
+  Future<void> handleDefaultErrors(
+    ApiError err, {
+    bool shouldShowConnectionError = true,
+    String? defaultErrorMessage,
+  }) async {
     if (err is ApiUnauthorizedError) {
       return await logout(showError: true);
     } else if (err is ApiConnectionError) {
-      return showConnectionError();
+      if (shouldShowConnectionError) return showConnectionError();
     } else {
       return showSnackbar(
         defaultErrorMessage ??

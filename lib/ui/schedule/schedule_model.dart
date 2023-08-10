@@ -70,7 +70,7 @@ class ScheduleModel extends BaseViewModel<ScheduleEvent> {
       err = await _sessionRepository.syncPatientSessions(userUid);
     }
     if (err != null) {
-      await handleDefaultErrors(err);
+      await handleDefaultErrors(err, shouldShowConnectionError: false);
     }
 
     if (isDoctor) {

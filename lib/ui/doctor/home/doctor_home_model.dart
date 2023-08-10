@@ -86,7 +86,7 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
     if (sync) {
       final err = await _sessionRepository.syncDoctorSessions(userUid, date: now);
       if (err != null) {
-        await handleDefaultErrors(err);
+        await handleDefaultErrors(err, shouldShowConnectionError: false);
       }
     }
 
@@ -96,7 +96,7 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
   Future<void> _syncDoctorPatients() async {
     final err = await _patientRepository.syncDoctorPatients(user!.uuid);
     if (err != null) {
-      return await handleDefaultErrors(err);
+      await handleDefaultErrors(err, shouldShowConnectionError: false);
     }
   }
 }

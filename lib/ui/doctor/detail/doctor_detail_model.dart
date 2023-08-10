@@ -80,7 +80,7 @@ class DoctorDetailModel extends BaseViewModel<DoctorDetailEvent> {
 
   Future<void> fetchScreenData({required User? doctor}) async {
     updateUi(() => _isLoading = true);
-    await getUserData();
+    await getUserData(showConnectionError: true);
     if (doctor != null) {
       _doctor = doctor;
     } else {

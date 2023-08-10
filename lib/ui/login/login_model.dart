@@ -207,7 +207,7 @@ class LoginModel extends BaseViewModel<LoginEvent> {
       return updateUi(() => _isLoadingAutoSignIn = false);
     }
 
-    await getUserData(sync: true);
+    await getUserData(sync: true, showConnectionError: true);
     if (user!.role.isDoctor) {
       emitEvent(LoginEvent.navigateToDoctorHome);
     } else {
