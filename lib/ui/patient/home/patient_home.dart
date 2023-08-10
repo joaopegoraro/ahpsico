@@ -62,7 +62,7 @@ class PatientHome extends StatelessWidget {
         AhpsicoSheet.show(
           context: context,
           builder: (context) {
-            return EditPatientNameSheet(patient: model.patient!);
+            return EditPatientNameSheet(patient: model.user!);
           },
         ).then((shouldRefresh) {
           if (shouldRefresh == true) {
@@ -112,7 +112,9 @@ class PatientHome extends StatelessWidget {
               ),
               AhpsicoSpacing.verticalSpaceSmall,
               Text(
-                "${model.sessions.length} sessões agendadas",
+                model.sessions.length > 1
+                    ? "${model.sessions.length} sessões agendadas"
+                    : "${model.sessions.length} sessão agendada",
                 style: AhpsicoText.title1Style.copyWith(
                   color: AhpsicoColors.dark75,
                 ),
@@ -126,7 +128,11 @@ class PatientHome extends StatelessWidget {
                   enableFlex: true,
                   color: AhpsicoColors.violet,
                   icon: Icons.event,
-                  onPressed: () => context.push(SessionList.route),
+                  onPressed: () => navigateThenFetchScreenDataOnReturn(
+                    context,
+                    model: model,
+                    route: SessionList.route,
+                  ),
                 ),
                 AhpsicoSpacing.horizontalSpaceSmall,
                 HomeButton(
@@ -134,13 +140,21 @@ class PatientHome extends StatelessWidget {
                   enableFlex: true,
                   color: AhpsicoColors.green,
                   icon: Icons.home_work,
-                  onPressed: () => context.push(AssignmentsList.route),
+                  onPressed: () => navigateThenFetchScreenDataOnReturn(
+                    context,
+                    model: model,
+                    route: AssignmentsList.route,
+                  ),
                 ),
               ],
             ),
             AhpsicoSpacing.verticalSpaceMedium,
             TextButton(
-              onPressed: () => context.push(ScheduleScreen.route),
+              onPressed: () => navigateThenFetchScreenDataOnReturn(
+                context,
+                model: model,
+                route: ScheduleScreen.route,
+              ),
               style: const ButtonStyle(
                 shape: MaterialStatePropertyAll(RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(28)),
@@ -173,8 +187,10 @@ class PatientHome extends StatelessWidget {
               return SessionCard(
                 session: session,
                 isUserDoctor: false,
-                onTap: (session) => context.push(
-                  SessionDetail.route,
+                onTap: (session) => navigateThenFetchScreenDataOnReturn(
+                  context,
+                  model: model,
+                  route: SessionDetail.route,
                   extra: session,
                 ),
               );
@@ -226,8 +242,10 @@ class PatientHome extends StatelessWidget {
                 return AssignmentCard(
                   assignment: assignment,
                   isUserDoctor: false,
-                  onTap: (assignment) => context.push(
-                    AssignmentDetail.route,
+                  onTap: (assignment) => navigateThenFetchScreenDataOnReturn(
+                    context,
+                    model: model,
+                    route: AssignmentDetail.route,
                     extra: assignment,
                   ),
                 );
@@ -243,5 +261,16 @@ class PatientHome extends StatelessWidget {
         );
       },
     );
+  }
+
+  void navigateThenFetchScreenDataOnReturn(
+    BuildContext context, {
+    required PatientHomeModel model,
+    required String route,
+    Object? extra,
+  }) {
+    context.push(route, extra: extra).then((_) {
+      model.fetchScreenData(sync: false);
+    });
   }
 }

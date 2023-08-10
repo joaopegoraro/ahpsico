@@ -1,4 +1,3 @@
-import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:flutter/material.dart';
 
 class AhpsicoSheet extends StatelessWidget {
@@ -17,7 +16,6 @@ class AhpsicoSheet extends StatelessWidget {
       context: context,
       useSafeArea: true,
       isScrollControlled: true,
-      backgroundColor: AhpsicoColors.light,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(20)),
       ),

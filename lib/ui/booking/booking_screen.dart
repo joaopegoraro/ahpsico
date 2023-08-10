@@ -109,7 +109,7 @@ class BookingScreen extends StatelessWidget {
       provider: bookingModelProvider,
       onEventEmitted: _onEventEmitted,
       onCreate: (model) {
-        model.fetchScreenData(doctorUuid: doctor?.uuid);
+        model.fetchScreenData(doctorUuid: doctor?.uuid ?? session?.doctor.uuid);
       },
       shouldShowLoading: (context, model) {
         return model.isLoadingFetchData || model.user == null;

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:ahpsico/constants/app_constants.dart';
 import 'package:ahpsico/models/invite.dart';
@@ -576,6 +577,11 @@ class ApiServiceImpl implements ApiService {
         case DioExceptionType.badResponse:
         case DioExceptionType.unknown:
           _logger.e("Dio Unknown error", e, stackTrace);
+
+          if (e.error is SocketException) {
+            return (null, ApiConnectionError(message: e.message));
+          }
+
           switch (e.response?.statusCode) {
             case 400:
               return (null, const ApiBadRequestError());

@@ -114,7 +114,9 @@ class DoctorHome extends StatelessWidget {
               ),
               AhpsicoSpacing.verticalSpaceSmall,
               Text(
-                "${model.sessions.length} sessões",
+                model.sessions.length > 1
+                    ? "${model.sessions.length} sessões"
+                    : "${model.sessions.length} sessão",
                 style: AhpsicoText.title1Style.copyWith(
                   color: AhpsicoColors.dark75,
                 ),
@@ -142,7 +144,11 @@ class DoctorHome extends StatelessWidget {
             ),
             AhpsicoSpacing.verticalSpaceMedium,
             TextButton(
-              onPressed: () => context.push(ScheduleScreen.route),
+                onPressed: () => navigateThenFetchScreenDataOnReturn(
+                  context,
+                  model: model,
+                  route: ScheduleScreen.route,
+                ),
               style: const ButtonStyle(
                 shape: MaterialStatePropertyAll(RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(28)),
@@ -175,8 +181,10 @@ class DoctorHome extends StatelessWidget {
               return SessionCard(
                 session: session,
                 isUserDoctor: true,
-                onTap: (session) => context.push(
-                  SessionDetail.route,
+                onTap: (session) => navigateThenFetchScreenDataOnReturn(
+                  context,
+                  model: model,
+                  route: SessionDetail.route,
                   extra: session,
                 ),
               );
@@ -191,5 +199,16 @@ class DoctorHome extends StatelessWidget {
         );
       },
     );
+  }
+
+  void navigateThenFetchScreenDataOnReturn(
+    BuildContext context, {
+    required DoctorHomeModel model,
+    required String route,
+    Object? extra,
+  }) {
+    context.push(route, extra: extra).then((_) {
+      model.fetchScreenData(sync: false);
+    });
   }
 }

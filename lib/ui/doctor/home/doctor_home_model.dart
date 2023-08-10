@@ -1,3 +1,4 @@
+import 'package:ahpsico/data/repositories/patient_repository.dart';
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
@@ -18,12 +19,14 @@ final doctorHomeModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final sessionRepository = ref.watch(sessionRepositoryProvider);
+  final patientRepository = ref.watch(patientRepositoryProvider);
   final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return DoctorHomeModel(
     authService,
     userRepository,
     preferencesRepository,
     sessionRepository,
+    patientRepository,
   );
 });
 
@@ -33,6 +36,7 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
     super.userRepository,
     super.preferencesRepository,
     this._sessionRepository,
+    this._patientRepository,
   ) : super(
           errorEvent: DoctorHomeEvent.showSnackbarError,
           messageEvent: DoctorHomeEvent.showSnackbarMessage,
@@ -41,6 +45,7 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
 
   /* Services */
   final SessionRepository _sessionRepository;
+  final PatientRepository _patientRepository;
 
   /* Fields */
 
@@ -62,22 +67,36 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
 
   /* Calls */
 
-  Future<void> fetchScreenData() async {
-    updateUi(() => _isLoading = true);
-    await getUserData(sync: true);
-    await _getTodaySessions();
+  Future<void> fetchScreenData({bool sync = true}) async {
+    updateUi(() => _isLoading = sync);
+    await getUserData(sync: sync);
+
+    if (sync) {
+      await _syncDoctorPatients();
+    }
+
+    await _getTodaySessions(sync: sync);
     updateUi(() => _isLoading = false);
   }
 
-  Future<void> _getTodaySessions() async {
+  Future<void> _getTodaySessions({bool sync = true}) async {
     final userUid = user!.uuid;
     final now = DateTime.now();
 
-    final err = await _sessionRepository.syncDoctorSessions(userUid, date: now);
-    if (err != null) {
-      return await handleDefaultErrors(err);
+    if (sync) {
+      final err = await _sessionRepository.syncDoctorSessions(userUid, date: now);
+      if (err != null) {
+        return await handleDefaultErrors(err);
+      }
     }
 
     _sessions = await _sessionRepository.getDoctorSessions(userUid, date: now);
+  }
+
+  Future<void> _syncDoctorPatients() async {
+    final err = await _patientRepository.syncDoctorPatients(user!.uuid);
+    if (err != null) {
+      return await handleDefaultErrors(err);
+    }
   }
 }

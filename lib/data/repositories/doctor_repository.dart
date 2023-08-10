@@ -11,7 +11,7 @@ import 'package:sqflite/sqflite.dart' as sqflite;
 abstract interface class DoctorRepository {
   Future<List<User>> getPatientDoctors(String patientId);
 
-  Future<ApiError?> syncPatientDoctors(String doctorId);
+  Future<ApiError?> syncPatientDoctors(String patientId);
 
   Future<void> clear();
 }
