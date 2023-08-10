@@ -107,7 +107,13 @@ class AssignmentDetail extends StatelessWidget {
       topbarBuilder: (context, model) {
         return Topbar(
           title: "Tarefa",
-          onBackPressed: () => context.go(LoginScreen.route),
+          onBackPressed: () {
+            if (model.updatedAssignment != null) {
+              context.go(LoginScreen.route);
+            } else {
+              context.pop();
+            }
+          }
         );
       },
       bodyBuilder: (context, model) {

@@ -120,9 +120,14 @@ class SessionDetail extends StatelessWidget {
       },
       topbarBuilder: (context, model) {
         return Topbar(
-          title: "Sessão",
-          onBackPressed: () => context.go(LoginScreen.route),
-        );
+            title: "Sessão",
+            onBackPressed: () {
+              if (model.updatedSession != null) {
+                context.go(LoginScreen.route);
+              } else {
+                context.pop();
+              }
+            });
       },
       bodyBuilder: (context, model) {
         final session = _getSession(model);
