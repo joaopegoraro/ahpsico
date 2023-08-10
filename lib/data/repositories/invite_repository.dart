@@ -2,6 +2,7 @@ import 'package:ahpsico/data/database/ahpsico_database.dart';
 import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/entities/invite_entity.dart';
 import 'package:ahpsico/data/database/mappers/invite_mapper.dart';
+import 'package:ahpsico/data/database/mappers/user_mapper.dart';
 import 'package:ahpsico/models/invite.dart';
 import 'package:ahpsico/services/api/api_service.dart';
 import 'package:ahpsico/services/api/errors.dart';
@@ -43,13 +44,6 @@ final class InviteRepositoryImpl implements InviteRepository {
   Future<(Invite?, ApiError?)> create(String phoneNumber) async {
     final (createdInvite, err) = await _api.createInvite(phoneNumber);
     if (err != null) return (null, err);
-
-    await _db.insert(
-      InviteEntity.tableName,
-      InviteMapper.toEntity(createdInvite!).toMap(),
-      conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-    );
-
     return (createdInvite, null);
   }
 
@@ -61,6 +55,12 @@ final class InviteRepositoryImpl implements InviteRepository {
     final batch = _db.batch();
     batch.delete(InviteEntity.tableName);
     for (final invite in invites!) {
+      batch.insert(
+        UserEntity.tableName,
+        UserMapper.toEntity(invite.doctor).toMap(),
+        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
+      );
+
       batch.insert(
         InviteEntity.tableName,
         InviteMapper.toEntity(invite).toMap(),

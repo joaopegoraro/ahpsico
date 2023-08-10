@@ -89,9 +89,6 @@ class BookingModel extends BaseViewModel<BookingEvent> {
 
   /* Fields */
 
-  User? _patient;
-  User? get patient => _patient;
-
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -147,7 +144,7 @@ class BookingModel extends BaseViewModel<BookingEvent> {
         final newSession = Session(
           id: 0,
           doctor: doctor,
-          patient: patient!,
+          patient: user!,
           groupIndex: index,
           status: SessionStatus.notConfirmed,
           type: SessionType.monthly,
@@ -159,7 +156,7 @@ class BookingModel extends BaseViewModel<BookingEvent> {
       final newSession = Session(
         id: 0,
         doctor: doctor,
-        patient: patient!,
+        patient: user!,
         groupIndex: 0,
         status: SessionStatus.notConfirmed,
         type: SessionType.individual,

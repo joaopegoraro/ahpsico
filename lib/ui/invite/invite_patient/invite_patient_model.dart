@@ -5,6 +5,7 @@ import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
+import 'package:ahpsico/utils/mask_formatters.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum InvitePatientEvent {
@@ -80,7 +81,8 @@ class InvitePatientModel extends BaseViewModel<InvitePatientEvent> {
 
     updateUi(() => _isLoading = true);
 
-    final (_, err) = await _inviteRepository.create(phoneNumber);
+    final unmaskedPhone = "+55${MaskFormatters.phoneMaskFormatter.unmaskText(phoneNumber)}";
+    final (_, err) = await _inviteRepository.create(unmaskedPhone);
     if (err != null) {
       if (err is ApiPatientAlreadyWithDoctorError) {
         showSnackbar(

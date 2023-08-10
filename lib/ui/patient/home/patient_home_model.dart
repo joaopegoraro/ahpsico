@@ -163,7 +163,7 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
     if (err != null) {
       await handleDefaultErrors(err);
     }
-    fetchScreenData();
+    await fetchScreenData();
     updateUi(() => _isLoading = false);
   }
 
@@ -173,7 +173,7 @@ class PatientHomeModel extends BaseViewModel<PatientHomeEvent> {
     if (err != null) {
       await handleDefaultErrors(err);
     }
-    fetchScreenData();
+    await fetchScreenData();
     updateUi(() => _isLoading = false);
   }
 }

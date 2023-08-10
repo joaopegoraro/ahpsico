@@ -12,8 +12,6 @@ import 'package:sqflite/sqflite.dart' as sqflite;
 abstract interface class AdviceRepository {
   Future<(Advice?, ApiError?)> create(Advice advice);
 
-  Future<(Advice?, ApiError?)> update(Advice advice);
-
   Future<ApiError?> delete(int id);
 
   Future<List<Advice>> getPatientAdvices(String patientId);
@@ -53,19 +51,6 @@ final class AdviceRepositoryImpl implements AdviceRepository {
       conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
     );
     return (createdAdvice, null);
-  }
-
-  @override
-  Future<(Advice?, ApiError?)> update(Advice advice) async {
-    final (updatedAdvice, err) = await _api.updateAdvice(advice);
-    if (err != null) return (updatedAdvice, err);
-    await _db.insert(
-      AdviceEntity.tableName,
-      AdviceMapper.toEntity(updatedAdvice!).toMap(),
-      conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-    );
-
-    return (updatedAdvice, null);
   }
 
   @override

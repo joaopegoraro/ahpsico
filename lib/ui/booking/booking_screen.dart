@@ -66,36 +66,40 @@ class BookingScreen extends StatelessWidget {
           firstButtonText: "Ok",
         );
       case BookingEvent.openRescheduleSessionDialog:
-        AhpsicoDialog.show(
-          context: context,
-          content: "Tem certeza que deseja remarcar a sessão para "
-              "${TimeUtils.getReadableDate(model.selectedDate)}, "
-              "às ${TimeUtils.getDateAsHours(model.selectedDate)}?",
-          firstButtonText: "Sim, tenho certeza",
-          secondButtonText: "Cancelar",
-          onTapFirstButton: () {
-            context.pop();
-            model.rescheduleSession(session: session!).then((updatedSession) {
-              context.pop(updatedSession);
-            });
-          },
-        );
+        if (model.newSessionTime != null) {
+          AhpsicoDialog.show(
+            context: context,
+            content: "Tem certeza que deseja remarcar a sessão para "
+                "${TimeUtils.getReadableDate(model.newSessionTime!)}, "
+                "às ${TimeUtils.getDateAsHours(model.newSessionTime!)}?",
+            firstButtonText: "Sim, tenho certeza",
+            secondButtonText: "Cancelar",
+            onTapFirstButton: () {
+              context.pop();
+              model.rescheduleSession(session: session!).then((updatedSession) {
+                context.pop(updatedSession);
+              });
+            },
+          );
+        }
       case BookingEvent.openSessionCreationDialog:
-        showDialog(
-          context: context,
-          builder: (context) {
-            return CreateSessionDialog(
-              dateTime: model.selectedDate,
-              onConfirm: (isMonthly) {
-                context.pop();
-                model.scheduleSession(
-                  doctor: doctor!,
-                  monthly: isMonthly,
-                );
-              },
-            );
-          },
-        );
+        if (model.newSessionTime != null) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return CreateSessionDialog(
+                dateTime: model.newSessionTime!,
+                onConfirm: (isMonthly) {
+                  context.pop();
+                  model.scheduleSession(
+                    doctor: doctor!,
+                    monthly: isMonthly,
+                  );
+                },
+              );
+            },
+          );
+        }
     }
   }
 
@@ -168,8 +172,6 @@ class BookingScreen extends StatelessWidget {
               );
               return MapEntry(schedule.id, range);
             }));
-
-            print(model.schedule);
 
             return Expanded(
               child: Stack(

@@ -76,8 +76,6 @@ abstract interface class ApiService {
 
   Future<(Advice?, ApiError?)> createAdvice(Advice advice);
 
-  Future<(Advice?, ApiError?)> updateAdvice(Advice advice);
-
   Future<ApiError?> deleteAdvice(int id);
 
   Future<(Schedule?, ApiError?)> createSchedule(Schedule schedule);
@@ -115,7 +113,7 @@ class ApiServiceImpl implements ApiService {
     final (_, err) = await request(
       method: "POST",
       endpoint: "verification-code",
-      requestBody: () => {
+      requestBody: () => <String, dynamic>{
         "phoneNumber": phoneNumber,
       },
       parseSuccess: (response) {/* SUCCESS! */},
@@ -128,7 +126,7 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "POST",
       endpoint: "login",
-      requestBody: () => {
+      requestBody: () => <String, dynamic>{
         "phoneNumber": phoneNumber,
         "code": code,
       },
@@ -150,7 +148,7 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "POST",
       endpoint: "signup",
-      requestBody: () => {
+      requestBody: () => <String, dynamic>{
         "name": userName,
         "role": role.value,
       },
@@ -172,8 +170,8 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "POST",
       endpoint: "invites",
-      requestBody: () {
-        return {"phone_number": phoneNumber};
+      requestBody: () => <String, dynamic>{
+        "phoneNumber": phoneNumber,
       },
       parseSuccess: (response) {
         final map = Utils.castToJsonMap(response.data);
@@ -265,7 +263,7 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "GET",
       endpoint: "patients",
-      buildQueryParameters: () => {
+      buildQueryParameters: () => <String, dynamic>{
         "doctorUuid": doctorUuid,
       },
       parseSuccess: (response) {
@@ -302,7 +300,7 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "GET",
       endpoint: "advices",
-      buildQueryParameters: () => {
+      buildQueryParameters: () => <String, dynamic>{
         "doctorUuid": doctorUuid,
       },
       parseSuccess: (response) {
@@ -317,7 +315,7 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "GET",
       endpoint: "schedule",
-      buildQueryParameters: () => {
+      buildQueryParameters: () => <String, dynamic>{
         "doctorUuid": doctorUuid,
       },
       parseSuccess: (response) {
@@ -332,7 +330,7 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "GET",
       endpoint: "doctors",
-      buildQueryParameters: () => {
+      buildQueryParameters: () => <String, dynamic>{
         "patientUuid": patientId,
       },
       parseSuccess: (response) {
@@ -350,7 +348,7 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "GET",
       endpoint: "sessions",
-      buildQueryParameters: () => {
+      buildQueryParameters: () => <String, dynamic>{
         "patientUuid": patientId,
         "upcoming": upcoming,
       },
@@ -369,7 +367,7 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "GET",
       endpoint: "assignments",
-      buildQueryParameters: () => {
+      buildQueryParameters: () => <String, dynamic>{
         "patientUuid": patientId,
         "pending": pending,
       },
@@ -385,7 +383,7 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "GET",
       endpoint: "advices",
-      buildQueryParameters: () => {
+      buildQueryParameters: () => <String, dynamic>{
         "patientUuid": patientId,
       },
       parseSuccess: (response) {
@@ -412,12 +410,17 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "POST",
       endpoint: "sessions",
-      requestBody: () {
-        return session.toMap();
+      requestBody: () => <String, dynamic>{
+        "doctorUuid": session.doctor.uuid,
+        "patientUuid": session.patient.uuid,
+        "groupIndex": session.groupIndex,
+        "status": session.status.value,
+        "type": session.type.value,
+        "date": TimeUtils.formatDateWithOffset(session.date, AppConstants.datePattern),
       },
       parseSuccess: (response) {
         final map = Utils.castToJsonMap(response.data);
-        return Session.fromMap(map);
+        return session.copyWith(id: map["id"]);
       },
       parseFailure: (response) {
         if (response?.statusCode == 409) {
@@ -433,12 +436,13 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "PUT",
       endpoint: "sessions/${session.id}",
-      requestBody: () {
-        return session.toMap();
+      requestBody: () => <String, dynamic>{
+        "status": session.status.value,
+        "date": TimeUtils.formatDateWithOffset(session.date, AppConstants.datePattern),
       },
       parseSuccess: (response) {
         final map = Utils.castToJsonMap(response.data);
-        return Session.fromMap(map);
+        return session.copyWith(id: map["id"]);
       },
       parseFailure: (response) {
         if (response?.statusCode == 409) {
@@ -454,12 +458,17 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "POST",
       endpoint: "assignments",
-      requestBody: () {
-        return assignment.toMap();
+      requestBody: () => <String, dynamic>{
+        "doctorUuid": assignment.doctor.uuid,
+        "patientUuid": assignment.patientId,
+        "deliverySessionId": assignment.deliverySession.id,
+        "title": assignment.title,
+        "description": assignment.description,
+        "status": assignment.status.value,
       },
       parseSuccess: (response) {
         final map = Utils.castToJsonMap(response.data);
-        return Assignment.fromMap(map);
+        return assignment.copyWith(id: map["id"]);
       },
     );
   }
@@ -469,12 +478,14 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "PUT",
       endpoint: "assignments/${assignment.id}",
-      requestBody: () {
-        return assignment.toMap();
+      requestBody: () => <String, dynamic>{
+        "title": assignment.title,
+        "description": assignment.description,
+        "status": assignment.status.value,
       },
       parseSuccess: (response) {
         final map = Utils.castToJsonMap(response.data);
-        return Assignment.fromMap(map);
+        return assignment.copyWith(id: map["id"]);
       },
     );
   }
@@ -494,23 +505,10 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "POST",
       endpoint: "advices",
-      requestBody: () {
-        return advice.toMap();
-      },
-      parseSuccess: (response) {
-        final map = Utils.castToJsonMap(response.data);
-        return Advice.fromMap(map);
-      },
-    );
-  }
-
-  @override
-  Future<(Advice?, ApiError?)> updateAdvice(Advice advice) async {
-    return await request(
-      method: "PUT",
-      endpoint: "assignments/${advice.id}",
-      requestBody: () {
-        return advice.toMap();
+      requestBody: () => <String, dynamic>{
+        "doctorUuid": advice.doctor.uuid,
+        "message": advice.message,
+        "patientUuids": advice.patientIds,
       },
       parseSuccess: (response) {
         final map = Utils.castToJsonMap(response.data);
@@ -572,11 +570,12 @@ class ApiServiceImpl implements ApiService {
       );
 
       return (parseSuccess(response), null);
-    } on DioException catch (e) {
+    } on DioException catch (e, stackTrace) {
       if (e.error is ApiError) return (null, e.error as ApiError);
       switch (e.type) {
         case DioExceptionType.badResponse:
         case DioExceptionType.unknown:
+          _logger.e("Dio Unknown error", e, stackTrace);
           switch (e.response?.statusCode) {
             case 400:
               return (null, const ApiBadRequestError());

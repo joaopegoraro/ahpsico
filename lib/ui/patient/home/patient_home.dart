@@ -48,9 +48,15 @@ class PatientHome extends StatelessWidget {
           content:
               "Gostaria de aceitar o convite de terapia com ${model.selectedInvite!.doctor.name}?",
           firstButtonText: "Sim, aceitar convite",
-          onTapFirstButton: () => model.acceptInvite(model.selectedInvite!),
+          onTapFirstButton: () {
+            context.pop();
+            model.acceptInvite(model.selectedInvite!);
+          },
           secondButtonText: "Não, rejeitar convite",
-          onTapSecondButton: () => model.denyInvite(model.selectedInvite!),
+          onTapSecondButton: () {
+            context.pop();
+            model.denyInvite(model.selectedInvite!);
+          },
         );
       case PatientHomeEvent.openEditNameSheet:
         AhpsicoSheet.show(
@@ -119,7 +125,7 @@ class PatientHome extends StatelessWidget {
                   text: "SESSÕES",
                   enableFlex: true,
                   color: AhpsicoColors.violet,
-                  icon: Icons.groups,
+                  icon: Icons.event,
                   onPressed: () => context.push(SessionList.route),
                 ),
                 AhpsicoSpacing.horizontalSpaceSmall,
