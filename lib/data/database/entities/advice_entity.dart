@@ -1,5 +1,3 @@
-import 'package:ahpsico/data/database/entities/user_entity.dart';
-
 class AdviceEntity {
   AdviceEntity({
     required this.id,
@@ -20,8 +18,7 @@ class AdviceEntity {
     CREATE TABLE $tableName (
      $idColumn INTEGER PRIMARY KEY, 
      $messageColumn TEXT, 
-     $doctorIdColumn TEXT,
-     FOREIGN KEY ($doctorIdColumn) REFERENCES ${UserEntity.tableName} (${UserEntity.uuidColumn}) ON DELETE CASCADE)
+     $doctorIdColumn TEXT)
 """;
 
   AdviceEntity copyWith({

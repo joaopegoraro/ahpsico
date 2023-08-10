@@ -43,7 +43,7 @@ final class AuthServiceImpl implements AuthService {
   @override
   Future<void> signOut() async {
     for (final table in AhpsicoDatabase.tables) {
-      await _db.rawDelete("DELETE FROM ?", [table]);
+      await _db.rawDelete("DELETE FROM $table");
     }
     return await _preferencesRepository.clear();
   }

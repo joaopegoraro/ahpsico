@@ -1,6 +1,3 @@
-import 'package:ahpsico/data/database/entities/user_entity.dart';
-import 'package:ahpsico/data/database/entities/session_entity.dart';
-
 class AssignmentEntity {
   AssignmentEntity({
     required this.id,
@@ -37,10 +34,7 @@ class AssignmentEntity {
      $doctorIdColumn TEXT,
      $patientIdColumn TEXT,
      $statusColumn INTEGER,
-     $deliverySessionIdColumn INTEGER,
-     FOREIGN KEY ($doctorIdColumn) REFERENCES ${UserEntity.tableName} (${UserEntity.uuidColumn}) ON DELETE CASCADE, 
-     FOREIGN KEY ($patientIdColumn) REFERENCES ${UserEntity.tableName} (${UserEntity.uuidColumn}) ON DELETE CASCADE, 
-     FOREIGN KEY ($deliverySessionIdColumn) REFERENCES ${SessionEntity.tableName} (${SessionEntity.idColumn}) ON DELETE CASCADE)
+     $deliverySessionIdColumn INTEGER)
 """;
 
   AssignmentEntity copyWith({

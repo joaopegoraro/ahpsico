@@ -1,5 +1,3 @@
-import 'package:ahpsico/data/database/entities/user_entity.dart';
-
 class InviteEntity {
   InviteEntity({
     required this.id,
@@ -24,9 +22,7 @@ class InviteEntity {
      $idColumn INTEGER PRIMARY KEY, 
      $doctorIdColumn TEXT,
      $patientIdColumn TEXT,
-     $phoneNumberColumn TEXT,
-     FOREIGN KEY ($doctorIdColumn) REFERENCES ${UserEntity.tableName} (${UserEntity.uuidColumn}) ON DELETE CASCADE, 
-     FOREIGN KEY ($patientIdColumn) REFERENCES ${UserEntity.tableName} (${UserEntity.uuidColumn}) ON DELETE CASCADE)
+     $phoneNumberColumn TEXT)
 """;
 
   InviteEntity copyWith({

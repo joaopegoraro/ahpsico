@@ -1,5 +1,3 @@
-import 'package:ahpsico/data/database/entities/user_entity.dart';
-
 class SessionEntity {
   SessionEntity({
     required this.id,
@@ -36,9 +34,7 @@ class SessionEntity {
      $groupIndexColumn INTEGER,
      $statusColumn INTEGER,
      $typeColumn INTEGER,
-     $dateColumn INTEGER,
-     FOREIGN KEY ($doctorIdColumn) REFERENCES ${UserEntity.tableName} (${UserEntity.uuidColumn}) ON DELETE CASCADE, 
-     FOREIGN KEY ($patientIdColumn) REFERENCES ${UserEntity.tableName} (${UserEntity.uuidColumn}) ON DELETE CASCADE)
+     $dateColumn INTEGER)
 """;
 
   SessionEntity copyWith({

@@ -1,5 +1,4 @@
 import 'package:ahpsico/data/database/ahpsico_database.dart';
-import 'package:ahpsico/data/database/entities/patient_with_doctor.dart';
 import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/mappers/user_mapper.dart';
 import 'package:ahpsico/models/user.dart';
@@ -37,11 +36,9 @@ final class PatientRepositoryImpl implements PatientRepository {
   Future<List<User>> getDoctorPatients(String doctorId) async {
     final patientsMap = await _db.rawQuery(
       """
-        SELECT d.* FROM ${UserEntity.tableName} d  
-          LEFT JOIN ${PatientWithDoctor.tableName} pd ON pd.${PatientWithDoctor.patientIdColumn} = d.${UserEntity.uuidColumn}  
-          WHERE pd.${PatientWithDoctor.doctorIdColumn} = ?
+        SELECT * FROM ${UserEntity.tableName} WHERE ${UserEntity.roleColumn} = ?
         """,
-      [doctorId],
+      [UserRole.patient.value],
     );
 
     return patientsMap.mapToList((e) {
@@ -59,23 +56,15 @@ final class PatientRepositoryImpl implements PatientRepository {
 
     batch.rawDelete(
       """
-        DELETE FROM ${UserEntity.tableName} WHERE ${UserEntity.uuidColumn} in (
-          SELECT ${UserEntity.uuidColumn} FROM ${UserEntity.tableName} d  
-            LEFT JOIN ${PatientWithDoctor.tableName} pd ON pd.${PatientWithDoctor.patientIdColumn} = d.${UserEntity.uuidColumn}  
-            WHERE pd.${PatientWithDoctor.doctorIdColumn} = ?)
-        """,
-      [doctorId],
+        DELETE FROM ${UserEntity.tableName} WHERE ${UserEntity.roleColumn} = ?
+      """,
+      [UserRole.patient.value],
     );
 
     for (final patient in patients!) {
       batch.insert(
         UserEntity.tableName,
         UserMapper.toEntity(patient).toMap(),
-        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-      );
-      batch.insert(
-        PatientWithDoctor.tableName,
-        PatientWithDoctor(patientId: patient.uuid, doctorId: doctorId).toMap(),
         conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
       );
     }

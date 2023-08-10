@@ -9,6 +9,7 @@ import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/utils/extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
+import 'package:sqflite/sqlite_api.dart';
 
 abstract interface class AdviceRepository {
   Future<(Advice?, ApiError?)> create(Advice advice);
@@ -140,7 +141,13 @@ final class AdviceRepositoryImpl implements AdviceRepository {
         conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
       );
     }
-    await batch.commit(noResult: true);
+
+    try {
+      await batch.commit(noResult: true);
+    } on DatabaseException catch (e, stackTrace) {
+      print(e);
+      print(stackTrace);
+    }
 
     return null;
   }

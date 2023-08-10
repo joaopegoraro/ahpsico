@@ -1,6 +1,5 @@
 import 'package:ahpsico/data/database/ahpsico_database.dart';
 import 'package:ahpsico/data/database/entities/user_entity.dart';
-import 'package:ahpsico/data/database/entities/patient_with_doctor.dart';
 import 'package:ahpsico/data/database/mappers/user_mapper.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/api_service.dart';
@@ -36,11 +35,9 @@ final class DoctorRepositoryImpl implements DoctorRepository {
   Future<List<User>> getPatientDoctors(String patientId) async {
     final doctorsMap = await _db.rawQuery(
       """
-        SELECT * FROM ${UserEntity.tableName} d  
-          LEFT JOIN ${PatientWithDoctor.tableName} pd ON pd.${PatientWithDoctor.doctorIdColumn} = d.${UserEntity.uuidColumn}  
-          WHERE pd.${PatientWithDoctor.patientIdColumn} = ?
-        """,
-      [patientId],
+        SELECT * FROM ${UserEntity.tableName} WHERE ${UserEntity.roleColumn} = ?
+      """,
+      [UserRole.doctor.value],
     );
 
     return doctorsMap.mapToList((e) {
@@ -57,23 +54,15 @@ final class DoctorRepositoryImpl implements DoctorRepository {
     final batch = _db.batch();
     batch.rawDelete(
       """
-        DELETE FROM ${UserEntity.tableName} WHERE ${UserEntity.uuidColumn} in (
-          SELECT ${UserEntity.uuidColumn} FROM ${UserEntity.tableName} d  
-            LEFT JOIN ${PatientWithDoctor.tableName} pd ON pd.${PatientWithDoctor.doctorIdColumn} = d.${UserEntity.uuidColumn}  
-            WHERE pd.${PatientWithDoctor.patientIdColumn} = ?)
-        """,
-      [patientId],
+        DELETE FROM ${UserEntity.tableName} WHERE ${UserEntity.roleColumn} = ?
+      """,
+      [UserRole.doctor.value],
     );
 
     for (final doctor in doctors!) {
       batch.insert(
         UserEntity.tableName,
         UserMapper.toEntity(doctor).toMap(),
-        conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
-      );
-      batch.insert(
-        PatientWithDoctor.tableName,
-        PatientWithDoctor(patientId: patientId, doctorId: doctor.uuid).toMap(),
         conflictAlgorithm: sqflite.ConflictAlgorithm.replace,
       );
     }

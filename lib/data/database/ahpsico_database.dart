@@ -3,7 +3,6 @@ import 'package:ahpsico/data/database/entities/advice_with_patient.dart';
 import 'package:ahpsico/data/database/entities/assignment_entity.dart';
 import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/entities/invite_entity.dart';
-import 'package:ahpsico/data/database/entities/patient_with_doctor.dart';
 import 'package:ahpsico/data/database/entities/session_entity.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meta/meta.dart';
@@ -19,7 +18,6 @@ abstract class AhpsicoDatabase {
 
   static const tables = [
     UserEntity.tableName,
-    PatientWithDoctor.tableName,
     SessionEntity.tableName,
     AdviceEntity.tableName,
     AdviceWithPatient.tableName,
@@ -29,7 +27,6 @@ abstract class AhpsicoDatabase {
 
   static const _tablesCreationStatements = [
     UserEntity.creationStatement,
-    PatientWithDoctor.creationStatement,
     SessionEntity.creationStatement,
     AdviceEntity.creationStatement,
     AdviceWithPatient.creationStatement,
@@ -53,6 +50,9 @@ abstract class AhpsicoDatabase {
     return await openDatabase(
       join(dbPath, dbName),
       version: _dbVersion,
+      onConfigure: (db) async {
+        await db.execute('PRAGMA foreign_keys = ON');
+      },
       onCreate: (db, version) async {
         for (final statement in _tablesCreationStatements) {
           await db.execute(statement);
