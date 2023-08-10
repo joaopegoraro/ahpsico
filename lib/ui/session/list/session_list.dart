@@ -90,13 +90,7 @@ class SessionList extends StatelessWidget {
                   if (navigateBackOnTap) {
                     return context.pop(session);
                   }
-                  context.push(SessionDetail.route, extra: session).then(
-                    (shouldRefresh) {
-                      if (shouldRefresh == true) {
-                        model.fetchScreenData(patientUuid: patient?.uuid);
-                      }
-                    },
-                  );
+                  context.push(SessionDetail.route, extra: session);
                 },
               ),
             );

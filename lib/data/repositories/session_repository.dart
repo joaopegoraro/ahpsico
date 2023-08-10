@@ -3,6 +3,7 @@ import 'package:ahpsico/data/database/entities/session_entity.dart';
 import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/mappers/session_mapper.dart';
 import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/session/session_status.dart';
 import 'package:ahpsico/services/api/api_service.dart';
 import 'package:ahpsico/services/api/errors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -97,6 +98,10 @@ final class SessionRepositoryImpl implements SessionRepository {
     final sessions = <Session>[];
     for (final sessionMap in sessionsMap) {
       final entity = SessionEntity.fromMap(sessionMap);
+      final nonUpcomingStatus = [SessionStatus.canceled.value, SessionStatus.concluded.value];
+      if (upcoming && nonUpcomingStatus.contains(entity.status)) {
+        continue;
+      }
 
       final doctorsMap = await _db.query(
         UserEntity.tableName,

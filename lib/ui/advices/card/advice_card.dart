@@ -53,7 +53,8 @@ class _AdviceCardState extends State<AdviceCard> {
             : messageIsTooBig
                 ? () => setState(() => isExpanded = !isExpanded)
                 : null,
-        onLongPress: widget.onLongPress == null ? null : () => widget.onLongPress?.call(widget.advice),
+        onLongPress:
+            widget.onLongPress == null ? null : () => widget.onLongPress?.call(widget.advice),
         borderRadius: const BorderRadius.all(Radius.circular(4)),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -62,14 +63,16 @@ class _AdviceCardState extends State<AdviceCard> {
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 child: widget.selectModeOn && widget.isSelected
-                    ? Row(children: [
-                        Checkbox(
-                          value: widget.isSelected,
-                          fillColor: const MaterialStatePropertyAll(AhpsicoColors.violet),
-                          onChanged: null,
-                        ),
-                        AhpsicoSpacing.horizontalSpaceSmall,
-                      ])
+                    ? Row(
+                        children: [
+                          Checkbox(
+                            value: widget.isSelected,
+                            fillColor: const MaterialStatePropertyAll(AhpsicoColors.violet),
+                            onChanged: null,
+                          ),
+                          AhpsicoSpacing.horizontalSpaceSmall,
+                        ],
+                      )
                     : const SizedBox.shrink(),
               ),
               Expanded(
@@ -97,6 +100,7 @@ class _AdviceCardState extends State<AdviceCard> {
                           ),
                       ],
                     ),
+                    AhpsicoSpacing.verticalSpaceTiny,
                     Text(
                       !messageIsTooBig || isExpanded
                           ? widget.advice.message

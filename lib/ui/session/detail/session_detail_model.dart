@@ -11,6 +11,7 @@ enum SessionDetailEvent {
   concludeSession,
   cancelSession,
   confirmSession,
+  rescheduleSession,
   showSnackbarError,
   showSnackbarMessage,
   navigateToLogin,
@@ -50,7 +51,14 @@ class SessionDetailModel extends BaseViewModel<SessionDetailEvent> {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  Session? _updatedSession;
+  Session? get updatedSession => _updatedSession;
+
   /* Method */
+
+  void setUpdatedSession(Session? updatedSession) {
+    _updatedSession = updatedSession;
+  }
 
   void emitCancelSessionEvent() {
     emitEvent(SessionDetailEvent.cancelSession);
@@ -64,6 +72,10 @@ class SessionDetailModel extends BaseViewModel<SessionDetailEvent> {
     emitEvent(SessionDetailEvent.confirmSession);
   }
 
+  void emitRescheduleSessionEvent() {
+    emitEvent(SessionDetailEvent.rescheduleSession);
+  }
+
   /* Calls */
 
   Future<void> fetchScreenData() async {
@@ -72,45 +84,48 @@ class SessionDetailModel extends BaseViewModel<SessionDetailEvent> {
     updateUi(() => _isLoading = false);
   }
 
-  Future<Session?> confirmSession(Session session) async {
+  Future<void> confirmSession(Session session) async {
     updateUi(() => _isLoading = true);
+
     final (newSession, err) = await _sessionRepository.update(
       session.copyWith(status: SessionStatus.confirmed),
     );
     if (err != null) {
       await handleDefaultErrors(err);
-      updateUi(() => _isLoading = false);
-      return null;
+      return updateUi(() => _isLoading = false);
     }
 
-    updateUi(() => _isLoading = false);
+    updateUi(() {
+      _isLoading = false;
+      setUpdatedSession(newSession);
+    });
     showSnackbar(
       "Sessão confirmada com sucesso!",
       SessionDetailEvent.showSnackbarMessage,
     );
-    return newSession;
   }
 
-  Future<Session?> cancelSession(Session session) async {
+  Future<void> cancelSession(Session session) async {
     updateUi(() => _isLoading = true);
     final (newSession, err) = await _sessionRepository.update(
       session.copyWith(status: SessionStatus.canceled),
     );
     if (err != null) {
       await handleDefaultErrors(err);
-      updateUi(() => _isLoading = false);
-      return null;
+      return updateUi(() => _isLoading = false);
     }
 
-    updateUi(() => _isLoading = false);
+    updateUi(() {
+      _isLoading = false;
+      setUpdatedSession(newSession);
+    });
     showSnackbar(
       "Sessão cancelada com sucesso!",
       SessionDetailEvent.showSnackbarMessage,
     );
-    return newSession;
   }
 
-  Future<Session?> concludeSession(Session session) async {
+  Future<void> concludeSession(Session session) async {
     updateUi(() => _isLoading = true);
     final (newSession, err) = await _sessionRepository.update(
       session.copyWith(status: SessionStatus.concluded),
@@ -118,13 +133,15 @@ class SessionDetailModel extends BaseViewModel<SessionDetailEvent> {
     if (err != null) {
       await handleDefaultErrors(err);
       updateUi(() => _isLoading = false);
-      return null;
+      return;
     }
-    updateUi(() => _isLoading = false);
+    updateUi(() {
+      _isLoading = false;
+      setUpdatedSession(newSession);
+    });
     showSnackbar(
       "Sessão concluída com sucesso!",
       SessionDetailEvent.showSnackbarMessage,
     );
-    return newSession;
   }
 }

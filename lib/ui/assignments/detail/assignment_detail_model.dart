@@ -50,7 +50,14 @@ class AssignmentDetailModel extends BaseViewModel<AssignmentDetailEvent> {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  Assignment? _updatedAssignment;
+  Assignment? get updatedAssignment => _updatedAssignment;
+
   /* Method */
+
+  void setUpdatedAssignment(Assignment? updatedAssignment) {
+    _updatedAssignment = updatedAssignment;
+  }
 
   void emitCancelAssignmentEvent() {
     emitEvent(AssignmentDetailEvent.cancelAssignment);
@@ -66,13 +73,13 @@ class AssignmentDetailModel extends BaseViewModel<AssignmentDetailEvent> {
 
   /* Calls */
 
-  Future<void> fetchScreenData() async {
+  Future<void> fetchScreenData({bool sync = true}) async {
     updateUi(() => _isLoading = true);
     await getUserData();
     updateUi(() => _isLoading = false);
   }
 
-  Future<Assignment?> concludeAssignment(Assignment assignment) async {
+  Future<void> concludeAssignment(Assignment assignment) async {
     updateUi(() => _isLoading = true);
 
     final (newAssignment, err) = await _assignmentRepository.update(
@@ -85,20 +92,20 @@ class AssignmentDetailModel extends BaseViewModel<AssignmentDetailEvent> {
         defaultErrorMessage: "Ocorreu um erro desconhecido ao tentar concluir a tarefa."
             " Tente novamente mais tarde ou entre em contato com o suporte",
       );
-      updateUi(() => _isLoading = false);
-      return null;
+      return updateUi(() => _isLoading = false);
     }
 
-    updateUi(() => _isLoading = false);
+    updateUi(() {
+      _isLoading = false;
+      setUpdatedAssignment(newAssignment);
+    });
     showSnackbar(
       "Tarefa concluída com sucesso!",
       AssignmentDetailEvent.showSnackbarMessage,
     );
-
-    return newAssignment;
   }
 
-  Future<Assignment?> cancelAssignment(Assignment assignment) async {
+  Future<void> cancelAssignment(Assignment assignment) async {
     updateUi(() => _isLoading = true);
 
     final (newAssignment, err) = await _assignmentRepository.update(
@@ -110,17 +117,17 @@ class AssignmentDetailModel extends BaseViewModel<AssignmentDetailEvent> {
         defaultErrorMessage: "Ocorreu um erro desconhecido ao tentar cancelar a tarefa."
             " Tente novamente mais tarde ou entre em contato com o suporte",
       );
-      updateUi(() => _isLoading = false);
-      return null;
+      return updateUi(() => _isLoading = false);
     }
 
-    updateUi(() => _isLoading = false);
+    updateUi(() {
+      _isLoading = false;
+      setUpdatedAssignment(newAssignment);
+    });
     showSnackbar(
       "Tarefa cancelada com sucesso!",
       AssignmentDetailEvent.showSnackbarMessage,
     );
-
-    return newAssignment;
   }
 
   Future<void> deleteAssignment(Assignment assignment) async {

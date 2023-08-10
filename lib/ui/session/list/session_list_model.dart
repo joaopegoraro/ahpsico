@@ -50,27 +50,29 @@ class SessionListModel extends BaseViewModel<SessionListEvent> {
 
   /* Calls */
 
-  Future<void> fetchScreenData({required String? patientUuid}) async {
-    updateUi(() => _isLoading = true);
+  Future<void> fetchScreenData({required String? patientUuid, bool sync = true}) async {
+    updateUi(() => _isLoading = sync);
     await getUserData();
-    await _fetchSessions(patientUuid: patientUuid);
+    await _fetchSessions(patientUuid: patientUuid, sync: sync);
     updateUi(() => _isLoading = false);
   }
 
-  Future<void> _fetchSessions({String? patientUuid}) async {
+  Future<void> _fetchSessions({String? patientUuid, bool sync = true}) async {
     final isDoctor = user!.role.isDoctor;
     final userUid = user!.uuid;
 
-    ApiError? err;
-    if (patientUuid != null) {
-      err = await _sessionRepository.syncPatientSessions(patientUuid);
-    } else if (isDoctor) {
-      err = await _sessionRepository.syncDoctorSessions(userUid);
-    } else {
-      err = await _sessionRepository.syncPatientSessions(userUid);
-    }
-    if (err != null) {
-      await handleDefaultErrors(err, shouldShowConnectionError: false);
+    if (sync) {
+      ApiError? err;
+      if (patientUuid != null) {
+        err = await _sessionRepository.syncPatientSessions(patientUuid);
+      } else if (isDoctor) {
+        err = await _sessionRepository.syncDoctorSessions(userUid);
+      } else {
+        err = await _sessionRepository.syncPatientSessions(userUid);
+      }
+      if (err != null) {
+        await handleDefaultErrors(err, shouldShowConnectionError: false);
+      }
     }
 
     if (patientUuid != null) {

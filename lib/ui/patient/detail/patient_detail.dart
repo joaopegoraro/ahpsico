@@ -280,10 +280,12 @@ class PatientDetail extends StatelessWidget {
                 return AssignmentCard(
                   assignment: assignment,
                   isUserDoctor: true,
-                  onTap: (assignment) => context.push(
-                    AssignmentDetail.route,
-                    extra: assignment,
-                  ),
+                  onTap: (assignment) =>
+                      context.push(AssignmentDetail.route, extra: assignment).then((shouldRefresh) {
+                    if (shouldRefresh == true) {
+                      model.fetchScreenData(patientUuid: patient.uuid);
+                    }
+                  }),
                 );
               }),
             ],

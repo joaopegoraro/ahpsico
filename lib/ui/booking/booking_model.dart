@@ -192,7 +192,10 @@ class BookingModel extends BaseViewModel<BookingEvent> {
   Future<Session?> rescheduleSession({required Session session}) async {
     updateUi(() => _isLoading = true);
 
-    final updatedSession = session.copyWith(date: _newSessionTime!);
+    final updatedSession = session.copyWith(
+      date: _newSessionTime!,
+      status: SessionStatus.notConfirmed,
+    );
 
     final (result, err) = await _sessionRepository.update(updatedSession);
     if (err is ApiSessionAlreadyBookedError) {

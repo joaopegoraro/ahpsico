@@ -128,11 +128,7 @@ class PatientHome extends StatelessWidget {
                   enableFlex: true,
                   color: AhpsicoColors.violet,
                   icon: Icons.event,
-                  onPressed: () => navigateThenFetchScreenDataOnReturn(
-                    context,
-                    model: model,
-                    route: SessionList.route,
-                  ),
+                  onPressed: () => context.push(SessionList.route),
                 ),
                 AhpsicoSpacing.horizontalSpaceSmall,
                 HomeButton(
@@ -140,21 +136,13 @@ class PatientHome extends StatelessWidget {
                   enableFlex: true,
                   color: AhpsicoColors.green,
                   icon: Icons.home_work,
-                  onPressed: () => navigateThenFetchScreenDataOnReturn(
-                    context,
-                    model: model,
-                    route: AssignmentsList.route,
-                  ),
+                  onPressed: () => context.push(AssignmentsList.route),
                 ),
               ],
             ),
             AhpsicoSpacing.verticalSpaceMedium,
             TextButton(
-              onPressed: () => navigateThenFetchScreenDataOnReturn(
-                context,
-                model: model,
-                route: ScheduleScreen.route,
-              ),
+              onPressed: () => context.push(ScheduleScreen.route),
               style: const ButtonStyle(
                 shape: MaterialStatePropertyAll(RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(28)),
@@ -185,12 +173,11 @@ class PatientHome extends StatelessWidget {
               ),
             ...model.sessions.map((session) {
               return SessionCard(
+                key: Key(session.toString()),
                 session: session,
                 isUserDoctor: false,
-                onTap: (session) => navigateThenFetchScreenDataOnReturn(
-                  context,
-                  model: model,
-                  route: SessionDetail.route,
+                onTap: (session) => context.push(
+                  SessionDetail.route,
                   extra: session,
                 ),
               );
@@ -240,12 +227,11 @@ class PatientHome extends StatelessWidget {
               AhpsicoSpacing.verticalSpaceSmall,
               ...model.assignments.map((assignment) {
                 return AssignmentCard(
+                  key: Key(assignment.toString()),
                   assignment: assignment,
                   isUserDoctor: false,
-                  onTap: (assignment) => navigateThenFetchScreenDataOnReturn(
-                    context,
-                    model: model,
-                    route: AssignmentDetail.route,
+                  onTap: (assignment) => context.push(
+                    AssignmentDetail.route,
                     extra: assignment,
                   ),
                 );
@@ -261,16 +247,5 @@ class PatientHome extends StatelessWidget {
         );
       },
     );
-  }
-
-  Future<void> navigateThenFetchScreenDataOnReturn(
-    BuildContext context, {
-    required PatientHomeModel model,
-    required String route,
-    Object? extra,
-  }) async {
-    await context.push(route, extra: extra).then((_) {
-      model.fetchScreenData(sync: false);
-    });
   }
 }

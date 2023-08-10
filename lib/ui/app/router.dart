@@ -142,7 +142,7 @@ final class AhpsicoRouter {
         path: AssignmentDetail.route,
         builder: (context, state) {
           final assignment = state.extra as Assignment;
-          return AssignmentDetail(assignment: assignment);
+          return AssignmentDetail(assignment);
         },
       ),
 

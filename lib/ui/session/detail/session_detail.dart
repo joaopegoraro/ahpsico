@@ -20,24 +20,29 @@ import 'package:go_router/go_router.dart';
 
 class SessionDetail extends StatelessWidget {
   const SessionDetail(
-    this.session, {
+    this._session, {
     super.key,
   });
 
   static const route = "/session/detail";
 
-  final Session session;
+  final Session _session;
+
+  Session _getSession(SessionDetailModel model) {
+    return model.updatedSession ?? _session;
+  }
 
   void _onEventEmitted(
     BuildContext context,
     SessionDetailModel model,
     SessionDetailEvent event,
   ) {
+    final session = _getSession(model);
     switch (event) {
       case SessionDetailEvent.showSnackbarError:
         AhpsicoSnackbar.showError(context, model.snackbarMessage);
       case SessionDetailEvent.showSnackbarMessage:
-      // AhpsicoSnackbar.showSuccess(context, model.snackbarMessage);
+        AhpsicoSnackbar.showSuccess(context, model.snackbarMessage);
       case SessionDetailEvent.navigateToLogin:
         context.go(LoginScreen.route);
       case SessionDetailEvent.cancelSession:
@@ -46,11 +51,7 @@ class SessionDetail extends StatelessWidget {
           content: "Tem certeza que deseja cancelar a sessão?",
           onTapFirstButton: () {
             context.pop();
-            model.cancelSession(session).then((updatedSession) {
-              if (updatedSession != null) {
-                context.replace(SessionDetail.route, extra: updatedSession);
-              }
-            });
+            model.cancelSession(session);
           },
           firstButtonText: "Sim, cancelar a sessão",
           secondButtonText: "Não, fechar",
@@ -61,11 +62,7 @@ class SessionDetail extends StatelessWidget {
           content: "Tem certeza que deseja marcar a sessão como concluída?",
           onTapFirstButton: () {
             context.pop();
-            model.concludeSession(session).then((updatedSession) {
-              if (updatedSession != null) {
-                context.replace(SessionDetail.route, extra: updatedSession);
-              }
-            });
+            model.concludeSession(session);
           },
           firstButtonText: "Sim, marcar como concluída",
           secondButtonText: "Não, fechar",
@@ -76,31 +73,39 @@ class SessionDetail extends StatelessWidget {
           content: "Tem certeza que deseja confirmar a sessão?",
           onTapFirstButton: () {
             context.pop();
-            model.confirmSession(session).then((updatedSession) {
-              if (updatedSession != null) {
-                context.replace(SessionDetail.route, extra: updatedSession);
-              }
-            });
+            model.confirmSession(session);
           },
           firstButtonText: "Sim, confirmar a sessão",
           secondButtonText: "Não, fechar",
         );
+      case SessionDetailEvent.rescheduleSession:
+        context
+            .push<Session?>(BookingScreen.route, extra: BookingScreen.buildArgs(session: session))
+            .then((updatedSession) {
+          if (updatedSession != null) {
+            model.setUpdatedSession(updatedSession);
+          }
+        });
     }
   }
 
-  String get sessionStatus => switch (session.status) {
-        SessionStatus.canceled => "Cancelada",
-        SessionStatus.concluded => "Concluída",
-        SessionStatus.confirmed => "Confirmada",
-        SessionStatus.notConfirmed => "Não confirmada",
-      };
+  String getSessionStatus(Session session) {
+    return switch (session.status) {
+      SessionStatus.canceled => "Cancelada",
+      SessionStatus.concluded => "Concluída",
+      SessionStatus.confirmed => "Confirmada",
+      SessionStatus.notConfirmed => "Não confirmada",
+    };
+  }
 
-  Color get statusColor => switch (session.status) {
-        SessionStatus.canceled => AhpsicoColors.red,
-        SessionStatus.concluded => AhpsicoColors.violet,
-        SessionStatus.confirmed => AhpsicoColors.green,
-        SessionStatus.notConfirmed => AhpsicoColors.yellow
-      };
+  Color getStatusColor(Session session) {
+    return switch (session.status) {
+      SessionStatus.canceled => AhpsicoColors.red,
+      SessionStatus.concluded => AhpsicoColors.violet,
+      SessionStatus.confirmed => AhpsicoColors.green,
+      SessionStatus.notConfirmed => AhpsicoColors.yellow
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,123 +121,123 @@ class SessionDetail extends StatelessWidget {
       topbarBuilder: (context, model) {
         return Topbar(
           title: "Sessão",
-          onBackPressed: context.pop,
+          onBackPressed: () => context.go(LoginScreen.route),
         );
       },
       bodyBuilder: (context, model) {
-        return CustomScrollView(
-          slivers: [
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            "${session.readableDate} às ${session.dateTime}",
-                            style: AhpsicoText.title2Style.copyWith(
-                              color: AhpsicoColors.dark25,
+        final session = _getSession(model);
+        return WillPopScope(
+          onWillPop: () async {
+            if (model.updatedSession != null) {
+              context.go(LoginScreen.route);
+              return false;
+            }
+            return true;
+          },
+          child: CustomScrollView(
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "${session.readableDate} às ${session.dateTime}",
+                              style: AhpsicoText.title2Style.copyWith(
+                                color: AhpsicoColors.dark25,
+                              ),
                             ),
                           ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.all(Radius.circular(30)),
-                            color: statusColor,
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.all(Radius.circular(30)),
+                              color: getStatusColor(session),
+                            ),
+                            child: Text(
+                              getSessionStatus(session),
+                              style:
+                                  AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.light80),
+                            ),
                           ),
-                          child: Text(
-                            sessionStatus,
-                            style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.light80),
-                          ),
-                        ),
-                      ],
-                    ),
-                    AhpsicoSpacing.verticalSpaceLarge,
-                    Text(
-                      model.user!.role.isDoctor ? "Paciente" : "Psicólogo",
-                      style: AhpsicoText.title3Style.copyWith(
-                        color: AhpsicoColors.dark25,
+                        ],
                       ),
-                    ),
-                    AhpsicoSpacing.verticalSpaceRegular,
-                    model.user!.role.isDoctor
-                        ? PatientCard(
-                            patient: session.patient,
-                            onTap: (patient) => context.push(
-                              PatientDetail.route,
-                              extra: patient,
-                            ),
-                          )
-                        : DoctorCard(
-                            doctor: session.doctor,
-                            onTap: (doctor) => context.push(
-                              DoctorDetail.route,
-                              extra: doctor,
-                            ),
-                          ),
-                    const Expanded(child: AhpsicoSpacing.verticalSpaceLarge),
-                    Row(
-                      children: [
-                        HomeButton(
-                          text: "CONFIRMAR",
-                          enableFlex: true,
-                          onPressed: model.emitConfirmSessionEvent,
-                          color: AhpsicoColors.green,
-                          icon: Icons.check_circle,
+                      AhpsicoSpacing.verticalSpaceLarge,
+                      Text(
+                        model.user!.role.isDoctor ? "Paciente" : "Psicólogo",
+                        style: AhpsicoText.title3Style.copyWith(
+                          color: AhpsicoColors.dark25,
                         ),
-                        AhpsicoSpacing.horizontalSpaceSmall,
-                        HomeButton(
-                          text: "CANCELAR",
-                          enableFlex: true,
-                          onPressed: model.emitCancelSessionEvent,
-                          color: AhpsicoColors.red,
-                          icon: Icons.cancel,
-                        ),
-                      ],
-                    ),
-                    AhpsicoSpacing.verticalSpaceSmall,
-                    Row(
-                      children: [
-                        HomeButton(
-                          text: "REMARCAR",
-                          enableFlex: true,
-                          onPressed: () {
-                            context
-                                .push<Session?>(
-                              BookingScreen.route,
-                              extra: BookingScreen.buildArgs(session: session),
+                      ),
+                      AhpsicoSpacing.verticalSpaceRegular,
+                      model.user!.role.isDoctor
+                          ? PatientCard(
+                              patient: session.patient,
+                              onTap: (patient) => context.push(
+                                PatientDetail.route,
+                                extra: patient,
+                              ),
                             )
-                                .then((updatedSession) {
-                              if (updatedSession != null) {
-                                context.replace(SessionDetail.route, extra: updatedSession);
-                              }
-                            });
-                          },
-                          color: AhpsicoColors.blue,
-                          icon: Icons.edit_calendar,
-                        ),
-                        AhpsicoSpacing.horizontalSpaceSmall,
-                        HomeButton(
-                          text: "CONCLUIR",
-                          enableFlex: true,
-                          onPressed: model.emitConcludeSessionEvent,
-                          color: AhpsicoColors.violet,
-                          icon: Icons.assignment_turned_in,
-                        ),
-                      ],
-                    ),
-                    AhpsicoSpacing.verticalSpaceSmall,
-                  ],
+                          : DoctorCard(
+                              doctor: session.doctor,
+                              onTap: (doctor) => context.push(
+                                DoctorDetail.route,
+                                extra: doctor,
+                              ),
+                            ),
+                      const Expanded(child: AhpsicoSpacing.verticalSpaceLarge),
+                      Row(
+                        children: [
+                          HomeButton(
+                            text: "CONFIRMAR",
+                            enableFlex: true,
+                            onPressed: model.emitConfirmSessionEvent,
+                            color: AhpsicoColors.green,
+                            icon: Icons.check_circle,
+                          ),
+                          AhpsicoSpacing.horizontalSpaceSmall,
+                          HomeButton(
+                            text: "CANCELAR",
+                            enableFlex: true,
+                            onPressed: model.emitCancelSessionEvent,
+                            color: AhpsicoColors.red,
+                            icon: Icons.cancel,
+                          ),
+                        ],
+                      ),
+                      AhpsicoSpacing.verticalSpaceSmall,
+                      Row(
+                        children: [
+                          HomeButton(
+                            text: "REMARCAR",
+                            enableFlex: true,
+                            onPressed: model.emitRescheduleSessionEvent,
+                            color: AhpsicoColors.blue,
+                            icon: Icons.edit_calendar,
+                          ),
+                          AhpsicoSpacing.horizontalSpaceSmall,
+                          HomeButton(
+                            text: "CONCLUIR",
+                            enableFlex: true,
+                            onPressed: model.emitConcludeSessionEvent,
+                            color: AhpsicoColors.violet,
+                            icon: Icons.assignment_turned_in,
+                          ),
+                        ],
+                      ),
+                      AhpsicoSpacing.verticalSpaceSmall,
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
