@@ -177,7 +177,7 @@ class AssignmentDetail extends StatelessWidget {
                     Row(
                       children: [
                         HomeButton(
-                          text: "CONCLUIR TAREFA",
+                          text: "CONCLUIR\nTAREFA",
                           enableFlex: true,
                           onPressed: model.emitConcludeAssignmentEvent,
                           color: AhpsicoColors.green,
@@ -185,10 +185,10 @@ class AssignmentDetail extends StatelessWidget {
                         ),
                         AhpsicoSpacing.horizontalSpaceSmall,
                         HomeButton(
-                          text: "CANCELAR TAREFA",
+                          text: "CANCELAR\nTAREFA",
                           enableFlex: true,
                           onPressed: model.emitCancelAssignmentEvent,
-                          color: AhpsicoColors.red,
+                          color: AhpsicoColors.yellow,
                           icon: Icons.cancel,
                         ),
                       ],
