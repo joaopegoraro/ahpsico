@@ -59,7 +59,7 @@ class AssignmentListModel extends BaseViewModel<AssignmentListEvent> {
   Future<void> _fetchAssignments({required String? patientUuid}) async {
     final err = await _assignmentRepository.syncPatientAssignments(patientUuid ?? user!.uuid);
     if (err != null) {
-      return await handleDefaultErrors(err);
+      await handleDefaultErrors(err);
     }
 
     _assignments = await _assignmentRepository.getPatientAssignments(patientUuid ?? user!.uuid);

@@ -70,7 +70,7 @@ class SessionListModel extends BaseViewModel<SessionListEvent> {
       err = await _sessionRepository.syncPatientSessions(userUid);
     }
     if (err != null) {
-      return await handleDefaultErrors(err);
+      await handleDefaultErrors(err);
     }
 
     if (patientUuid != null) {

@@ -59,7 +59,7 @@ class DoctorListModel extends BaseViewModel<DoctorListEvent> {
   Future<void> _fetchDoctors() async {
     final err = await _doctorRepository.syncPatientDoctors(user!.uuid);
     if (err != null) {
-      return await handleDefaultErrors(err);
+      await handleDefaultErrors(err);
     }
 
     _doctors = await _doctorRepository.getPatientDoctors(user!.uuid);

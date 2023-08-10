@@ -86,7 +86,7 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
     if (sync) {
       final err = await _sessionRepository.syncDoctorSessions(userUid, date: now);
       if (err != null) {
-        return await handleDefaultErrors(err);
+        await handleDefaultErrors(err);
       }
     }
 

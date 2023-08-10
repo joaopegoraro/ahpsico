@@ -277,11 +277,14 @@ class BookingModel extends BaseViewModel<BookingEvent> {
 
   Future<void> _getSchedules({required String? doctorUuid}) async {
     final userUid = user!.uuid;
+
     final (schedule, err) = await _scheduleRepository.getDoctorSchedule(doctorUuid ?? userUid);
     if (err != null) {
       await handleDefaultErrors(err);
-      return updateUi(() => _isLoadingFetchData = false);
     }
+
     _schedule = schedule ?? [];
+
+    updateUi(() => _isLoadingFetchData = false);
   }
 }

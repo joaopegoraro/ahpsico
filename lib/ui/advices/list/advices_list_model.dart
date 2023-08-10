@@ -93,7 +93,7 @@ class AdviceListModel extends BaseViewModel<AdviceListEvent> {
       err = await _adviceRepository.syncDoctorAdvices(user!.uuid);
     }
     if (err != null) {
-      return await handleDefaultErrors(err);
+      await handleDefaultErrors(err);
     }
 
     if (patientUuid != null) {

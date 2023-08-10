@@ -98,7 +98,7 @@ class PatientDetailModel extends BaseViewModel<PatientDetailEvent> {
   Future<void> _getUpcomingSessions({required String patientUuid}) async {
     final err = await _sessionRepository.syncPatientSessions(patientUuid, upcoming: true);
     if (err != null) {
-      return await handleDefaultErrors(err);
+      await handleDefaultErrors(err);
     }
 
     _sessions = await _sessionRepository.getPatientSessions(
@@ -110,7 +110,7 @@ class PatientDetailModel extends BaseViewModel<PatientDetailEvent> {
   Future<void> _getPendingAssignments({required String patientUuid}) async {
     final err = await _assignmentRepository.syncPatientAssignments(patientUuid, pending: true);
     if (err != null) {
-      return await handleDefaultErrors(err);
+      await handleDefaultErrors(err);
     }
 
     _assignments = await _assignmentRepository.getPatientAssignments(
@@ -122,7 +122,7 @@ class PatientDetailModel extends BaseViewModel<PatientDetailEvent> {
   Future<void> _getReceivedAdvices({required String patientUuid}) async {
     final err = await _adviceRepository.syncPatientAdvices(patientUuid);
     if (err != null) {
-      return await handleDefaultErrors(err);
+      await handleDefaultErrors(err);
     }
 
     _advices = await _adviceRepository.getPatientAdvices(patientUuid);
