@@ -213,7 +213,7 @@ class PatientHome extends StatelessWidget {
               }),
               AhpsicoSpacing.verticalSpaceLarge,
             ],
-            if (model.assignments.isNotEmpty) ...[
+            if (model.advices.isNotEmpty) ...[
               Text(
                 "Mensagens recebidas",
                 style: AhpsicoText.title3Style.copyWith(
@@ -263,13 +263,13 @@ class PatientHome extends StatelessWidget {
     );
   }
 
-  void navigateThenFetchScreenDataOnReturn(
+  Future<void> navigateThenFetchScreenDataOnReturn(
     BuildContext context, {
     required PatientHomeModel model,
     required String route,
     Object? extra,
-  }) {
-    context.push(route, extra: extra).then((_) {
+  }) async {
+    await context.push(route, extra: extra).then((_) {
       model.fetchScreenData(sync: false);
     });
   }

@@ -6,6 +6,7 @@ import 'package:ahpsico/data/database/mappers/advice_mapper.dart';
 import 'package:ahpsico/models/advice.dart';
 import 'package:ahpsico/services/api/api_service.dart';
 import 'package:ahpsico/services/api/errors.dart';
+import 'package:ahpsico/utils/extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
@@ -57,13 +58,7 @@ final class AdviceRepositoryImpl implements AdviceRepository {
   Future<ApiError?> delete(int id) async {
     final err = await _api.deleteAdvice(id);
     if (err != null) return err;
-
-    await _db.delete(
-      AdviceEntity.tableName,
-      where: "${AdviceEntity.idColumn} = ?",
-      whereArgs: [id],
-    );
-
+    await _deleteLocally(id);
     return null;
   }
 
@@ -78,7 +73,8 @@ final class AdviceRepositoryImpl implements AdviceRepository {
       [patientId],
     );
 
-    final advices = advicesMap.map((adviceMap) async {
+    final advices = <Advice>[];
+    for (final adviceMap in advicesMap) {
       final entity = AdviceEntity.fromMap(adviceMap);
 
       final doctorsMap = await _db.query(
@@ -86,25 +82,34 @@ final class AdviceRepositoryImpl implements AdviceRepository {
         where: "${UserEntity.uuidColumn} = ?",
         whereArgs: [entity.doctorId],
       );
-      final doctorEntity = UserEntity.fromMap(doctorsMap.first);
+      if (doctorsMap.isEmpty) {
+        await _deleteLocally(entity.id);
+        continue;
+      }
+      final doctorEntity = UserEntity.fromMap(doctorsMap.firstOrNull ?? {"uuid": entity.doctorId});
 
       final patientsMap = await _db.query(
         UserEntity.tableName,
         where: "${UserEntity.uuidColumn} = ?",
         whereArgs: [patientId],
       );
-      final patientIds = patientsMap.map((patient) {
-        final patientEntity = UserEntity.fromMap(patientsMap.first);
+      if (patientsMap.isEmpty) {
+        await _deleteLocally(entity.id);
+        continue;
+      }
+      final patientIds = patientsMap.mapToList((patient) {
+        final patientEntity = UserEntity.fromMap(patient);
         return patientEntity.uuid;
       });
-      return AdviceMapper.toAdvice(
+
+      advices.add(AdviceMapper.toAdvice(
         entity,
         doctorEntity: doctorEntity,
-        patientIds: patientIds.toList(),
-      );
-    });
+        patientIds: patientIds,
+      ));
+    }
 
-    return Future.wait(advices.toList());
+    return advices;
   }
 
   @override
@@ -148,7 +153,8 @@ final class AdviceRepositoryImpl implements AdviceRepository {
       whereArgs: [doctorId],
     );
 
-    final advices = advicesMap.map((adviceMap) async {
+    final advices = <Advice>[];
+    for (final adviceMap in advicesMap) {
       final entity = AdviceEntity.fromMap(adviceMap);
 
       final doctorsMap = await _db.query(
@@ -156,6 +162,10 @@ final class AdviceRepositoryImpl implements AdviceRepository {
         where: "${UserEntity.uuidColumn} = ?",
         whereArgs: [doctorId],
       );
+      if (doctorsMap.isEmpty) {
+        await _deleteLocally(entity.id);
+        continue;
+      }
       final doctorEntity = UserEntity.fromMap(doctorsMap.first);
 
       final patientsMap = await _db.rawQuery(
@@ -166,19 +176,23 @@ final class AdviceRepositoryImpl implements AdviceRepository {
           """,
         [entity.id],
       );
-      final patientIds = patientsMap.map((patient) {
-        final patientEntity = UserEntity.fromMap(patientsMap.first);
+      if (patientsMap.isEmpty) {
+        await _deleteLocally(entity.id);
+        continue;
+      }
+      final patientIds = patientsMap.mapToList((patient) {
+        final patientEntity = UserEntity.fromMap(patient);
         return patientEntity.uuid;
       });
 
-      return AdviceMapper.toAdvice(
+      advices.add(AdviceMapper.toAdvice(
         entity,
         doctorEntity: doctorEntity,
-        patientIds: patientIds.toList(),
-      );
-    });
+        patientIds: patientIds,
+      ));
+    }
 
-    return Future.wait(advices.toList());
+    return advices;
   }
 
   @override
@@ -216,5 +230,13 @@ final class AdviceRepositoryImpl implements AdviceRepository {
   @override
   Future<int> clear() async {
     return await _db.delete(AdviceEntity.tableName);
+  }
+
+  Future<void> _deleteLocally(int id) async {
+    await _db.delete(
+      AdviceEntity.tableName,
+      where: "${AdviceEntity.idColumn} = ?",
+      whereArgs: [id],
+    );
   }
 }

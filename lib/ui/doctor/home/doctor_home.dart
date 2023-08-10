@@ -144,11 +144,11 @@ class DoctorHome extends StatelessWidget {
             ),
             AhpsicoSpacing.verticalSpaceMedium,
             TextButton(
-                onPressed: () => navigateThenFetchScreenDataOnReturn(
-                  context,
-                  model: model,
-                  route: ScheduleScreen.route,
-                ),
+              onPressed: () => navigateThenFetchScreenDataOnReturn(
+                context,
+                model: model,
+                route: ScheduleScreen.route,
+              ),
               style: const ButtonStyle(
                 shape: MaterialStatePropertyAll(RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(28)),

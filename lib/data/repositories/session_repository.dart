@@ -94,7 +94,8 @@ final class SessionRepositoryImpl implements SessionRepository {
       whereArgs: [patientId, if (upcoming) now],
     );
 
-    final sessions = sessionsMap.map((sessionMap) async {
+    final sessions = <Session>[];
+    for (final sessionMap in sessionsMap) {
       final entity = SessionEntity.fromMap(sessionMap);
 
       final doctorsMap = await _db.query(
@@ -102,6 +103,10 @@ final class SessionRepositoryImpl implements SessionRepository {
         where: "${UserEntity.uuidColumn} = ?",
         whereArgs: [entity.doctorId],
       );
+      if (doctorsMap.isEmpty) {
+        await _deleteLocally(entity.id);
+        continue;
+      }
       final doctorEntity = UserEntity.fromMap(doctorsMap.first);
 
       final patientsMap = await _db.query(
@@ -109,16 +114,20 @@ final class SessionRepositoryImpl implements SessionRepository {
         where: "${UserEntity.uuidColumn} = ?",
         whereArgs: [patientId],
       );
+      if (patientsMap.isEmpty) {
+        await _deleteLocally(entity.id);
+        continue;
+      }
       final patientEntity = UserEntity.fromMap(patientsMap.first);
 
-      return SessionMapper.toSession(
+      sessions.add(SessionMapper.toSession(
         entity,
         doctorEntity: doctorEntity,
         patientEntity: patientEntity,
-      );
-    });
+      ));
+    }
 
-    return Future.wait(sessions.toList());
+    return sessions;
   }
 
   @override
@@ -176,7 +185,8 @@ final class SessionRepositoryImpl implements SessionRepository {
       ],
     );
 
-    final sessions = sessionsMap.map((sessionMap) async {
+    final sessions = <Session>[];
+    for (final sessionMap in sessionsMap) {
       final entity = SessionEntity.fromMap(sessionMap);
 
       final doctorsMap = await _db.query(
@@ -184,6 +194,10 @@ final class SessionRepositoryImpl implements SessionRepository {
         where: "${UserEntity.uuidColumn} = ?",
         whereArgs: [doctorId],
       );
+      if (doctorsMap.isEmpty) {
+        await _deleteLocally(entity.id);
+        continue;
+      }
       final doctorEntity = UserEntity.fromMap(doctorsMap.first);
 
       final patientsMap = await _db.query(
@@ -191,16 +205,20 @@ final class SessionRepositoryImpl implements SessionRepository {
         where: "${UserEntity.uuidColumn} = ?",
         whereArgs: [entity.patientId],
       );
+      if (patientsMap.isEmpty) {
+        await _deleteLocally(entity.id);
+        continue;
+      }
       final patientEntity = UserEntity.fromMap(patientsMap.first);
 
-      return SessionMapper.toSession(
+      sessions.add(SessionMapper.toSession(
         entity,
         doctorEntity: doctorEntity,
         patientEntity: patientEntity,
-      );
-    });
+      ));
+    }
 
-    return Future.wait(sessions.toList());
+    return sessions;
   }
 
   @override
@@ -247,5 +265,13 @@ final class SessionRepositoryImpl implements SessionRepository {
   @override
   Future<void> clear() async {
     await _db.delete(SessionEntity.tableName);
+  }
+
+  Future<void> _deleteLocally(int id) async {
+    await _db.delete(
+      SessionEntity.tableName,
+      where: "${SessionEntity.idColumn} = ?",
+      whereArgs: [id],
+    );
   }
 }

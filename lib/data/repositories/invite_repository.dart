@@ -76,31 +76,29 @@ final class InviteRepositoryImpl implements InviteRepository {
   Future<List<Invite>> get() async {
     final invitesMap = await _db.query(InviteEntity.tableName);
 
-    return Future.wait(
-      invitesMap.map((inviteMap) async {
-        final entity = InviteEntity.fromMap(inviteMap);
-        final doctorsMap = await _db.query(
-          UserEntity.tableName,
-          where: "${UserEntity.uuidColumn} = ?",
-          whereArgs: [entity.doctorId],
-        );
-        final doctorEntity = UserEntity.fromMap(doctorsMap.first);
-        return InviteMapper.toInvite(entity, doctorEntity: doctorEntity);
-      }).toList(),
-    );
+    final invites = <Invite>[];
+    for (final inviteMap in invitesMap) {
+      final entity = InviteEntity.fromMap(inviteMap);
+      final doctorsMap = await _db.query(
+        UserEntity.tableName,
+        where: "${UserEntity.uuidColumn} = ?",
+        whereArgs: [entity.doctorId],
+      );
+      if (doctorsMap.isEmpty) {
+        await _deleteLocally(entity.id);
+        continue;
+      }
+      final doctorEntity = UserEntity.fromMap(doctorsMap.first);
+      invites.add(InviteMapper.toInvite(entity, doctorEntity: doctorEntity));
+    }
+    return invites;
   }
 
   @override
   Future<ApiError?> accept(int id) async {
     final err = await _api.acceptInvite(id);
     if (err != null) return err;
-
-    await _db.delete(
-      InviteEntity.tableName,
-      where: "${InviteEntity.idColumn} = ?",
-      whereArgs: [id],
-    );
-
+    await _deleteLocally(id);
     return null;
   }
 
@@ -108,18 +106,20 @@ final class InviteRepositoryImpl implements InviteRepository {
   Future<ApiError?> delete(int id) async {
     final err = await _api.deleteInvite(id);
     if (err != null) return err;
-
-    await _db.delete(
-      InviteEntity.tableName,
-      where: "${InviteEntity.idColumn} = ?",
-      whereArgs: [id],
-    );
-
+    await _deleteLocally(id);
     return null;
   }
 
   @override
   Future<void> clear() async {
     await _db.delete(InviteEntity.tableName);
+  }
+
+  Future<void> _deleteLocally(int id) async {
+    await _db.delete(
+      InviteEntity.tableName,
+      where: "${InviteEntity.idColumn} = ?",
+      whereArgs: [id],
+    );
   }
 }

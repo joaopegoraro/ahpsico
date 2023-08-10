@@ -251,7 +251,7 @@ class PatientDetail extends StatelessWidget {
               );
             }),
             AhpsicoSpacing.verticalSpaceLarge,
-            if (model.assignments.isNotEmpty) ...[
+            if (model.advices.isNotEmpty) ...[
               Text(
                 "Mensagens enviadas por você",
                 style: AhpsicoText.title3Style.copyWith(

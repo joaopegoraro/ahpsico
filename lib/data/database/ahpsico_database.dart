@@ -17,6 +17,26 @@ abstract class AhpsicoDatabase {
   static const dbName = "ahpsico.db";
   static const _dbVersion = 1;
 
+  static const tables = [
+    UserEntity.tableName,
+    PatientWithDoctor.tableName,
+    SessionEntity.tableName,
+    AdviceEntity.tableName,
+    AdviceWithPatient.tableName,
+    AssignmentEntity.tableName,
+    InviteEntity.tableName,
+  ];
+
+  static const _tablesCreationStatements = [
+    UserEntity.creationStatement,
+    PatientWithDoctor.creationStatement,
+    SessionEntity.creationStatement,
+    AdviceEntity.creationStatement,
+    AdviceWithPatient.creationStatement,
+    AssignmentEntity.creationStatement,
+    InviteEntity.creationStatement,
+  ];
+
   static Future<Database> get instance async {
     if (_db != null) return _db!;
     _db = await _initDB();
@@ -26,20 +46,17 @@ abstract class AhpsicoDatabase {
   static Future<Database> _initDB() async {
     final dbPath = await getDatabasesPath();
 
+    if (_tablesCreationStatements.length != tables.length) {
+      throw Exception("Number of table creation statements different than number of tables");
+    }
+
     return await openDatabase(
       join(dbPath, dbName),
       version: _dbVersion,
       onCreate: (db, version) async {
-        await db.execute(UserEntity.creationStatement);
-        await db.execute(PatientWithDoctor.creationStatement);
-        await db.execute(SessionEntity.creationStatement);
-        await db.execute(AdviceEntity.creationStatement);
-        await db.execute(AdviceWithPatient.creationStatement);
-        await db.execute(AssignmentEntity.creationStatement);
-        await db.execute(InviteEntity.creationStatement);
-      },
-      onConfigure: (db) async {
-        await db.execute('PRAGMA foreign_keys = ON');
+        for (final statement in _tablesCreationStatements) {
+          await db.execute(statement);
+        }
       },
     );
   }

@@ -5,6 +5,7 @@ import 'package:ahpsico/data/database/mappers/user_mapper.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/api/api_service.dart';
 import 'package:ahpsico/services/api/errors.dart';
+import 'package:ahpsico/utils/extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
@@ -42,12 +43,10 @@ final class DoctorRepositoryImpl implements DoctorRepository {
       [patientId],
     );
 
-    final doctors = doctorsMap.map((e) {
+    return doctorsMap.mapToList((e) {
       final entity = UserEntity.fromMap(e);
       return UserMapper.toUser(entity);
     });
-
-    return doctors.toList();
   }
 
   @override

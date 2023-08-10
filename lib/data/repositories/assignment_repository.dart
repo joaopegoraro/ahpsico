@@ -7,7 +7,6 @@ import 'package:ahpsico/models/assignment/assignment.dart';
 import 'package:ahpsico/models/assignment/assignment_status.dart';
 import 'package:ahpsico/services/api/api_service.dart';
 import 'package:ahpsico/services/api/errors.dart';
-import 'package:ahpsico/utils/extensions.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
@@ -79,13 +78,7 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
   Future<ApiError?> delete(int id) async {
     final err = await _api.deleteAssignment(id);
     if (err != null) return err;
-
-    await _db.delete(
-      AssignmentEntity.tableName,
-      where: "${AssignmentEntity.idColumn} = ?",
-      whereArgs: [id],
-    );
-
+    await _deleteLocally(id);
     return null;
   }
 
@@ -129,7 +122,8 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
       whereArgs: [patientId, if (pending) AssignmentStatus.pending.value],
     );
 
-    final assignments = await Future.wait(assignmentsMap.mapToList((assignmentMap) async {
+    final assignments = <Assignment>[];
+    for (final assignmentMap in assignmentsMap) {
       final entity = AssignmentEntity.fromMap(assignmentMap);
 
       final doctorsMap = await _db.query(
@@ -137,29 +131,44 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
         where: "${UserEntity.uuidColumn} = ?",
         whereArgs: [entity.doctorId],
       );
-      final doctorEntity = UserEntity.fromMap(doctorsMap.first);
+      if (doctorsMap.isEmpty) {
+        await _deleteLocally(entity.id);
+        continue;
+      }
+      final doctorEntity = UserEntity.fromMap(doctorsMap.firstOrNull ?? {"uuid": entity.doctorId});
 
       final patientsMap = await _db.query(
         UserEntity.tableName,
         where: "${UserEntity.uuidColumn} = ?",
         whereArgs: [entity.patientId],
       );
-      final patientEntity = UserEntity.fromMap(patientsMap.first);
+      if (patientsMap.isEmpty) {
+        await _deleteLocally(entity.id);
+        continue;
+      }
+      final patientEntity =
+          UserEntity.fromMap(patientsMap.firstOrNull ?? {"uuid": entity.patientId});
 
       final sessionsMap = await _db.query(
         SessionEntity.tableName,
         where: "${SessionEntity.idColumn} = ?",
         whereArgs: [entity.deliverySessionId],
       );
-      final sessionEntity = SessionEntity.fromMap(sessionsMap.first);
+      if (sessionsMap.isEmpty) {
+        await _deleteLocally(entity.id);
+        continue;
+      }
+      final sessionEntity = SessionEntity.fromMap(
+        sessionsMap.firstOrNull ?? {"id": entity.deliverySessionId},
+      );
 
-      return AssignmentMapper.toAssignment(
+      assignments.add(AssignmentMapper.toAssignment(
         entity,
         doctorEntity: doctorEntity,
         patientEntity: patientEntity,
         sessionEntity: sessionEntity,
-      );
-    }));
+      ));
+    }
 
     return assignments.sorted((a, b) => b.deliverySession.date.compareTo(a.deliverySession.date));
   }
@@ -167,5 +176,13 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
   @override
   Future<void> clear() async {
     await _db.delete(AssignmentEntity.tableName);
+  }
+
+  Future<void> _deleteLocally(int id) async {
+    await _db.delete(
+      AssignmentEntity.tableName,
+      where: "${AssignmentEntity.idColumn} = ?",
+      whereArgs: [id],
+    );
   }
 }
