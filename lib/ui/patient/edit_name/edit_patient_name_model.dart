@@ -7,6 +7,7 @@ import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum EditPatientNameEvent {
   closeSheet,
+  closeSheetWithoutRefreshing,
   showSnackbarError,
   showSnackbarMessage,
   navigateToLoginScreen,
@@ -51,7 +52,7 @@ class EditPatientNameModel extends BaseViewModel<EditPatientNameEvent> {
 
   Future<void> confirmUpdateName({required User patient}) async {
     if (patient.name == name) {
-      return emitEvent(EditPatientNameEvent.closeSheet);
+      return emitEvent(EditPatientNameEvent.closeSheetWithoutRefreshing);
     }
 
     if (name.isEmpty) {

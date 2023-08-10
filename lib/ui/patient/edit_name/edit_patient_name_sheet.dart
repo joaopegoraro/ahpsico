@@ -50,6 +50,8 @@ class _EditPatientNameSheetState extends State<EditPatientNameSheet> {
         AhpsicoSnackbar.showSuccess(context, model.snackbarMessage);
       case EditPatientNameEvent.closeSheet:
         context.pop(true);
+      case EditPatientNameEvent.closeSheetWithoutRefreshing:
+        context.pop(false);
     }
   }
 

@@ -47,7 +47,9 @@ class SessionDetail extends StatelessWidget {
           onTapFirstButton: () {
             context.pop();
             model.cancelSession(session).then((updatedSession) {
-              context.replace(SessionDetail.route, extra: updatedSession);
+              if (updatedSession != null) {
+                context.replace(SessionDetail.route, extra: updatedSession);
+              }
             });
           },
           firstButtonText: "Sim, cancelar a sessão",
@@ -60,7 +62,9 @@ class SessionDetail extends StatelessWidget {
           onTapFirstButton: () {
             context.pop();
             model.concludeSession(session).then((updatedSession) {
-              context.replace(SessionDetail.route, extra: updatedSession);
+              if (updatedSession != null) {
+                context.replace(SessionDetail.route, extra: updatedSession);
+              }
             });
           },
           firstButtonText: "Sim, marcar como concluída",
@@ -71,8 +75,11 @@ class SessionDetail extends StatelessWidget {
           context: context,
           content: "Tem certeza que deseja confirmar a sessão?",
           onTapFirstButton: () {
+            context.pop();
             model.confirmSession(session).then((updatedSession) {
-              context.replace(SessionDetail.route, extra: updatedSession);
+              if (updatedSession != null) {
+                context.replace(SessionDetail.route, extra: updatedSession);
+              }
             });
           },
           firstButtonText: "Sim, confirmar a sessão",
