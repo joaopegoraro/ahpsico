@@ -54,7 +54,7 @@ class DoctorCard extends StatelessWidget {
                     ),
                     AhpsicoSpacing.verticalSpaceSmall,
                     Text(
-                      MaskFormatters.phoneMaskFormatter.maskText(doctor.phoneNumber),
+                      MaskFormatters.phoneMaskFormatter.maskText(doctor.phoneNumber.substring(3)),
                       style: AhpsicoText.regular3Style.copyWith(
                         color: AhpsicoColors.light20,
                         fontWeight: FontWeight.w600,

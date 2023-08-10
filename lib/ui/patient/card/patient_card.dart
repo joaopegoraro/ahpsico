@@ -69,7 +69,7 @@ class PatientCard extends StatelessWidget {
                     ),
                     AhpsicoSpacing.verticalSpaceSmall,
                     Text(
-                      MaskFormatters.phoneMaskFormatter.maskText(patient.phoneNumber),
+                      MaskFormatters.phoneMaskFormatter.maskText(patient.phoneNumber.substring(3)),
                       style: AhpsicoText.regular3Style.copyWith(
                         color: AhpsicoColors.light20,
                         fontWeight: FontWeight.w600,

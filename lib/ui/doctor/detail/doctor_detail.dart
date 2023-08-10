@@ -157,7 +157,8 @@ class DoctorDetail extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          MaskFormatters.phoneMaskFormatter.maskText(model.doctor!.phoneNumber),
+                          MaskFormatters.phoneMaskFormatter
+                              .maskText(model.doctor!.phoneNumber.substring(3)),
                           style: AhpsicoText.title3Style.copyWith(
                             color: AhpsicoColors.dark25,
                           ),

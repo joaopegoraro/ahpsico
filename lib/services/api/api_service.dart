@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:ahpsico/constants/app_constants.dart';
@@ -183,8 +182,8 @@ class ApiServiceImpl implements ApiService {
           case 404:
             return const ApiPatientNotRegisteredError();
           case 409:
-            final errorBody = json.decode(response?.data) as Map<String, dynamic>;
-            final errorCode = errorBody['code'] as String;
+            final errorBody = Utils.castToJsonMap(response!.data);
+            final errorCode = errorBody['type'] as String?;
             switch (errorCode) {
               case "invite_already_sent":
                 return const ApiInviteAlreadySentError();

@@ -81,7 +81,17 @@ class InvitePatientModel extends BaseViewModel<InvitePatientEvent> {
 
     updateUi(() => _isLoading = true);
 
+    await getUserData();
+
     final unmaskedPhone = "+55${MaskFormatters.phoneMaskFormatter.unmaskText(phoneNumber)}";
+    if (user!.phoneNumber == unmaskedPhone) {
+      showSnackbar(
+        "Você não pode enviar um convite para você mesmo!",
+        errorEvent,
+      );
+      return updateUi(() => _isLoading = false);
+    }
+
     final (_, err) = await _inviteRepository.create(unmaskedPhone);
     if (err != null) {
       if (err is ApiPatientAlreadyWithDoctorError) {

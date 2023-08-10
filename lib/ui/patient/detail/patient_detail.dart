@@ -184,7 +184,8 @@ class PatientDetail extends StatelessWidget {
                       AhpsicoSpacing.horizontalSpaceSmall,
                       Expanded(
                         child: Text(
-                          MaskFormatters.phoneMaskFormatter.maskText(patient.phoneNumber),
+                          MaskFormatters.phoneMaskFormatter
+                              .maskText(patient.phoneNumber.substring(3)),
                           style: AhpsicoText.title3Style.copyWith(
                             color: AhpsicoColors.dark25,
                           ),
