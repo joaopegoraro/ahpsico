@@ -8,7 +8,7 @@ enum SessionStatus {
   final int value;
 
   factory SessionStatus.fromValue(
-    int value, {
+    int? value, {
     SessionStatus fallback = SessionStatus.notConfirmed,
   }) {
     return SessionStatus.values.firstWhere(

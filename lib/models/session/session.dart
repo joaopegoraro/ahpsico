@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:ahpsico/constants/app_constants.dart';
+import 'package:ahpsico/models/session/session_payment_status.dart';
 import 'package:ahpsico/models/session/session_status.dart';
 import 'package:ahpsico/models/session/session_type.dart';
 import 'package:ahpsico/models/user.dart';
@@ -14,6 +15,7 @@ class Session {
     required this.patient,
     required this.groupIndex,
     required this.status,
+    required this.paymentStatus,
     required this.type,
     required this.date,
   });
@@ -23,6 +25,7 @@ class Session {
   final User patient;
   final int groupIndex;
   final SessionStatus status;
+  final SessionPaymentStatus paymentStatus;
   final SessionType type;
   final DateTime date;
 
@@ -40,6 +43,7 @@ class Session {
     User? patient,
     int? groupIndex,
     SessionStatus? status,
+    SessionPaymentStatus? paymentStatus,
     SessionType? type,
     DateTime? date,
   }) {
@@ -49,6 +53,7 @@ class Session {
       patient: patient ?? this.patient,
       groupIndex: groupIndex ?? this.groupIndex,
       status: status ?? this.status,
+      paymentStatus: paymentStatus ?? this.paymentStatus,
       type: type ?? this.type,
       date: date ?? this.date,
     );
@@ -61,6 +66,7 @@ class Session {
       'patient': patient.toMap(),
       'groupIndex': groupIndex,
       'status': status.value,
+      'paymentStatus': paymentStatus.value,
       'type': type.value,
       'date': TimeUtils.formatDateWithOffset(date, AppConstants.datePattern),
     };
@@ -72,7 +78,8 @@ class Session {
       doctor: User.fromMap(map['doctor'] as Map<String, dynamic>? ?? {}),
       patient: User.fromMap(map['patient'] as Map<String, dynamic>? ?? {}),
       groupIndex: map['groupIndex'] as int? ?? 0,
-      status: SessionStatus.fromValue(map['status'] as int? ?? -1),
+      status: SessionStatus.fromValue(map['status']),
+      paymentStatus: SessionPaymentStatus.fromValue(map['paymentStatus']),
       type: SessionType.fromValue(map['type'] as int? ?? -1),
       date: DateFormat(AppConstants.datePattern).parse(map['date'] as String? ?? ""),
     );
@@ -88,7 +95,7 @@ class Session {
 
   @override
   String toString() {
-    return 'Session(id: $id, doctor: $doctor, patient: $patient, groupIndex: $groupIndex, status: $status, type: $type, date: $date)';
+    return 'Session(id: $id, doctor: $doctor, patient: $patient, groupIndex: $groupIndex, status: $status, paymentStatus: $paymentStatus, type: $type, date: $date)';
   }
 
   @override
@@ -100,6 +107,7 @@ class Session {
         other.patient == patient &&
         other.groupIndex == groupIndex &&
         other.status == status &&
+        other.paymentStatus == paymentStatus &&
         other.type == type &&
         other.date == date;
   }
@@ -111,6 +119,7 @@ class Session {
         patient.hashCode ^
         groupIndex.hashCode ^
         status.hashCode ^
+        paymentStatus.hashCode ^
         type.hashCode ^
         date.hashCode;
   }
