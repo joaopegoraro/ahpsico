@@ -2,6 +2,7 @@ import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/session/session_payment_status.dart';
 import 'package:ahpsico/models/session/session_status.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
@@ -11,6 +12,7 @@ enum SessionDetailEvent {
   concludeSession,
   cancelSession,
   confirmSession,
+  paySession,
   rescheduleSession,
   showSnackbarError,
   showSnackbarMessage,
@@ -70,6 +72,10 @@ class SessionDetailModel extends BaseViewModel<SessionDetailEvent> {
 
   void emitConfirmSessionEvent() {
     emitEvent(SessionDetailEvent.confirmSession);
+  }
+
+  void emitPaySessionEvent() {
+    emitEvent(SessionDetailEvent.paySession);
   }
 
   void emitRescheduleSessionEvent() {
@@ -141,6 +147,26 @@ class SessionDetailModel extends BaseViewModel<SessionDetailEvent> {
     });
     showSnackbar(
       "Sessão concluída com sucesso!",
+      SessionDetailEvent.showSnackbarMessage,
+    );
+  }
+
+  Future<void> paySession(Session session) async {
+    updateUi(() => _isLoading = true);
+    final (newSession, err) = await _sessionRepository.update(
+      session.copyWith(paymentStatus: SessionPaymentStatus.payed),
+    );
+    if (err != null) {
+      await handleDefaultErrors(err);
+      updateUi(() => _isLoading = false);
+      return;
+    }
+    updateUi(() {
+      _isLoading = false;
+      setUpdatedSession(newSession);
+    });
+    showSnackbar(
+      "Sessão marcada como paga com sucesso!",
       SessionDetailEvent.showSnackbarMessage,
     );
   }

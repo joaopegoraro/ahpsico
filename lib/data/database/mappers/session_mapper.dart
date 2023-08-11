@@ -18,7 +18,7 @@ abstract class SessionMapper {
       patient: UserMapper.toUser(patientEntity),
       groupIndex: entity.groupIndex,
       status: SessionStatus.fromValue(entity.status),
-      paymentStatus: SessionPaymentStatus.fromValue(entity.status),
+      paymentStatus: SessionPaymentStatus.fromValue(entity.paymentStatus),
       type: SessionType.fromValue(entity.type),
       date: DateTime.fromMillisecondsSinceEpoch(entity.dateInMillisecondsSinceEpoch),
     );

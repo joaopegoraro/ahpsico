@@ -26,6 +26,8 @@ class AdvicesList extends StatelessWidget {
     switch (event) {
       case AdviceListEvent.showSnackbarError:
         AhpsicoSnackbar.showError(context, model.snackbarMessage);
+      case AdviceListEvent.showSnackbarMessage:
+        AhpsicoSnackbar.showSuccess(context, model.snackbarMessage);
       case AdviceListEvent.navigateToLogin:
         context.go(LoginScreen.route);
       case AdviceListEvent.openDeleteConfirmationDialog:
@@ -77,10 +79,13 @@ class AdvicesList extends StatelessWidget {
           onBackPressed: context.pop,
           actions: [
             if (model.isSelectModeOn)
-              IconButton(
-                onPressed: model.openDeleteConfirmationDialog,
-                color: AhpsicoColors.light80,
-                icon: const Icon(Icons.delete),
+              Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: IconButton(
+                  onPressed: model.openDeleteConfirmationDialog,
+                  color: AhpsicoColors.light80,
+                  icon: const Icon(Icons.delete),
+                ),
               ),
           ],
         );

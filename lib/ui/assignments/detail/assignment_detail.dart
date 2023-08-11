@@ -106,15 +106,14 @@ class AssignmentDetail extends StatelessWidget {
       },
       topbarBuilder: (context, model) {
         return Topbar(
-          title: "Tarefa",
-          onBackPressed: () {
-            if (model.updatedAssignment != null) {
-              context.go(LoginScreen.route);
-            } else {
-              context.pop();
-            }
-          }
-        );
+            title: "Tarefa",
+            onBackPressed: () {
+              if (model.updatedAssignment != null) {
+                context.go(LoginScreen.route);
+              } else {
+                context.pop();
+              }
+            });
       },
       bodyBuilder: (context, model) {
         final assignment = _getAssignment(model);
@@ -146,13 +145,9 @@ class AssignmentDetail extends StatelessWidget {
                               ),
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.all(Radius.circular(30)),
-                              color: getStatusColor(assignment),
-                            ),
-                            child: Text(
+                          Chip(
+                            backgroundColor: getStatusColor(assignment),
+                            label: Text(
                               getAssignmentStatus(assignment),
                               style:
                                   AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.light80),

@@ -11,6 +11,7 @@ enum SendMessageEvent {
   closeSheet,
   showSnackbarError,
   showSnackbarMessage,
+  navigateToHomeScreen,
   navigateToLoginScreen,
 }
 
@@ -89,6 +90,7 @@ class SendMessageModel extends BaseViewModel<SendMessageEvent> {
       SendMessageEvent.showSnackbarMessage,
     );
     emitEvent(SendMessageEvent.closeSheet);
+    emitEvent(SendMessageEvent.navigateToHomeScreen);
 
     updateUi(() => _isLoading = false);
   }

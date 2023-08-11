@@ -415,6 +415,7 @@ class ApiServiceImpl implements ApiService {
         "patientUuid": session.patient.uuid,
         "groupIndex": session.groupIndex,
         "status": session.status.value,
+        "paymentStatus": session.paymentStatus.value,
         "type": session.type.value,
         "date": TimeUtils.formatDateWithOffset(session.date, AppConstants.datePattern),
       },
@@ -438,6 +439,7 @@ class ApiServiceImpl implements ApiService {
       endpoint: "sessions/${session.id}",
       requestBody: () => <String, dynamic>{
         "status": session.status.value,
+        "paymentStatus": session.paymentStatus.value,
         "date": TimeUtils.formatDateWithOffset(session.date, AppConstants.datePattern),
       },
       parseSuccess: (response) {

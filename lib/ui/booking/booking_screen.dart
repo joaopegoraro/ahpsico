@@ -61,8 +61,8 @@ class BookingScreen extends StatelessWidget {
       case BookingEvent.openScheduleAlreadyBookedDialog:
         AhpsicoDialog.show(
           context: context,
-          content:
-              "Já existe uma sessão agendada nesse horário, por isso não é possível desbloqueá-lo",
+          content: "Já existe uma sessão agendada nesse horário, "
+              "por isso não é possível desbloqueá-lo",
           firstButtonText: "Ok",
         );
       case BookingEvent.openRescheduleSessionDialog:
@@ -77,7 +77,9 @@ class BookingScreen extends StatelessWidget {
             onTapFirstButton: () {
               context.pop();
               model.rescheduleSession(session: session!).then((updatedSession) {
-                context.pop(updatedSession);
+                if (updatedSession != null) {
+                  context.go(LoginScreen.route);
+                }
               });
             },
           );
@@ -91,10 +93,13 @@ class BookingScreen extends StatelessWidget {
                 dateTime: model.newSessionTime!,
                 onConfirm: (isMonthly) {
                   context.pop();
-                  model.scheduleSession(
-                    doctor: doctor!,
-                    monthly: isMonthly,
-                  );
+                  model
+                      .scheduleSession(doctor: doctor!, monthly: isMonthly)
+                      .then((updatedSessions) {
+                    if (updatedSessions.isNotEmpty) {
+                      context.go(LoginScreen.route);
+                    }
+                  });
                 },
               );
             },

@@ -4,6 +4,7 @@ import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
 import 'package:ahpsico/models/schedule.dart';
 import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/session/session_payment_status.dart';
 import 'package:ahpsico/models/session/session_status.dart';
 import 'package:ahpsico/models/session/session_type.dart';
 import 'package:ahpsico/models/user.dart';
@@ -131,7 +132,7 @@ class BookingModel extends BaseViewModel<BookingEvent> {
 
   /* Calls */
 
-  Future<void> scheduleSession({
+  Future<List<Session>> scheduleSession({
     required User doctor,
     required bool monthly,
   }) async {
@@ -147,6 +148,7 @@ class BookingModel extends BaseViewModel<BookingEvent> {
           patient: user!,
           groupIndex: index,
           status: SessionStatus.notConfirmed,
+          paymentStatus: SessionPaymentStatus.notPayed,
           type: SessionType.monthly,
           date: _newSessionTime!.add(Duration(days: 7 * index)),
         );
@@ -159,6 +161,7 @@ class BookingModel extends BaseViewModel<BookingEvent> {
         patient: user!,
         groupIndex: 0,
         status: SessionStatus.notConfirmed,
+        paymentStatus: SessionPaymentStatus.notPayed,
         type: SessionType.individual,
         date: _newSessionTime!,
       );
@@ -173,10 +176,12 @@ class BookingModel extends BaseViewModel<BookingEvent> {
           "Ops! Parece que o horário escolhido não está mais disponível",
           BookingEvent.showSnackbarError,
         );
-        return updateUi(() => _isLoading = false);
+        updateUi(() => _isLoading = false);
+        return [];
       } else if (err != null) {
         await handleDefaultErrors(err);
-        return updateUi(() => _isLoading = false);
+        updateUi(() => _isLoading = false);
+        return [];
       }
     }
 
@@ -184,9 +189,9 @@ class BookingModel extends BaseViewModel<BookingEvent> {
       monthly ? "Sessões agendadas com sucesso!" : "Sessão agendada com sucesso!",
       BookingEvent.showSnackbarMessage,
     );
-    emitEvent(BookingEvent.navigateBack);
-
     updateUi(() => _isLoading = false);
+
+    return newSessions;
   }
 
   Future<Session?> rescheduleSession({required Session session}) async {

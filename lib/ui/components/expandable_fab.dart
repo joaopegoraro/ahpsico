@@ -9,10 +9,14 @@ class ExpandableFab extends StatefulWidget {
     this.initialOpen,
     required this.distance,
     required this.children,
+    this.mainChild,
+    this.color = AhpsicoColors.violet,
   });
 
   final bool? initialOpen;
   final double distance;
+  final Widget? mainChild;
+  final Color color;
   final List<Widget> children;
 
   @override
@@ -97,7 +101,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
         child: Material(
           shape: const CircleBorder(),
           clipBehavior: Clip.antiAlias,
-          color: AhpsicoColors.violet,
+          color: widget.color,
           elevation: 4,
           child: InkWell(
             onTap: _toggle,
@@ -132,8 +136,8 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
           duration: const Duration(milliseconds: 250),
           child: FloatingActionButton(
             onPressed: _toggle,
-            backgroundColor: AhpsicoColors.violet,
-            child: const Icon(Icons.create),
+            backgroundColor: widget.color,
+            child: widget.mainChild ?? const Icon(Icons.create),
           ),
         ),
       ),

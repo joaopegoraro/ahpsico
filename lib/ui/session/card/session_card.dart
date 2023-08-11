@@ -1,4 +1,5 @@
 import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/session/session_payment_status.dart';
 import 'package:ahpsico/models/session/session_status.dart';
 import 'package:ahpsico/models/session/session_type.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
@@ -33,6 +34,16 @@ class SessionCard extends StatelessWidget {
         SessionStatus.notConfirmed => AhpsicoColors.yellow
       };
 
+  String get sessionPaymentStatus => switch (session.paymentStatus) {
+        SessionPaymentStatus.notPayed => "Não paga",
+        SessionPaymentStatus.payed => "Paga",
+      };
+
+  Color get paymentStatusColor => switch (session.paymentStatus) {
+        SessionPaymentStatus.notPayed => AhpsicoColors.red,
+        SessionPaymentStatus.payed => AhpsicoColors.green,
+      };
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -59,23 +70,30 @@ class SessionCard extends StatelessWidget {
                       ),
                     ),
                     AhpsicoSpacing.verticalSpaceSmall,
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 10,
                       children: [
                         Text(
                           "Situação",
                           style: AhpsicoText.smallStyle.copyWith(color: AhpsicoColors.light20),
                         ),
-                        AhpsicoSpacing.horizontalSpaceSmall,
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.all(Radius.circular(30)),
-                            color: statusColor,
-                          ),
-                          child: Text(
+                        Chip(
+                          backgroundColor: statusColor,
+                          label: Text(
                             sessionStatus,
-                            style: AhpsicoText.smallStyle.copyWith(color: AhpsicoColors.light80),
+                            style: AhpsicoText.smallStyle.copyWith(
+                              color: AhpsicoColors.light80,
+                            ),
+                          ),
+                        ),
+                        Chip(
+                          backgroundColor: paymentStatusColor,
+                          label: Text(
+                            sessionPaymentStatus,
+                            style: AhpsicoText.smallStyle.copyWith(
+                              color: AhpsicoColors.light80,
+                            ),
                           ),
                         ),
                       ],
@@ -83,7 +101,7 @@ class SessionCard extends StatelessWidget {
                     if (session.type == SessionType.monthly) ...[
                       AhpsicoSpacing.verticalSpaceSmall,
                       Text(
-                        "Sessão ${session.groupIndex} de 4",
+                        "Sessão ${session.groupIndex + 1} de 4",
                         style: AhpsicoText.regular3Style.copyWith(color: AhpsicoColors.dark50),
                       ),
                     ],

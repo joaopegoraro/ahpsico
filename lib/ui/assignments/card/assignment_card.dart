@@ -64,13 +64,9 @@ class AssignmentCard extends StatelessWidget {
                           style: AhpsicoText.smallStyle.copyWith(color: AhpsicoColors.light20),
                         ),
                         AhpsicoSpacing.horizontalSpaceSmall,
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.all(Radius.circular(30)),
-                            color: statusColor,
-                          ),
-                          child: Text(
+                        Chip(
+                          backgroundColor: statusColor,
+                          label: Text(
                             assignmentStatus,
                             style: AhpsicoText.smallStyle.copyWith(color: AhpsicoColors.light80),
                           ),

@@ -9,6 +9,7 @@ import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum AdviceListEvent {
   openDeleteConfirmationDialog,
+  showSnackbarMessage,
   showSnackbarError,
   navigateToLogin,
 }
@@ -34,6 +35,7 @@ class AdviceListModel extends BaseViewModel<AdviceListEvent> {
     this._adviceRepository,
   ) : super(
           errorEvent: AdviceListEvent.showSnackbarError,
+          messageEvent: AdviceListEvent.showSnackbarMessage,
           navigateToLoginEvent: AdviceListEvent.navigateToLogin,
         );
 
@@ -115,7 +117,12 @@ class AdviceListModel extends BaseViewModel<AdviceListEvent> {
       }
     }
 
+    _advices.removeWhere((advice) => _selectedAdvicesIds.contains(advice.id));
     clearSelection();
+    showSnackbar(
+      "Mensagens deletadas com sucesso!",
+      AdviceListEvent.showSnackbarMessage,
+    );
     updateUi(() => _isLoading = false);
   }
 }

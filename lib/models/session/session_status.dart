@@ -16,4 +16,15 @@ enum SessionStatus {
       orElse: () => fallback,
     );
   }
+
+  bool get isNotConfirmed => this == notConfirmed;
+  bool get isConfirmed => this == confirmed;
+  bool get isCanceled => this == canceled;
+  bool get isConcluded => this == concluded;
+
+  bool isIn(List<SessionStatus> statusList) {
+    return statusList.contains(this);
+  }
+
+  bool get isOver => isIn([canceled, concluded]);
 }

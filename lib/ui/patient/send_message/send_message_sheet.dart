@@ -6,6 +6,7 @@ import 'package:ahpsico/ui/components/button.dart';
 import 'package:ahpsico/ui/components/dialogs/ahpsico_dialog.dart';
 import 'package:ahpsico/ui/components/input_field.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
+import 'package:ahpsico/ui/doctor/home/doctor_home.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:ahpsico/ui/patient/send_message/send_message_model.dart';
 import 'package:flutter/material.dart';
@@ -50,13 +51,18 @@ class _SendMessageSheetState extends State<SendMessageSheet> {
         AhpsicoSnackbar.showSuccess(context, model.snackbarMessage);
       case SendMessageEvent.closeSheet:
         context.pop();
+      case SendMessageEvent.navigateToHomeScreen:
+        context.go(DoctorHome.route);
       case SendMessageEvent.openConfirmationDialog:
         AhpsicoDialog.show(
           context: context,
           content: "Tem certeza que deseja enviar essa mensagem para os pacientes selecionados?",
           firstButtonText: "Sim, tenho certeza",
           secondButtonText: "Não, cancelar",
-          onTapFirstButton: () => model.sendMessage(widget.patientIds),
+          onTapFirstButton: () {
+            context.pop();
+            model.sendMessage(widget.patientIds);
+          },
         );
     }
   }

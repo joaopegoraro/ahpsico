@@ -5,6 +5,9 @@ enum SessionPaymentStatus {
   const SessionPaymentStatus(this.value);
   final int value;
 
+  bool get isNotPayed => this == SessionPaymentStatus.notPayed;
+  bool get isPayed => this == SessionPaymentStatus.payed;
+
   factory SessionPaymentStatus.fromValue(
     int? value, {
     SessionPaymentStatus fallback = SessionPaymentStatus.notPayed,
