@@ -15,24 +15,29 @@ class SessionList extends StatelessWidget {
   const SessionList({
     super.key,
     required this.patient,
+    required this.upcomingSessions,
     required this.navigateBackOnTap,
   });
 
   static const route = "/sessions";
   static const patientArgsKey = "patient";
+  static const upcomingSessionsArgsKey = "upcomingSessions";
   static const navigateBackOnTapArgsKey = "navigateBackOnTap";
 
   static Map<String, dynamic> buildArgs({
     User? patient,
+    bool upcomingSessions = false,
     bool navigateBackOnTap = false,
   }) {
     return {
       patientArgsKey: patient,
+      upcomingSessionsArgsKey: upcomingSessions,
       navigateBackOnTapArgsKey: navigateBackOnTap,
     };
   }
 
   final User? patient;
+  final bool upcomingSessions;
   final bool navigateBackOnTap;
 
   void _onEventEmitted(
@@ -57,7 +62,10 @@ class SessionList extends StatelessWidget {
         return model.isLoading || model.user == null;
       },
       onCreate: (model) {
-        model.fetchScreenData(patientUuid: patient?.uuid);
+        model.fetchScreenData(
+          patientUuid: patient?.uuid,
+          upcomingSessions: upcomingSessions,
+        );
       },
       topbarBuilder: (context, model) {
         return Topbar(

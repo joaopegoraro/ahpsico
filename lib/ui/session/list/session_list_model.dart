@@ -50,25 +50,43 @@ class SessionListModel extends BaseViewModel<SessionListEvent> {
 
   /* Calls */
 
-  Future<void> fetchScreenData({required String? patientUuid, bool sync = true}) async {
+  Future<void> fetchScreenData({
+    required String? patientUuid,
+    required bool upcomingSessions,
+    bool sync = true,
+  }) async {
     updateUi(() => _isLoading = sync);
     await getUserData();
-    await _fetchSessions(patientUuid: patientUuid, sync: sync);
+    await _fetchSessions(
+      patientUuid: patientUuid,
+      upcomingSessions: upcomingSessions,
+      sync: sync,
+    );
     updateUi(() => _isLoading = false);
   }
 
-  Future<void> _fetchSessions({String? patientUuid, bool sync = true}) async {
+  Future<void> _fetchSessions({
+    required String? patientUuid,
+    required bool upcomingSessions,
+    bool sync = true,
+  }) async {
     final isDoctor = user!.role.isDoctor;
     final userUid = user!.uuid;
 
     if (sync) {
       ApiError? err;
       if (patientUuid != null) {
-        err = await _sessionRepository.syncPatientSessions(patientUuid);
+        err = await _sessionRepository.syncPatientSessions(
+          patientUuid,
+          upcoming: upcomingSessions,
+        );
       } else if (isDoctor) {
         err = await _sessionRepository.syncDoctorSessions(userUid);
       } else {
-        err = await _sessionRepository.syncPatientSessions(userUid);
+        err = await _sessionRepository.syncPatientSessions(
+          userUid,
+          upcoming: upcomingSessions,
+        );
       }
       if (err != null) {
         await handleDefaultErrors(err, shouldShowConnectionError: false);
@@ -76,11 +94,17 @@ class SessionListModel extends BaseViewModel<SessionListEvent> {
     }
 
     if (patientUuid != null) {
-      _sessions = await _sessionRepository.getPatientSessions(patientUuid);
+      _sessions = await _sessionRepository.getPatientSessions(
+        patientUuid,
+        upcoming: upcomingSessions,
+      );
     } else if (isDoctor) {
       _sessions = await _sessionRepository.getDoctorSessions(userUid);
     } else {
-      _sessions = await _sessionRepository.getPatientSessions(userUid);
+      _sessions = await _sessionRepository.getPatientSessions(
+        userUid,
+        upcoming: upcomingSessions,
+      );
     }
   }
 }

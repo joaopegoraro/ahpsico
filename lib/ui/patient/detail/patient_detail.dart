@@ -224,7 +224,7 @@ class PatientDetail extends StatelessWidget {
                 );
               }),
             ],
-            AhpsicoSpacing.verticalSpaceLarge,
+            AhpsicoSpacing.verticalSpaceRegular,
             if (model.assignments.isNotEmpty) ...[
               Text(
                 "Tarefas pendentes",
@@ -247,6 +247,7 @@ class PatientDetail extends StatelessWidget {
               }),
             ],
             AhpsicoSpacing.verticalSpaceMassive,
+            AhpsicoSpacing.verticalSpaceLarge,
           ].mapToList((item) {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),

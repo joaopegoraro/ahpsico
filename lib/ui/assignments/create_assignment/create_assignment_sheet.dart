@@ -130,6 +130,7 @@ class _CreateAssignmentSheetState extends State<CreateAssignmentSheet> {
                       SessionList.route,
                       extra: SessionList.buildArgs(
                         patient: widget.patient,
+                        upcomingSessions: true,
                         navigateBackOnTap: true,
                       ),
                     );
@@ -154,8 +155,8 @@ class _CreateAssignmentSheetState extends State<CreateAssignmentSheet> {
                       ),
                     ),
                   ),
-                ),
-              if (_session != null)
+                )
+              else
                 SessionCard(
                   session: _session!,
                   onTap: (session) {
@@ -163,6 +164,7 @@ class _CreateAssignmentSheetState extends State<CreateAssignmentSheet> {
                       SessionList.route,
                       extra: SessionList.buildArgs(
                         patient: widget.patient,
+                        upcomingSessions: true,
                         navigateBackOnTap: true,
                       ),
                     );

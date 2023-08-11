@@ -114,9 +114,11 @@ final class AhpsicoRouter {
         builder: (context, state) {
           final args = state.extra as Map<String, dynamic>?;
           final User? patient = args?[SessionList.patientArgsKey];
+          final bool upcomingSessions = args?[SessionList.upcomingSessionsArgsKey] ?? false;
           final bool navigateBackOnTap = args?[SessionList.navigateBackOnTapArgsKey] ?? false;
           return SessionList(
             patient: patient,
+            upcomingSessions: upcomingSessions,
             navigateBackOnTap: navigateBackOnTap,
           );
         },
