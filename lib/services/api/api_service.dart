@@ -1,12 +1,11 @@
 import 'dart:io';
 
 import 'package:ahpsico/constants/app_constants.dart';
-import 'package:ahpsico/models/invite.dart';
-import 'package:ahpsico/models/assignment/assignment.dart';
-import 'package:ahpsico/models/schedule.dart';
-import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/constants/user_role.dart';
+import 'package:ahpsico/models/assignment.dart';
+import 'package:ahpsico/models/session.dart';
 import 'package:ahpsico/models/user.dart';
-import 'package:ahpsico/models/advice.dart';
+import 'package:ahpsico/models/message.dart';
 import 'package:ahpsico/services/api/auth_interceptor.dart';
 import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/logger/logging_service.dart';
@@ -25,30 +24,13 @@ abstract interface class ApiService {
 
   Future<(User?, ApiError?)> signUp(String userName, UserRole role);
 
-  Future<(Invite?, ApiError?)> createInvite(String phoneNumber);
-
-  Future<(List<Invite>?, ApiError?)> getInvites();
-
-  Future<ApiError?> deleteInvite(int id);
-
-  Future<ApiError?> acceptInvite(int id);
-
-  Future<(User?, ApiError?)> getUser(String uuid);
+  Future<(User?, ApiError?)> getUser(int id);
 
   Future<(User?, ApiError?)> updateUser(User user);
 
-  Future<(List<User>?, ApiError?)> getDoctorPatients(String doctorId);
+  Future<(List<User>?, ApiError?)> getPatients();
 
-  Future<(List<Session>?, ApiError?)> getDoctorSessions(
-    String doctorId, {
-    DateTime? date,
-  });
-
-  Future<(List<Advice>?, ApiError?)> getDoctorAdvices(String doctorId);
-
-  Future<(List<Schedule>?, ApiError?)> getDoctorSchedule(String doctorId);
-
-  Future<(List<User>?, ApiError?)> getPatientDoctors(String patientId);
+  Future<(List<Session>?, ApiError?)> getDoctorSessions({DateTime? date});
 
   Future<(List<Session>?, ApiError?)> getPatientSessions(
     String patientId, {
@@ -60,7 +42,9 @@ abstract interface class ApiService {
     bool? pending,
   });
 
-  Future<(List<Advice>?, ApiError?)> getPatientAdvices(String patientId);
+  Future<(List<Message>?, ApiError?)> getDoctorMessages();
+
+  Future<(List<Message>?, ApiError?)> getPatientMessages(String patientId);
 
   Future<(Session?, ApiError?)> getSession(int id);
 
@@ -74,13 +58,9 @@ abstract interface class ApiService {
 
   Future<ApiError?> deleteAssignment(int id);
 
-  Future<(Advice?, ApiError?)> createAdvice(Advice advice);
+  Future<(Message?, ApiError?)> createMessage(Message message);
 
-  Future<ApiError?> deleteAdvice(int id);
-
-  Future<(Schedule?, ApiError?)> createSchedule(Schedule schedule);
-
-  Future<ApiError?> deleteSchedule(int id);
+  Future<ApiError?> deleteMessage(int id);
 }
 
 final apiServiceProvider = Provider<ApiService>((ref) {
@@ -97,7 +77,8 @@ final apiServiceProvider = Provider<ApiService>((ref) {
     requestBody: true,
     responseHeader: true,
   );
-  final dio = Dio(options)..interceptors.addAll([authInterceptor, loggerInterceptor]);
+  final dio = Dio(options)
+    ..interceptors.addAll([authInterceptor, loggerInterceptor]);
   final logger = ref.watch(loggerProvider);
   return ApiServiceImpl(dio, logger);
 });
@@ -166,76 +147,10 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(Invite?, ApiError?)> createInvite(String phoneNumber) async {
-    return await request(
-      method: "POST",
-      endpoint: "invites",
-      requestBody: () => <String, dynamic>{
-        "phoneNumber": phoneNumber,
-      },
-      parseSuccess: (response) {
-        final map = Utils.castToJsonMap(response.data);
-        return Invite.fromMap(map);
-      },
-      parseFailure: (response) {
-        switch (response?.statusCode) {
-          case 404:
-            return const ApiPatientNotRegisteredError();
-          case 409:
-            final errorBody = Utils.castToJsonMap(response!.data);
-            final errorCode = errorBody['type'] as String?;
-            switch (errorCode) {
-              case "invite_already_sent":
-                return const ApiInviteAlreadySentError();
-              case "patient_already_with_doctor":
-                return const ApiPatientAlreadyWithDoctorError();
-              default:
-                return null;
-            }
-          default:
-            return null;
-        }
-      },
-    );
-  }
-
-  @override
-  Future<(List<Invite>?, ApiError?)> getInvites() async {
+  Future<(User?, ApiError?)> getUser(int id) async {
     return await request(
       method: "GET",
-      endpoint: "invites",
-      parseSuccess: (response) {
-        final list = Utils.castToJsonList(response.data);
-        return list.map((e) => Invite.fromMap(e)).toList();
-      },
-    );
-  }
-
-  @override
-  Future<ApiError?> deleteInvite(int id) async {
-    final (_, err) = await request(
-      method: "DELETE",
-      endpoint: "invites/$id",
-      parseSuccess: (response) {/* SUCCESS! */},
-    );
-    return err;
-  }
-
-  @override
-  Future<ApiError?> acceptInvite(int id) async {
-    final (_, err) = await request(
-      method: "POST",
-      endpoint: "invites/$id/accept",
-      parseSuccess: (response) {/* SUCCESS! */},
-    );
-    return err;
-  }
-
-  @override
-  Future<(User?, ApiError?)> getUser(String uuid) async {
-    return await request(
-      method: "GET",
-      endpoint: "users/$uuid",
+      endpoint: "users/$id",
       parseSuccess: (response) {
         final map = Utils.castToJsonMap(response.data);
         return User.fromMap(map);
@@ -247,7 +162,7 @@ class ApiServiceImpl implements ApiService {
   Future<(User?, ApiError?)> updateUser(User user) async {
     return await request(
       method: "PUT",
-      endpoint: "users/${user.uuid}",
+      endpoint: "users/${user.id}",
       requestBody: () {
         return user.toMap();
       },
@@ -259,13 +174,10 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(List<User>?, ApiError?)> getDoctorPatients(String doctorUuid) async {
+  Future<(List<User>?, ApiError?)> getPatients() async {
     return await request(
       method: "GET",
       endpoint: "patients",
-      buildQueryParameters: () => <String, dynamic>{
-        "doctorUuid": doctorUuid,
-      },
       parseSuccess: (response) {
         final list = Utils.castToJsonList(response.data);
         return list.map((e) => User.fromMap(e)).toList();
@@ -274,18 +186,17 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(List<Session>?, ApiError?)> getDoctorSessions(
-    String doctorUuid, {
+  Future<(List<Session>?, ApiError?)> getDoctorSessions({
     DateTime? date,
   }) async {
     return await request(
       method: "GET",
       endpoint: "sessions",
       buildQueryParameters: () {
-        if (date == null) return {"doctorUuid": doctorUuid};
+        if (date == null) return null;
         return {
-          "date": TimeUtils.formatDateWithOffset(date, AppConstants.datePattern),
-          "doctorUuid": doctorUuid,
+          "date":
+              TimeUtils.formatDateWithOffset(date, AppConstants.datePattern),
         };
       },
       parseSuccess: (response) {
@@ -296,46 +207,13 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(List<Advice>?, ApiError?)> getDoctorAdvices(String doctorUuid) async {
+  Future<(List<Message>?, ApiError?)> getDoctorMessages() async {
     return await request(
       method: "GET",
       endpoint: "advices",
-      buildQueryParameters: () => <String, dynamic>{
-        "doctorUuid": doctorUuid,
-      },
       parseSuccess: (response) {
         final list = Utils.castToJsonList(response.data);
-        return list.map((e) => Advice.fromMap(e)).toList();
-      },
-    );
-  }
-
-  @override
-  Future<(List<Schedule>?, ApiError?)> getDoctorSchedule(String doctorUuid) async {
-    return await request(
-      method: "GET",
-      endpoint: "schedule",
-      buildQueryParameters: () => <String, dynamic>{
-        "doctorUuid": doctorUuid,
-      },
-      parseSuccess: (response) {
-        final list = Utils.castToJsonList(response.data);
-        return list.map((e) => Schedule.fromMap(e)).toList();
-      },
-    );
-  }
-
-  @override
-  Future<(List<User>?, ApiError?)> getPatientDoctors(String patientId) async {
-    return await request(
-      method: "GET",
-      endpoint: "doctors",
-      buildQueryParameters: () => <String, dynamic>{
-        "patientUuid": patientId,
-      },
-      parseSuccess: (response) {
-        final list = Utils.castToJsonList(response.data);
-        return list.map((e) => User.fromMap(e)).toList();
+        return list.map((e) => Message.fromMap(e)).toList();
       },
     );
   }
@@ -379,7 +257,9 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(List<Advice>?, ApiError?)> getPatientAdvices(String patientId) async {
+  Future<(List<Message>?, ApiError?)> getPatientMessages(
+    String patientId,
+  ) async {
     return await request(
       method: "GET",
       endpoint: "advices",
@@ -388,7 +268,7 @@ class ApiServiceImpl implements ApiService {
       },
       parseSuccess: (response) {
         final list = Utils.castToJsonList(response.data);
-        return list.map((e) => Advice.fromMap(e)).toList();
+        return list.map((e) => Message.fromMap(e)).toList();
       },
     );
   }
@@ -410,15 +290,7 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "POST",
       endpoint: "sessions",
-      requestBody: () => <String, dynamic>{
-        "doctorUuid": session.doctor.uuid,
-        "patientUuid": session.patient.uuid,
-        "groupIndex": session.groupIndex,
-        "status": session.status.value,
-        "paymentStatus": session.paymentStatus.value,
-        "type": session.type.value,
-        "date": TimeUtils.formatDateWithOffset(session.date, AppConstants.datePattern),
-      },
+      requestBody: session.toMap,
       parseSuccess: (response) {
         final map = Utils.castToJsonMap(response.data);
         return session.copyWith(id: map["id"]);
@@ -437,11 +309,7 @@ class ApiServiceImpl implements ApiService {
     return await request(
       method: "PUT",
       endpoint: "sessions/${session.id}",
-      requestBody: () => <String, dynamic>{
-        "status": session.status.value,
-        "paymentStatus": session.paymentStatus.value,
-        "date": TimeUtils.formatDateWithOffset(session.date, AppConstants.datePattern),
-      },
+      requestBody: session.toMap,
       parseSuccess: (response) {
         final map = Utils.castToJsonMap(response.data);
         return session.copyWith(id: map["id"]);
@@ -456,18 +324,12 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(Assignment?, ApiError?)> createAssignment(Assignment assignment) async {
+  Future<(Assignment?, ApiError?)> createAssignment(
+      Assignment assignment) async {
     return await request(
       method: "POST",
       endpoint: "assignments",
-      requestBody: () => <String, dynamic>{
-        "doctorUuid": assignment.doctor.uuid,
-        "patientUuid": assignment.patientId,
-        "deliverySessionId": assignment.deliverySession.id,
-        "title": assignment.title,
-        "description": assignment.description,
-        "status": assignment.status.value,
-      },
+      requestBody: assignment.toMap,
       parseSuccess: (response) {
         final map = Utils.castToJsonMap(response.data);
         return assignment.copyWith(id: map["id"]);
@@ -476,15 +338,12 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(Assignment?, ApiError?)> updateAssignment(Assignment assignment) async {
+  Future<(Assignment?, ApiError?)> updateAssignment(
+      Assignment assignment) async {
     return await request(
       method: "PUT",
       endpoint: "assignments/${assignment.id}",
-      requestBody: () => <String, dynamic>{
-        "title": assignment.title,
-        "description": assignment.description,
-        "status": assignment.status.value,
-      },
+      requestBody: assignment.toMap,
       parseSuccess: (response) {
         final map = Utils.castToJsonMap(response.data);
         return assignment.copyWith(id: map["id"]);
@@ -503,52 +362,23 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(Advice?, ApiError?)> createAdvice(Advice advice) async {
+  Future<(Message?, ApiError?)> createMessage(Message message) async {
     return await request(
       method: "POST",
       endpoint: "advices",
-      requestBody: () => <String, dynamic>{
-        "doctorUuid": advice.doctor.uuid,
-        "message": advice.message,
-        "patientUuids": advice.patientIds,
-      },
+      requestBody: message.toMap,
       parseSuccess: (response) {
         final map = Utils.castToJsonMap(response.data);
-        return Advice.fromMap(map);
+        return Message.fromMap(map);
       },
     );
   }
 
   @override
-  Future<ApiError?> deleteAdvice(int id) async {
+  Future<ApiError?> deleteMessage(int id) async {
     final (_, err) = await request(
       method: "DELETE",
       endpoint: "advices/$id",
-      parseSuccess: (response) {/* SUCCESS */},
-    );
-    return err;
-  }
-
-  @override
-  Future<(Schedule?, ApiError?)> createSchedule(Schedule schedule) async {
-    return await request(
-      method: "POST",
-      endpoint: "schedule",
-      requestBody: () {
-        return schedule.toMap();
-      },
-      parseSuccess: (response) {
-        final map = Utils.castToJsonMap(response.data);
-        return Schedule.fromMap(map);
-      },
-    );
-  }
-
-  @override
-  Future<ApiError?> deleteSchedule(int id) async {
-    final (_, err) = await request(
-      method: "DELETE",
-      endpoint: "schedule/$id",
       parseSuccess: (response) {/* SUCCESS */},
     );
     return err;
