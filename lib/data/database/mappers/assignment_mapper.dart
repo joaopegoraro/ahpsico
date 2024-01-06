@@ -8,9 +8,8 @@ import 'package:ahpsico/models/assignment.dart';
 abstract class AssignmentMapper {
   static Assignment toAssignment(
     AssignmentEntity entity, {
-    required UserEntity doctorEntity,
+    required UserEntity userEntity,
     required SessionEntity sessionEntity,
-    required UserEntity patientEntity,
   }) {
     return Assignment(
       id: entity.id,
@@ -20,8 +19,7 @@ abstract class AssignmentMapper {
       status: AssignmentStatus.fromValue(entity.status),
       session: SessionMapper.toSession(
         sessionEntity,
-        doctorEntity: doctorEntity,
-        patientEntity: patientEntity,
+        userEntity: userEntity,
       ),
     );
   }
