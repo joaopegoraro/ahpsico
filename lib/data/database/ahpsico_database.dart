@@ -1,8 +1,6 @@
-import 'package:ahpsico/data/database/entities/advice_entity.dart';
-import 'package:ahpsico/data/database/entities/advice_with_patient.dart';
 import 'package:ahpsico/data/database/entities/assignment_entity.dart';
+import 'package:ahpsico/data/database/entities/message_entity.dart';
 import 'package:ahpsico/data/database/entities/user_entity.dart';
-import 'package:ahpsico/data/database/entities/invite_entity.dart';
 import 'package:ahpsico/data/database/entities/session_entity.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meta/meta.dart';
@@ -19,19 +17,15 @@ abstract class AhpsicoDatabase {
   static const tables = [
     UserEntity.tableName,
     SessionEntity.tableName,
-    AdviceEntity.tableName,
-    AdviceWithPatient.tableName,
+    MessageEntity.tableName,
     AssignmentEntity.tableName,
-    InviteEntity.tableName,
   ];
 
   static const _tablesCreationStatements = [
     UserEntity.creationStatement,
     SessionEntity.creationStatement,
-    AdviceEntity.creationStatement,
-    AdviceWithPatient.creationStatement,
+    MessageEntity.creationStatement,
     AssignmentEntity.creationStatement,
-    InviteEntity.creationStatement,
   ];
 
   static Future<Database> get instance async {
@@ -44,15 +38,13 @@ abstract class AhpsicoDatabase {
     final dbPath = await getDatabasesPath();
 
     if (_tablesCreationStatements.length != tables.length) {
-      throw Exception("Number of table creation statements different than number of tables");
+      throw Exception(
+          "Number of table creation statements different than number of tables");
     }
 
     return await openDatabase(
       join(dbPath, dbName),
       version: _dbVersion,
-      onConfigure: (db) async {
-        await db.execute('PRAGMA foreign_keys = ON');
-      },
       onCreate: (db, version) async {
         for (final statement in _tablesCreationStatements) {
           await db.execute(statement);
