@@ -1,7 +1,7 @@
-import 'package:ahpsico/data/repositories/advice_repository.dart';
+import 'package:ahpsico/data/repositories/message_repository.dart';
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
-import 'package:ahpsico/models/advice.dart';
+import 'package:ahpsico/models/message.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
@@ -18,13 +18,13 @@ enum SendMessageEvent {
 final sendMessageModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
-  final adviceRepository = ref.watch(adviceRepositoryProvider);
+  final messageRepository = ref.watch(messageRepositoryProvider);
   final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return SendMessageModel(
     authService,
     userRepository,
     preferencesRepository,
-    adviceRepository,
+    messageRepository,
   );
 });
 
@@ -33,7 +33,7 @@ class SendMessageModel extends BaseViewModel<SendMessageEvent> {
     super.authService,
     super.userRepository,
     super.preferencesRepository,
-    this._adviceRepository,
+    this._messageRepository,
   ) : super(
           errorEvent: SendMessageEvent.showSnackbarError,
           navigateToLoginEvent: SendMessageEvent.navigateToLoginScreen,
@@ -41,24 +41,24 @@ class SendMessageModel extends BaseViewModel<SendMessageEvent> {
 
   /* Services */
 
-  final AdviceRepository _adviceRepository;
+  final MessageRepository _messageRepository;
 
   /* Fields */
 
-  String _message = "";
-  String get message => _message;
+  String _text = "";
+  String get text => _text;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
   /* Methods */
 
-  void updateMessage(String message) {
-    _message = message;
+  void updateMessage(String text) {
+    _text = text;
   }
 
   void openConfirmationDialog() {
-    if (message.isEmpty) {
+    if (text.isEmpty) {
       return showSnackbar(
         "O campo de mensagem não pode ficar vazio",
         SendMessageEvent.showSnackbarError,
@@ -70,17 +70,19 @@ class SendMessageModel extends BaseViewModel<SendMessageEvent> {
 
   /* Calls */
 
-  Future<void> sendMessage(List<String> patientIds) async {
+  Future<void> sendMessage(List<int> patientIds) async {
     updateUi(() => _isLoading = true);
 
     await getUserData();
-    final advice = Advice(
+    final message = Message(
       id: 0,
-      message: message,
-      doctor: user!,
-      patientIds: patientIds,
+      text: text,
+      createdAt: DateTime.now(),
     );
-    final (_, err) = await _adviceRepository.create(advice);
+    final (_, err) = await _messageRepository.create(
+      message,
+      userIds: patientIds,
+    );
     if (err != null) {
       await handleDefaultErrors(err);
       return updateUi(() => _isLoading = false);

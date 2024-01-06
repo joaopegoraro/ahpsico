@@ -1,11 +1,9 @@
-import 'package:ahpsico/data/repositories/advice_repository.dart';
 import 'package:ahpsico/data/repositories/assignment_repository.dart';
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
-import 'package:ahpsico/models/advice.dart';
-import 'package:ahpsico/models/assignment/assignment.dart';
-import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/assignment.dart';
+import 'package:ahpsico/models/session.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:flutter/services.dart';
@@ -23,7 +21,6 @@ final patientDetailModelProvider = ViewModelProviderFactory.create((ref) {
   final userRepository = ref.watch(userRepositoryProvider);
   final sessionRepository = ref.watch(sessionRepositoryProvider);
   final assignmentRepository = ref.watch(assignmentRepositoryProvider);
-  final adviceRepository = ref.watch(adviceRepositoryProvider);
   final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return PatientDetailModel(
     authService,
@@ -31,7 +28,6 @@ final patientDetailModelProvider = ViewModelProviderFactory.create((ref) {
     preferencesRepository,
     sessionRepository,
     assignmentRepository,
-    adviceRepository,
   );
 });
 
@@ -42,7 +38,6 @@ class PatientDetailModel extends BaseViewModel<PatientDetailEvent> {
     super.preferencesRepository,
     this._sessionRepository,
     this._assignmentRepository,
-    this._adviceRepository,
   ) : super(
           errorEvent: PatientDetailEvent.showSnackbarError,
           messageEvent: PatientDetailEvent.showSnackbarMessage,
@@ -53,7 +48,6 @@ class PatientDetailModel extends BaseViewModel<PatientDetailEvent> {
 
   final SessionRepository _sessionRepository;
   final AssignmentRepository _assignmentRepository;
-  final AdviceRepository _adviceRepository;
 
   /* Fields */
 
@@ -65,9 +59,6 @@ class PatientDetailModel extends BaseViewModel<PatientDetailEvent> {
 
   List<Assignment> _assignments = [];
   List<Assignment> get assignments => _assignments;
-
-  List<Advice> _advices = [];
-  List<Advice> get advices => _advices;
 
   /* Methods */
 
@@ -86,45 +77,39 @@ class PatientDetailModel extends BaseViewModel<PatientDetailEvent> {
 
   /* Calls */
 
-  Future<void> fetchScreenData({required String patientUuid}) async {
+  Future<void> fetchScreenData({required int patientId}) async {
     updateUi(() => _isLoading = true);
     await getUserData();
-    await _getUpcomingSessions(patientUuid: patientUuid);
-    await _getPendingAssignments(patientUuid: patientUuid);
-    await _getReceivedAdvices(patientUuid: patientUuid);
+    await _getUpcomingSessions(patientId: patientId);
+    await _getPendingAssignments(patientId: patientId);
     updateUi(() => _isLoading = false);
   }
 
-  Future<void> _getUpcomingSessions({required String patientUuid}) async {
-    final err = await _sessionRepository.syncPatientSessions(patientUuid, upcoming: true);
+  Future<void> _getUpcomingSessions({required int patientId}) async {
+    final err =
+        await _sessionRepository.syncPatientSessions(patientId, upcoming: true);
     if (err != null) {
       await handleDefaultErrors(err, shouldShowConnectionError: false);
     }
 
     _sessions = await _sessionRepository.getPatientSessions(
-      patientUuid,
+      patientId,
       upcoming: true,
     );
   }
 
-  Future<void> _getPendingAssignments({required String patientUuid}) async {
-    final err = await _assignmentRepository.syncPatientAssignments(patientUuid, pending: true);
+  Future<void> _getPendingAssignments({required int patientId}) async {
+    final err = await _assignmentRepository.syncPatientAssignments(
+      patientId,
+      pending: true,
+    );
     if (err != null) {
       await handleDefaultErrors(err, shouldShowConnectionError: false);
     }
 
     _assignments = await _assignmentRepository.getPatientAssignments(
-      patientUuid,
+      patientId,
       pending: true,
     );
-  }
-
-  Future<void> _getReceivedAdvices({required String patientUuid}) async {
-    final err = await _adviceRepository.syncPatientAdvices(patientUuid);
-    if (err != null) {
-      await handleDefaultErrors(err, shouldShowConnectionError: false);
-    }
-
-    _advices = await _adviceRepository.getPatientAdvices(patientUuid);
   }
 }

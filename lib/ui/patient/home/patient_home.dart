@@ -4,14 +4,12 @@ import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/assignments/detail/assignment_detail.dart';
 import 'package:ahpsico/ui/assignments/list/assignments_list.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
-import 'package:ahpsico/ui/advices/card/advice_card.dart';
+import 'package:ahpsico/ui/messages/card/message_card.dart';
 import 'package:ahpsico/ui/assignments/card/assignment_card.dart';
 import 'package:ahpsico/ui/components/bottomsheet.dart';
-import 'package:ahpsico/ui/components/dialogs/ahpsico_dialog.dart';
 import 'package:ahpsico/ui/components/dialogs/logout_dialog.dart';
 import 'package:ahpsico/ui/components/home_button.dart';
 import 'package:ahpsico/ui/components/home_topbar.dart';
-import 'package:ahpsico/ui/invite/card/invite_card.dart';
 import 'package:ahpsico/ui/session/card/session_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
@@ -41,23 +39,6 @@ class PatientHome extends StatelessWidget {
         AhpsicoSnackbar.showError(context, model.snackbarMessage);
       case PatientHomeEvent.navigateToLoginScreen:
         context.go(LoginScreen.route);
-      case PatientHomeEvent.openAcceptInviteDialog:
-        if (model.selectedInvite == null) return;
-        AhpsicoDialog.show(
-          context: context,
-          content:
-              "Gostaria de aceitar o convite de terapia com ${model.selectedInvite!.doctor.name}?",
-          firstButtonText: "Sim, aceitar convite",
-          onTapFirstButton: () {
-            context.pop();
-            model.acceptInvite(model.selectedInvite!);
-          },
-          secondButtonText: "Não, rejeitar convite",
-          onTapSecondButton: () {
-            context.pop();
-            model.denyInvite(model.selectedInvite!);
-          },
-        );
       case PatientHomeEvent.openEditNameSheet:
         AhpsicoSheet.show(
           context: context,
@@ -183,24 +164,7 @@ class PatientHome extends StatelessWidget {
               );
             }),
             AhpsicoSpacing.verticalSpaceLarge,
-            if (model.invites.isNotEmpty) ...[
-              Text(
-                "Convites de terapia recebidos",
-                style: AhpsicoText.title3Style.copyWith(
-                  color: AhpsicoColors.dark25,
-                ),
-              ),
-              AhpsicoSpacing.verticalSpaceSmall,
-              ...model.invites.map((invite) {
-                return InviteCard(
-                  invite: invite,
-                  userName: model.user!.firstName,
-                  onTap: model.openAcceptInviteDialog,
-                );
-              }),
-              AhpsicoSpacing.verticalSpaceLarge,
-            ],
-            if (model.advices.isNotEmpty) ...[
+            if (model.messages.isNotEmpty) ...[
               Text(
                 "Mensagens recebidas",
                 style: AhpsicoText.title3Style.copyWith(
@@ -208,9 +172,9 @@ class PatientHome extends StatelessWidget {
                 ),
               ),
               AhpsicoSpacing.verticalSpaceSmall,
-              ...model.advices.map((advice) {
-                return AdviceCard(
-                  advice: advice,
+              ...model.messages.map((message) {
+                return MessageCard(
+                  message: message,
                   showTitle: true,
                   isUserDoctor: false,
                 );

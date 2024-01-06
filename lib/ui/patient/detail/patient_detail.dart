@@ -6,7 +6,6 @@ import 'package:ahpsico/ui/assignments/create_assignment/create_assignment_sheet
 import 'package:ahpsico/ui/assignments/detail/assignment_detail.dart';
 import 'package:ahpsico/ui/assignments/list/assignments_list.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
-import 'package:ahpsico/ui/advices/card/advice_card.dart';
 import 'package:ahpsico/ui/assignments/card/assignment_card.dart';
 import 'package:ahpsico/ui/components/bottomsheet.dart';
 import 'package:ahpsico/ui/components/home_button.dart';
@@ -53,7 +52,7 @@ class PatientDetail extends StatelessWidget {
           },
         ).then((shouldRefresh) {
           if (shouldRefresh == true) {
-            model.fetchScreenData(patientUuid: patient.uuid);
+            model.fetchScreenData(patientId: patient.id);
           }
         });
     }
@@ -68,7 +67,7 @@ class PatientDetail extends StatelessWidget {
         return model.isLoading || model.user == null;
       },
       onCreate: (model) {
-        model.fetchScreenData(patientUuid: patient.uuid);
+        model.fetchScreenData(patientId: patient.id);
       },
       topbarBuilder: (context, model) {
         return Topbar(
@@ -123,7 +122,8 @@ class PatientDetail extends StatelessWidget {
                 ),
                 AhpsicoSpacing.verticalSpaceRegular,
                 TextButton(
-                  onPressed: () => model.addPhoneToClipboard(patient.phoneNumber),
+                  onPressed: () =>
+                      model.addPhoneToClipboard(patient.phoneNumber),
                   style: const ButtonStyle(
                     shape: MaterialStatePropertyAll(RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(28)),
@@ -208,23 +208,6 @@ class PatientDetail extends StatelessWidget {
               );
             }),
             AhpsicoSpacing.verticalSpaceLarge,
-            if (model.advices.isNotEmpty) ...[
-              Text(
-                "Mensagens enviadas por você",
-                style: AhpsicoText.title3Style.copyWith(
-                  color: AhpsicoColors.dark25,
-                ),
-              ),
-              AhpsicoSpacing.verticalSpaceSmall,
-              ...model.advices.map((advice) {
-                return AdviceCard(
-                  advice: advice,
-                  showTitle: false,
-                  isUserDoctor: true,
-                );
-              }),
-            ],
-            AhpsicoSpacing.verticalSpaceLarge,
             if (model.assignments.isNotEmpty) ...[
               Text(
                 "Tarefas pendentes",
@@ -237,10 +220,11 @@ class PatientDetail extends StatelessWidget {
                 return AssignmentCard(
                   assignment: assignment,
                   isUserDoctor: true,
-                  onTap: (assignment) =>
-                      context.push(AssignmentDetail.route, extra: assignment).then((shouldRefresh) {
+                  onTap: (assignment) => context
+                      .push(AssignmentDetail.route, extra: assignment)
+                      .then((shouldRefresh) {
                     if (shouldRefresh == true) {
-                      model.fetchScreenData(patientUuid: patient.uuid);
+                      model.fetchScreenData(patientId: patient.id);
                     }
                   }),
                 );

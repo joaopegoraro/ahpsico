@@ -16,7 +16,7 @@ import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 class SendMessageSheet extends StatefulWidget {
   const SendMessageSheet({super.key, required this.patientIds});
 
-  final List<String> patientIds;
+  final List<int> patientIds;
 
   @override
   State<SendMessageSheet> createState() => _SendMessageSheetState();
@@ -56,7 +56,8 @@ class _SendMessageSheetState extends State<SendMessageSheet> {
       case SendMessageEvent.openConfirmationDialog:
         AhpsicoDialog.show(
           context: context,
-          content: "Tem certeza que deseja enviar essa mensagem para os pacientes selecionados?",
+          content:
+              "Tem certeza que deseja enviar essa mensagem para os pacientes selecionados?",
           firstButtonText: "Sim, tenho certeza",
           secondButtonText: "Não, cancelar",
           onTapFirstButton: () {
@@ -78,7 +79,8 @@ class _SendMessageSheetState extends State<SendMessageSheet> {
             children: [
               Text(
                 "Digite a mensagem que será enviada para os pacientes selecionados",
-                style: AhpsicoText.title3Style.copyWith(color: AhpsicoColors.dark75),
+                style: AhpsicoText.title3Style
+                    .copyWith(color: AhpsicoColors.dark75),
               ),
               AhpsicoSpacing.verticalSpaceRegular,
               AhpsicoInputField(

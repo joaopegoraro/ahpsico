@@ -51,10 +51,11 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
 
   bool _selectMode = false;
 
-  final List<String> _selectedPatientIds = [];
-  List<String> get selectedPatientIds => _selectedPatientIds;
+  final List<int> _selectedPatientIds = [];
+  List<int> get selectedPatientIds => _selectedPatientIds;
 
-  bool get areAllPatientsSelected => selectedPatientIds.length == patients.length;
+  bool get areAllPatientsSelected =>
+      selectedPatientIds.length == patients.length;
 
   bool get isSelectModeOn => _selectMode || selectedPatientIds.isNotEmpty;
 
@@ -66,8 +67,8 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
 
   void selectPatient(User patient) {
     updateUi(() {
-      if (!_selectedPatientIds.remove(patient.uuid)) {
-        _selectedPatientIds.add(patient.uuid);
+      if (!_selectedPatientIds.remove(patient.id)) {
+        _selectedPatientIds.add(patient.id);
       }
     });
   }
@@ -76,7 +77,7 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
     updateUi(() {
       _selectedPatientIds.clear();
       _selectedPatientIds.addAll(
-        patients.map((patient) => patient.uuid),
+        patients.map((patient) => patient.id),
       );
     });
   }
@@ -111,11 +112,11 @@ class PatientListModel extends BaseViewModel<PatientListEvent> {
   }
 
   Future<void> _fetchPatients() async {
-    final err = await _patientRepository.syncDoctorPatients(user!.uuid);
+    final err = await _patientRepository.syncDoctorPatients();
     if (err != null) {
-        await handleDefaultErrors(err, shouldShowConnectionError: false);
+      await handleDefaultErrors(err, shouldShowConnectionError: false);
     }
 
-    _patients = await _patientRepository.getDoctorPatients(user!.uuid);
+    _patients = await _patientRepository.getDoctorPatients();
   }
 }

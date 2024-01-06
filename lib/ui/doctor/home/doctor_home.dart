@@ -1,9 +1,9 @@
-import 'package:ahpsico/ui/advices/list/advices_list.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/components/dialogs/logout_dialog.dart';
+import 'package:ahpsico/ui/messages/list/messages_list.dart';
 import 'package:ahpsico/ui/session/card/session_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/doctor/home/doctor_home_model.dart';
@@ -86,6 +86,7 @@ class DoctorHome extends StatelessWidget {
       topbarBuilder: (context, model) {
         return HomeTopbar(
           userName: model.user!.firstName,
+          editProfile: () {},
           logout: model.openLogoutDialog,
         );
       },
@@ -125,7 +126,7 @@ class DoctorHome extends StatelessWidget {
                   enableFlex: true,
                   color: AhpsicoColors.green,
                   icon: Icons.message,
-                  onPressed: () => context.push(AdvicesList.route),
+                  onPressed: () => context.push(MessagesList.route),
                 ),
               ],
             ),

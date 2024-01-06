@@ -176,8 +176,10 @@ class PatientList extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: PatientCard(
                 patient: patient,
-                isSelected: model.selectedPatientIds.contains(patient.uuid),
-                showSelected: selectModeByDefault || allSelectedByDefault || model.isSelectModeOn,
+                isSelected: model.selectedPatientIds.contains(patient.id),
+                showSelected: selectModeByDefault ||
+                    allSelectedByDefault ||
+                    model.isSelectModeOn,
                 onLongPress: model.selectPatient,
                 onTap: (patient) {
                   if (model.isSelectModeOn) {

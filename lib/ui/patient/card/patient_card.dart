@@ -49,7 +49,8 @@ class PatientCard extends StatelessWidget {
                     ? Row(children: [
                         Checkbox(
                           value: isSelected,
-                          fillColor: const MaterialStatePropertyAll(AhpsicoColors.violet),
+                          fillColor: const MaterialStatePropertyAll(
+                              AhpsicoColors.violet),
                           onChanged: null,
                         ),
                         AhpsicoSpacing.horizontalSpaceSmall,
@@ -69,7 +70,8 @@ class PatientCard extends StatelessWidget {
                     ),
                     AhpsicoSpacing.verticalSpaceSmall,
                     Text(
-                      MaskFormatters.phoneMaskFormatter.maskText(patient.phoneNumber.substring(3)),
+                      MaskFormatters.phoneMaskFormatter
+                          .maskText(patient.phoneNumber.substring(3)),
                       style: AhpsicoText.regular3Style.copyWith(
                         color: AhpsicoColors.light20,
                         fontWeight: FontWeight.w600,
