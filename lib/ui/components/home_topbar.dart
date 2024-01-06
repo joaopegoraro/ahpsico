@@ -6,12 +6,10 @@ class HomeTopbar extends StatelessWidget {
   const HomeTopbar({
     super.key,
     required this.userName,
-    required this.editProfile,
     required this.logout,
   });
 
   final String userName;
-  final VoidCallback editProfile;
   final VoidCallback? logout;
 
   @override
@@ -27,10 +25,6 @@ class HomeTopbar extends StatelessWidget {
               color: AhpsicoColors.light80,
             ),
             itemBuilder: (context) => [
-              PopupMenuItem(
-                onTap: editProfile,
-                child: const Text('Editar perfil'),
-              ),
               PopupMenuItem(
                 onTap: logout,
                 child: const Text('Sair do aplicativo'),

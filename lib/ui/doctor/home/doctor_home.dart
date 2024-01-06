@@ -6,7 +6,6 @@ import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/components/dialogs/logout_dialog.dart';
 import 'package:ahpsico/ui/session/card/session_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
-import 'package:ahpsico/ui/doctor/detail/doctor_detail.dart';
 import 'package:ahpsico/ui/doctor/home/doctor_home_model.dart';
 import 'package:ahpsico/ui/components/expandable_fab.dart';
 import 'package:ahpsico/ui/doctor/widgets/doctor_fab_action.dart';
@@ -87,7 +86,6 @@ class DoctorHome extends StatelessWidget {
       topbarBuilder: (context, model) {
         return HomeTopbar(
           userName: model.user!.firstName,
-          editProfile: () => context.push(DoctorDetail.route),
           logout: model.openLogoutDialog,
         );
       },

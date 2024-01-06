@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
@@ -42,21 +41,10 @@ class DoctorCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    if (doctor.description.isNotEmpty) ...[
-                      AhpsicoSpacing.verticalSpaceSmall,
-                      Text(
-                        doctor.description.length > 100
-                            ? "${doctor.description.substring(0, math.min(doctor.description.length, 100))}..."
-                            : doctor.description,
-                        style: AhpsicoText.regular3Style.copyWith(
-                          color: AhpsicoColors.dark75,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
                     AhpsicoSpacing.verticalSpaceSmall,
                     Text(
-                      MaskFormatters.phoneMaskFormatter.maskText(doctor.phoneNumber.substring(3)),
+                      MaskFormatters.phoneMaskFormatter
+                          .maskText(doctor.phoneNumber.substring(3)),
                       style: AhpsicoText.regular3Style.copyWith(
                         color: AhpsicoColors.light20,
                         fontWeight: FontWeight.w600,
