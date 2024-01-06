@@ -1,3 +1,4 @@
+import 'package:ahpsico/constants/user_role.dart';
 import 'package:ahpsico/data/database/ahpsico_database.dart';
 import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/mappers/user_mapper.dart';
@@ -8,9 +9,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class UserRepository {
-  Future<ApiError?> sync(String uuid);
+  Future<ApiError?> sync(int id);
 
-  Future<User?> get(String uuid);
+  Future<User?> get(int id);
 
   Future<(User?, ApiError?)> create(String userName, UserRole role);
 
@@ -60,8 +61,8 @@ final class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<ApiError?> sync(String uuid) async {
-    final (user, err) = await _api.getUser(uuid);
+  Future<ApiError?> sync(int id) async {
+    final (user, err) = await _api.getUser(id);
     if (err != null) return err;
 
     final batch = _db.batch();
@@ -77,11 +78,11 @@ final class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<User?> get(String uuid) async {
+  Future<User?> get(int id) async {
     final usersMap = await _db.query(
       UserEntity.tableName,
-      where: "${UserEntity.uuidColumn} = ?",
-      whereArgs: [uuid],
+      where: "${UserEntity.idColumn} = ?",
+      whereArgs: [id],
     );
 
     if (usersMap.isEmpty) {
