@@ -1,5 +1,3 @@
-import 'package:collection/collection.dart';
-
 enum UserStatus {
   notConfirmed("NOT_CONFIRMED"),
   confirmed("CONFIRMED");
@@ -8,11 +6,14 @@ enum UserStatus {
 
   final String value;
 
-  static UserStatus fromValue(String value) {
-    final role = UserStatus.values.firstWhereOrNull((element) {
-      return element.value == value;
-    });
-    return role ?? UserStatus.notConfirmed;
+  factory UserStatus.fromValue(
+    String value, {
+    UserStatus fallback = UserStatus.notConfirmed,
+  }) {
+    return UserStatus.values.firstWhere(
+      (element) => element.value == value,
+      orElse: () => fallback,
+    );
   }
 
   bool get isConfirmed {

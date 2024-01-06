@@ -1,20 +1,23 @@
+import 'package:collection/collection.dart';
+
 enum SessionPaymentStatus {
-  notPayed(0),
-  payed(1);
+  notPayed("NOT_PAYED"),
+  payed("PAYED");
 
   const SessionPaymentStatus(this.value);
-  final int value;
+  final String value;
 
-  bool get isNotPayed => this == SessionPaymentStatus.notPayed;
-  bool get isPayed => this == SessionPaymentStatus.payed;
-
-  factory SessionPaymentStatus.fromValue(
-    int? value, {
-    SessionPaymentStatus fallback = SessionPaymentStatus.notPayed,
-  }) {
-    return SessionPaymentStatus.values.firstWhere(
+  SessionPaymentStatus? fromValue(String? value) {
+    return SessionPaymentStatus.values.firstWhereOrNull(
       (element) => element.value == value,
-      orElse: () => fallback,
     );
+  }
+
+  bool get isNotPayed {
+    return this == notPayed;
+  }
+
+  bool get isPayed {
+    return this == payed;
   }
 }

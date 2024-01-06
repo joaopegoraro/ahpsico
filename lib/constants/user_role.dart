@@ -1,18 +1,18 @@
-import 'package:collection/collection.dart';
-
 enum UserRole {
   patient("PATIENT"),
   doctor("DOCTOR");
 
   const UserRole(this.value);
-
   final String value;
 
-  static UserRole fromValue(String value) {
-    final role = UserRole.values.firstWhereOrNull((element) {
-      return element.value == value;
-    });
-    return role ?? UserRole.patient;
+  factory UserRole.fromValue(
+    String value, {
+    UserRole fallback = UserRole.patient,
+  }) {
+    return UserRole.values.firstWhere(
+      (element) => element.value == value,
+      orElse: () => fallback,
+    );
   }
 
   bool get isPatient {

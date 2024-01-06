@@ -1,14 +1,16 @@
 enum SessionStatus {
-  notConfirmed(0),
-  confirmed(1),
-  canceled(2),
-  concluded(3);
+  notConfirmed("NOT_CONFIRMED"),
+  confirmedByPatient("CONFIRMED_BY_PATIENT"),
+  confirmedByDoctor("CONFIRMED_BY_DOCTOR"),
+  confirmed("CONFIRMED"),
+  canceled("CANCELED"),
+  concluded("CONCLUDED");
 
   const SessionStatus(this.value);
-  final int value;
+  final String value;
 
   factory SessionStatus.fromValue(
-    int? value, {
+    String? value, {
     SessionStatus fallback = SessionStatus.notConfirmed,
   }) {
     return SessionStatus.values.firstWhere(
@@ -17,14 +19,35 @@ enum SessionStatus {
     );
   }
 
-  bool get isNotConfirmed => this == notConfirmed;
-  bool get isConfirmed => this == confirmed;
-  bool get isCanceled => this == canceled;
-  bool get isConcluded => this == concluded;
+  bool get isNotConfirmed {
+    return this == notConfirmed;
+  }
+
+  bool get isConfirmedByPatient {
+    return this == confirmedByPatient;
+  }
+
+  bool get isConfirmedByDoctor {
+    return this == confirmedByDoctor;
+  }
+
+  bool get isConfirmed {
+    return this == confirmed;
+  }
+
+  bool get isCanceled {
+    return this == canceled;
+  }
+
+  bool get isConcluded {
+    return this == concluded;
+  }
 
   bool isIn(List<SessionStatus> statusList) {
     return statusList.contains(this);
   }
 
-  bool get isOver => isIn([canceled, concluded]);
+  bool get isOver {
+    return isIn([canceled, concluded]);
+  }
 }
