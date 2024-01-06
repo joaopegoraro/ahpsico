@@ -42,14 +42,15 @@ class Message {
     return Message(
       id: map['id'] as int,
       text: map['text'] as String,
-      userIds: List<int>.from((map['userIds']),
+      userIds: List<int>.from(map['userIds']),
       createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int),
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory Message.fromJson(String source) => Message.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory Message.fromJson(String source) =>
+      Message.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
@@ -59,19 +60,15 @@ class Message {
   @override
   bool operator ==(covariant Message other) {
     if (identical(this, other)) return true;
-  
-    return 
-      other.id == id &&
-      other.text == text &&
-      listEquals(other.userIds, userIds) &&
-      other.createdAt == createdAt;
+
+    return other.id == id &&
+        other.text == text &&
+        listEquals(other.userIds, userIds) &&
+        other.createdAt == createdAt;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^
-      text.hashCode ^
-      userIds.hashCode ^
-      createdAt.hashCode;
+    return id.hashCode ^ text.hashCode ^ userIds.hashCode ^ createdAt.hashCode;
   }
 }
