@@ -2,8 +2,8 @@ import 'package:ahpsico/data/database/ahpsico_database.dart';
 import 'package:ahpsico/data/database/entities/session_entity.dart';
 import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/mappers/session_mapper.dart';
-import 'package:ahpsico/models/session/session.dart';
-import 'package:ahpsico/models/session/session_status.dart';
+import 'package:ahpsico/models/session.dart';
+import 'package:ahpsico/constants/session_status.dart';
 import 'package:ahpsico/services/api/api_service.dart';
 import 'package:ahpsico/services/api/errors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,12 +25,12 @@ abstract interface class SessionRepository {
   });
 
   Future<List<Session>> getDoctorSessions(
-    String doctorId, {
+    int doctorId, {
     DateTime? date,
   });
 
   Future<ApiError?> syncDoctorSessions(
-    String doctorId, {
+    int doctorId, {
     DateTime? date,
   });
 
@@ -87,36 +87,30 @@ final class SessionRepositoryImpl implements SessionRepository {
     bool upcoming = false,
   }) async {
     // substract one hour so ongoing sessions also count as upcoming
-    final now = DateTime.now().subtract(const Duration(hours: 1)).millisecondsSinceEpoch;
+    final now = DateTime.now()
+        .subtract(const Duration(hours: 1))
+        .millisecondsSinceEpoch;
     final sessionsMap = await _db.query(
       SessionEntity.tableName,
       where:
-          "${SessionEntity.patientIdColumn} = ?${upcoming ? " AND ${SessionEntity.dateColumn} >= ?" : ""} ORDER BY ${SessionEntity.dateColumn} ASC",
+          "${SessionEntity.userIdColumn} = ?${upcoming ? " AND ${SessionEntity.dateColumn} >= ?" : ""} ORDER BY ${SessionEntity.dateColumn} ASC",
       whereArgs: [patientId, if (upcoming) now],
     );
 
     final sessions = <Session>[];
     for (final sessionMap in sessionsMap) {
       final entity = SessionEntity.fromMap(sessionMap);
-      final nonUpcomingStatus = [SessionStatus.canceled.value, SessionStatus.concluded.value];
+      final nonUpcomingStatus = [
+        SessionStatus.canceled.value,
+        SessionStatus.concluded.value
+      ];
       if (upcoming && nonUpcomingStatus.contains(entity.status)) {
         continue;
       }
 
-      final doctorsMap = await _db.query(
-        UserEntity.tableName,
-        where: "${UserEntity.uuidColumn} = ?",
-        whereArgs: [entity.doctorId],
-      );
-      if (doctorsMap.isEmpty) {
-        await _deleteLocally(entity.id);
-        continue;
-      }
-      final doctorEntity = UserEntity.fromMap(doctorsMap.first);
-
       final patientsMap = await _db.query(
         UserEntity.tableName,
-        where: "${UserEntity.uuidColumn} = ?",
+        where: "${UserEntity.idColumn} = ?",
         whereArgs: [patientId],
       );
       if (patientsMap.isEmpty) {
@@ -127,8 +121,7 @@ final class SessionRepositoryImpl implements SessionRepository {
 
       sessions.add(SessionMapper.toSession(
         entity,
-        doctorEntity: doctorEntity,
-        patientEntity: patientEntity,
+        userEntity: patientEntity,
       ));
     }
 
@@ -140,17 +133,20 @@ final class SessionRepositoryImpl implements SessionRepository {
     String patientId, {
     bool? upcoming,
   }) async {
-    final (sessions, err) = await _api.getPatientSessions(patientId, upcoming: upcoming);
+    final (sessions, err) =
+        await _api.getPatientSessions(patientId, upcoming: upcoming);
     if (err != null) return err;
 
     // substract one hour so ongoing sessions also count as upcoming
-    final now = DateTime.now().subtract(const Duration(hours: 1)).millisecondsSinceEpoch;
+    final now = DateTime.now()
+        .subtract(const Duration(hours: 1))
+        .millisecondsSinceEpoch;
 
     final batch = _db.batch();
     batch.delete(
       SessionEntity.tableName,
       where:
-          "${SessionEntity.patientIdColumn} = ?${upcoming == true ? " AND ${SessionEntity.dateColumn} >= ?" : ""}",
+          "${SessionEntity.userIdColumn} = ?${upcoming == true ? " AND ${SessionEntity.dateColumn} >= ?" : ""}",
       whereArgs: [patientId, if (upcoming == true) now],
     );
 
@@ -168,18 +164,20 @@ final class SessionRepositoryImpl implements SessionRepository {
 
   @override
   Future<List<Session>> getDoctorSessions(
-    String doctorId, {
+    int doctorId, {
     DateTime? date,
   }) async {
-    final startOfToday = date != null ? DateTime(date.year, date.month, date.day) : null;
+    final startOfToday =
+        date != null ? DateTime(date.year, date.month, date.day) : null;
 
     final tomorrow = date?.add(const Duration(days: 1));
-    final startOfTomorrow =
-        tomorrow != null ? DateTime(tomorrow.year, tomorrow.month, tomorrow.day) : null;
+    final startOfTomorrow = tomorrow != null
+        ? DateTime(tomorrow.year, tomorrow.month, tomorrow.day)
+        : null;
 
     final sessionsMap = await _db.query(
       SessionEntity.tableName,
-      where: "${SessionEntity.doctorIdColumn} = ?"
+      where: "${SessionEntity.userIdColumn} = ?"
           "${date == null ? "" : " AND ${SessionEntity.dateColumn} >= ? AND ${SessionEntity.dateColumn} <= ?"} ORDER BY ${SessionEntity.dateColumn} ASC",
       whereArgs: [
         doctorId,
@@ -194,21 +192,10 @@ final class SessionRepositoryImpl implements SessionRepository {
     for (final sessionMap in sessionsMap) {
       final entity = SessionEntity.fromMap(sessionMap);
 
-      final doctorsMap = await _db.query(
-        UserEntity.tableName,
-        where: "${UserEntity.uuidColumn} = ?",
-        whereArgs: [doctorId],
-      );
-      if (doctorsMap.isEmpty) {
-        await _deleteLocally(entity.id);
-        continue;
-      }
-      final doctorEntity = UserEntity.fromMap(doctorsMap.first);
-
       final patientsMap = await _db.query(
         UserEntity.tableName,
-        where: "${UserEntity.uuidColumn} = ?",
-        whereArgs: [entity.patientId],
+        where: "${UserEntity.idColumn} = ?",
+        whereArgs: [entity.userId],
       );
       if (patientsMap.isEmpty) {
         await _deleteLocally(entity.id);
@@ -218,8 +205,7 @@ final class SessionRepositoryImpl implements SessionRepository {
 
       sessions.add(SessionMapper.toSession(
         entity,
-        doctorEntity: doctorEntity,
-        patientEntity: patientEntity,
+        userEntity: patientEntity,
       ));
     }
 
@@ -228,7 +214,7 @@ final class SessionRepositoryImpl implements SessionRepository {
 
   @override
   Future<ApiError?> syncDoctorSessions(
-    String doctorId, {
+    int doctorId, {
     DateTime? date,
   }) async {
     final (sessions, err) = await _api.getDoctorSessions(doctorId, date: date);
@@ -240,7 +226,8 @@ final class SessionRepositoryImpl implements SessionRepository {
     final startOfToday = DateTime(today.year, today.month, today.day);
 
     final tomorrow = today.add(const Duration(days: 1));
-    final startOfTomorrow = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
+    final startOfTomorrow =
+        DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
 
     batch.delete(
       SessionEntity.tableName,

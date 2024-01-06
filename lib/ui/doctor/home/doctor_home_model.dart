@@ -2,7 +2,7 @@ import 'package:ahpsico/data/repositories/patient_repository.dart';
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
-import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/session.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
@@ -80,17 +80,18 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
   }
 
   Future<void> _getTodaySessions({bool sync = true}) async {
-    final userUid = user!.uuid;
+    final userId = user!.id;
     final now = DateTime.now();
 
     if (sync) {
-      final err = await _sessionRepository.syncDoctorSessions(userUid, date: now);
+      final err =
+          await _sessionRepository.syncDoctorSessions(userId, date: now);
       if (err != null) {
         await handleDefaultErrors(err, shouldShowConnectionError: false);
       }
     }
 
-    _sessions = await _sessionRepository.getDoctorSessions(userUid, date: now);
+    _sessions = await _sessionRepository.getDoctorSessions(userId, date: now);
   }
 
   Future<void> _syncDoctorPatients() async {

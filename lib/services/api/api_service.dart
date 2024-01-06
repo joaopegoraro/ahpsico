@@ -44,7 +44,7 @@ abstract interface class ApiService {
 
   Future<(List<Message>?, ApiError?)> getDoctorMessages();
 
-  Future<(List<Message>?, ApiError?)> getPatientMessages(String patientId);
+  Future<(List<Message>?, ApiError?)> getPatientMessages(int patientId);
 
   Future<(Session?, ApiError?)> getSession(int id);
 
@@ -58,7 +58,10 @@ abstract interface class ApiService {
 
   Future<ApiError?> deleteAssignment(int id);
 
-  Future<(Message?, ApiError?)> createMessage(Message message);
+  Future<(Message?, ApiError?)> createMessage(
+    Message message, {
+    required List<int> userIds,
+  });
 
   Future<ApiError?> deleteMessage(int id);
 }
@@ -227,7 +230,7 @@ class ApiServiceImpl implements ApiService {
       method: "GET",
       endpoint: "sessions",
       buildQueryParameters: () => <String, dynamic>{
-        "patientUuid": patientId,
+        "patientId": patientId,
         "upcoming": upcoming,
       },
       parseSuccess: (response) {
@@ -246,7 +249,7 @@ class ApiServiceImpl implements ApiService {
       method: "GET",
       endpoint: "assignments",
       buildQueryParameters: () => <String, dynamic>{
-        "patientUuid": patientId,
+        "patientId": patientId,
         "pending": pending,
       },
       parseSuccess: (response) {
@@ -258,13 +261,13 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<(List<Message>?, ApiError?)> getPatientMessages(
-    String patientId,
+    int patientId,
   ) async {
     return await request(
       method: "GET",
       endpoint: "advices",
       buildQueryParameters: () => <String, dynamic>{
-        "patientUuid": patientId,
+        "patientId": patientId,
       },
       parseSuccess: (response) {
         final list = Utils.castToJsonList(response.data);
@@ -362,11 +365,16 @@ class ApiServiceImpl implements ApiService {
   }
 
   @override
-  Future<(Message?, ApiError?)> createMessage(Message message) async {
+  Future<(Message?, ApiError?)> createMessage(
+    Message message, {
+    required List<int> userIds,
+  }) async {
     return await request(
       method: "POST",
       endpoint: "advices",
-      requestBody: message.toMap,
+      requestBody: () {
+        return message.toMap().addAll({"userIds": userIds});
+      },
       parseSuccess: (response) {
         final map = Utils.castToJsonMap(response.data);
         return Message.fromMap(map);

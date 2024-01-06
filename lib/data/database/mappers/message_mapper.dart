@@ -2,14 +2,10 @@ import 'package:ahpsico/data/database/entities/message_entity.dart';
 import 'package:ahpsico/models/message.dart';
 
 abstract class MessageMapper {
-  static Message toMessage(
-    MessageEntity entity, {
-    required List<int> userIds,
-  }) {
+  static Message toMessage(MessageEntity entity) {
     return Message(
       id: entity.id,
       text: entity.text,
-      userIds: userIds,
       createdAt: DateTime.fromMillisecondsSinceEpoch(entity.createdAtTimestamp),
     );
   }
