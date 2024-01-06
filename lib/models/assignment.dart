@@ -1,45 +1,40 @@
 import 'dart:convert';
 
-import 'package:ahpsico/models/assignment/assignment_status.dart';
-import 'package:ahpsico/models/session/session.dart';
-import 'package:ahpsico/models/user.dart';
+import 'package:ahpsico/constants/assignment_status.dart';
+import 'package:ahpsico/models/session.dart';
 
 class Assignment {
   const Assignment({
     required this.id,
     required this.title,
     required this.description,
-    required this.doctor,
-    required this.patientId,
+    required this.userId,
     required this.status,
-    required this.deliverySession,
+    required this.session,
   });
 
   final int id;
   final String title;
   final String description;
-  final User doctor;
-  final String patientId;
+  final int userId;
   final AssignmentStatus status;
-  final Session deliverySession;
+  final Session session;
 
   Assignment copyWith({
     int? id,
     String? title,
     String? description,
-    User? doctor,
-    String? patientId,
+    int? userId,
     AssignmentStatus? status,
-    Session? deliverySession,
+    Session? session,
   }) {
     return Assignment(
       id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
-      doctor: doctor ?? this.doctor,
-      patientId: patientId ?? this.patientId,
+      userId: userId ?? this.userId,
       status: status ?? this.status,
-      deliverySession: deliverySession ?? this.deliverySession,
+      session: session ?? this.session,
     );
   }
 
@@ -48,36 +43,31 @@ class Assignment {
       'id': id,
       'title': title,
       'description': description,
-      'doctor': doctor.toMap(),
-      'patientUuid': patientId,
+      'userId': userId,
       'status': status.value,
-      'deliverySession': deliverySession.toMap(),
+      'session': session.toMap(),
     };
   }
 
   factory Assignment.fromMap(Map<String, dynamic> map) {
     return Assignment(
-      id: map['id'] as int? ?? -1,
-      title: map['title'] as String? ?? "",
-      description: map['description'] as String? ?? "",
-      doctor: User.fromMap(map['doctor'] as Map<String, dynamic>? ?? {}),
-      patientId: map['patientUuid'] as String? ?? "",
-      status: AssignmentStatus.fromValue(map['status'] as int? ?? -1),
-      deliverySession: Session.fromMap(map['deliverySession'] as Map<String, dynamic>? ?? {}),
+      id: map['id'] as int,
+      title: map['title'] as String,
+      description: map['description'] as String,
+      userId: map['userId'] as int,
+      status: AssignmentStatus.fromValue(map['status']),
+      session: Session.fromMap(map['session'] as Map<String, dynamic>),
     );
   }
 
-  String toJson() {
-    return json.encode(toMap());
-  }
+  String toJson() => json.encode(toMap());
 
-  factory Assignment.fromJson(String source) {
-    return Assignment.fromMap(json.decode(source) as Map<String, dynamic>);
-  }
+  factory Assignment.fromJson(String source) =>
+      Assignment.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
-    return 'Assignment(id: $id, title: $title, description: $description, doctor: $doctor, patientId: $patientId, status: $status, deliverySession: $deliverySession)';
+    return 'Assignment(id: $id, title: $title, description: $description, userId: $userId, status: $status, session: $session)';
   }
 
   @override
@@ -87,10 +77,9 @@ class Assignment {
     return other.id == id &&
         other.title == title &&
         other.description == description &&
-        other.doctor == doctor &&
-        other.patientId == patientId &&
+        other.userId == userId &&
         other.status == status &&
-        other.deliverySession == deliverySession;
+        other.session == session;
   }
 
   @override
@@ -98,9 +87,8 @@ class Assignment {
     return id.hashCode ^
         title.hashCode ^
         description.hashCode ^
-        doctor.hashCode ^
-        patientId.hashCode ^
+        userId.hashCode ^
         status.hashCode ^
-        deliverySession.hashCode;
+        session.hashCode;
   }
 }
