@@ -1,9 +1,9 @@
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
-import 'package:ahpsico/models/session/session.dart';
-import 'package:ahpsico/models/session/session_payment_status.dart';
-import 'package:ahpsico/models/session/session_status.dart';
+import 'package:ahpsico/models/session.dart';
+import 'package:ahpsico/constants/session_payment_status.dart';
+import 'package:ahpsico/constants/session_status.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';

@@ -1,6 +1,6 @@
-import 'package:ahpsico/models/session/session.dart';
-import 'package:ahpsico/models/session/session_payment_status.dart';
-import 'package:ahpsico/models/session/session_status.dart';
+import 'package:ahpsico/models/session.dart';
+import 'package:ahpsico/constants/session_payment_status.dart';
+import 'package:ahpsico/constants/session_status.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
@@ -10,7 +10,6 @@ import 'package:ahpsico/ui/components/dialogs/ahpsico_dialog.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/components/topbar.dart';
 import 'package:ahpsico/ui/doctor/card/doctor_card.dart';
-import 'package:ahpsico/ui/doctor/detail/doctor_detail.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:ahpsico/ui/patient/card/patient_card.dart';
 import 'package:ahpsico/ui/patient/detail/patient_detail.dart';
@@ -54,13 +53,17 @@ class SessionDetail extends StatelessWidget {
         AhpsicoDialog.show(
           context: context,
           content: switch (event) {
-            SessionDetailEvent.cancelSession => "Tem certeza que deseja cancelar a sessão?\n"
-                "Isso não poderá ser desfeito.",
-            SessionDetailEvent.concludeSession => "Tem certeza que deseja marcar a sessão "
-                "como concluída?\nIsso não poderá ser desfeito.",
-            SessionDetailEvent.confirmSession => "Tem certeza que deseja confirmar a sessão?",
-            SessionDetailEvent.paySession => "Tem certeza que deseja marcar a sessão como paga?\n"
-                "Isso não poderá ser desfeito.",
+            SessionDetailEvent.cancelSession =>
+              "Tem certeza que deseja cancelar a sessão?\n"
+                  "Isso não poderá ser desfeito.",
+            SessionDetailEvent.concludeSession =>
+              "Tem certeza que deseja marcar a sessão "
+                  "como concluída?\nIsso não poderá ser desfeito.",
+            SessionDetailEvent.confirmSession =>
+              "Tem certeza que deseja confirmar a sessão?",
+            SessionDetailEvent.paySession =>
+              "Tem certeza que deseja marcar a sessão como paga?\n"
+                  "Isso não poderá ser desfeito.",
             _ => "",
           },
           onTapFirstButton: () {
@@ -89,7 +92,8 @@ class SessionDetail extends StatelessWidget {
         );
       case SessionDetailEvent.rescheduleSession:
         context
-            .push<Session?>(BookingScreen.route, extra: BookingScreen.buildArgs(session: session))
+            .push<Session?>(BookingScreen.route,
+                extra: BookingScreen.buildArgs(session: session))
             .then((updatedSession) {
           if (updatedSession != null) {
             model.setUpdatedSession(updatedSession);
@@ -104,6 +108,8 @@ class SessionDetail extends StatelessWidget {
       SessionStatus.concluded => "Concluída",
       SessionStatus.confirmed => "Confirmada",
       SessionStatus.notConfirmed => "Não confirmada",
+      SessionStatus.confirmedByDoctor => "Não confirmada pelo paciente",
+      SessionStatus.confirmedByPatient => "Não confirmada pela doutora",
     };
   }
 
@@ -112,18 +118,21 @@ class SessionDetail extends StatelessWidget {
       SessionStatus.canceled => AhpsicoColors.red,
       SessionStatus.concluded => AhpsicoColors.violet,
       SessionStatus.confirmed => AhpsicoColors.green,
-      SessionStatus.notConfirmed => AhpsicoColors.yellow
+      _ => AhpsicoColors.yellow
     };
   }
 
-  String _getSessionPaymentStatus(SessionPaymentStatus status) => switch (status) {
+  String _getSessionPaymentStatus(SessionPaymentStatus status) =>
+      switch (status) {
         SessionPaymentStatus.notPayed => "Não paga",
         SessionPaymentStatus.payed => "Paga",
       };
 
-  Color _getPaymentStatusColor(Session session) => switch (session.paymentStatus) {
+  Color _getPaymentStatusColor(Session session) =>
+      switch (session.paymentStatus) {
         SessionPaymentStatus.notPayed => AhpsicoColors.red,
         SessionPaymentStatus.payed => AhpsicoColors.green,
+        null => AhpsicoColors.yellow,
       };
 
   @override
@@ -167,7 +176,8 @@ class SessionDetail extends StatelessWidget {
               icon: const Icon(Icons.edit_calendar),
             ),
             AhpsicoSpacing.verticalSpaceSmall,
-            if (model.user!.role.isDoctor && session.paymentStatus.isNotPayed)
+            if (model.user!.role.isDoctor &&
+                session.paymentStatus?.isNotPayed == true)
               FloatingActionButton.extended(
                 backgroundColor: AhpsicoColors.green,
                 label: Text(
@@ -201,7 +211,8 @@ class SessionDetail extends StatelessWidget {
               SliverFillRemaining(
                 hasScrollBody: false,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -220,18 +231,21 @@ class SessionDetail extends StatelessWidget {
                             backgroundColor: _getStatusColor(session.status),
                             label: Text(
                               _getSessionStatus(session.status),
-                              style:
-                                  AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.light80),
+                              style: AhpsicoText.regular1Style
+                                  .copyWith(color: AhpsicoColors.light80),
                             ),
                           ),
-                          Chip(
-                            backgroundColor: _getPaymentStatusColor(session),
-                            label: Text(
-                              _getSessionPaymentStatus(session.paymentStatus),
-                              style:
-                                  AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.light80),
+                          if (session.paymentStatus != null)
+                            Chip(
+                              backgroundColor: _getPaymentStatusColor(session),
+                              label: Text(
+                                _getSessionPaymentStatus(
+                                  session.paymentStatus!,
+                                ),
+                                style: AhpsicoText.regular1Style
+                                    .copyWith(color: AhpsicoColors.light80),
+                              ),
                             ),
-                          ),
                         ],
                       ),
                       AhpsicoSpacing.verticalSpaceLarge,
@@ -244,19 +258,13 @@ class SessionDetail extends StatelessWidget {
                       AhpsicoSpacing.verticalSpaceRegular,
                       model.user!.role.isDoctor
                           ? PatientCard(
-                              patient: session.patient,
+                              patient: session.user,
                               onTap: (patient) => context.push(
                                 PatientDetail.route,
                                 extra: patient,
                               ),
                             )
-                          : DoctorCard(
-                              doctor: session.doctor,
-                              onTap: (doctor) => context.push(
-                                DoctorDetail.route,
-                                extra: doctor,
-                              ),
-                            ),
+                          : const DoctorCard(),
                       AhpsicoSpacing.verticalSpaceLarge,
                       if (!session.status.isOver)
                         Row(
@@ -277,7 +285,8 @@ class SessionDetail extends StatelessWidget {
                               underline: const SizedBox.shrink(),
                               dropdownColor: Colors.transparent,
                               elevation: 0,
-                              borderRadius: const BorderRadius.all(Radius.circular(28)),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(28)),
                               items: updateStatusOptions.mapToList((status) {
                                 final color = _getStatusColor(status);
                                 return DropdownMenuItem(
@@ -286,17 +295,22 @@ class SessionDetail extends StatelessWidget {
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
                                       color: color,
-                                      borderRadius: const BorderRadius.all(Radius.circular(28)),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(28)),
                                     ),
                                     child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
                                       children: [
                                         Icon(
                                           switch (status) {
-                                            SessionStatus.canceled => Icons.cancel,
-                                            SessionStatus.confirmed => Icons.check_circle,
-                                            SessionStatus.concluded => Icons.assignment_turned_in,
-                                            SessionStatus.notConfirmed => Icons.schedule,
+                                            SessionStatus.canceled =>
+                                              Icons.cancel,
+                                            SessionStatus.confirmed =>
+                                              Icons.check_circle,
+                                            SessionStatus.concluded =>
+                                              Icons.assignment_turned_in,
+                                            _ => Icons.schedule,
                                           },
                                           color: AhpsicoColors.light80,
                                         ),
@@ -305,7 +319,8 @@ class SessionDetail extends StatelessWidget {
                                           fit: BoxFit.contain,
                                           child: Text(
                                             _getSessionStatus(status),
-                                            style: AhpsicoText.regular2Style.copyWith(
+                                            style: AhpsicoText.regular2Style
+                                                .copyWith(
                                               color: AhpsicoColors.light80,
                                             ),
                                             maxLines: 3,
@@ -320,20 +335,26 @@ class SessionDetail extends StatelessWidget {
                                 return updateStatusOptions.mapToList((status) {
                                   final color = _getStatusColor(status);
                                   return Container(
-                                    padding: const EdgeInsets.fromLTRB(12, 12, 16, 12),
+                                    padding: const EdgeInsets.fromLTRB(
+                                        12, 12, 16, 12),
                                     decoration: BoxDecoration(
                                       color: color,
-                                      borderRadius: const BorderRadius.all(Radius.circular(28)),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(28)),
                                     ),
                                     child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
                                       children: [
                                         Icon(
                                           switch (session.status) {
-                                            SessionStatus.canceled => Icons.cancel,
-                                            SessionStatus.confirmed => Icons.check_circle,
-                                            SessionStatus.concluded => Icons.assignment_turned_in,
-                                            SessionStatus.notConfirmed => Icons.schedule,
+                                            SessionStatus.canceled =>
+                                              Icons.cancel,
+                                            SessionStatus.confirmed =>
+                                              Icons.check_circle,
+                                            SessionStatus.concluded =>
+                                              Icons.assignment_turned_in,
+                                            _ => Icons.schedule,
                                           },
                                           color: AhpsicoColors.light80,
                                         ),
@@ -342,7 +363,8 @@ class SessionDetail extends StatelessWidget {
                                           fit: BoxFit.contain,
                                           child: Text(
                                             _getSessionStatus(status),
-                                            style: AhpsicoText.regular2Style.copyWith(
+                                            style: AhpsicoText.regular2Style
+                                                .copyWith(
                                               color: AhpsicoColors.light80,
                                             ),
                                             maxLines: 3,
@@ -356,9 +378,12 @@ class SessionDetail extends StatelessWidget {
                               onChanged: (status) {
                                 if (status == session.status) return;
                                 return switch (status) {
-                                  SessionStatus.canceled => model.emitCancelSessionEvent(),
-                                  SessionStatus.concluded => model.emitConcludeSessionEvent(),
-                                  SessionStatus.confirmed => model.emitConfirmSessionEvent(),
+                                  SessionStatus.canceled =>
+                                    model.emitCancelSessionEvent(),
+                                  SessionStatus.concluded =>
+                                    model.emitConcludeSessionEvent(),
+                                  SessionStatus.confirmed =>
+                                    model.emitConfirmSessionEvent(),
                                   _ => null,
                                 };
                               },

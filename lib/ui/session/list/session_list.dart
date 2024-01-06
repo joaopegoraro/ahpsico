@@ -57,7 +57,7 @@ class SessionList extends StatelessWidget {
         return model.isLoading || model.user == null;
       },
       onCreate: (model) {
-        model.fetchScreenData(patientUuid: patient?.uuid);
+        model.fetchScreenData(patientId: patient?.id);
       },
       topbarBuilder: (context, model) {
         return Topbar(
