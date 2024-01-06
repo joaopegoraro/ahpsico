@@ -9,9 +9,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class PatientRepository {
-  Future<List<User>> getDoctorPatients(String doctorId);
+  Future<List<User>> getDoctorPatients();
 
-  Future<ApiError?> syncDoctorPatients(String doctorId);
+  Future<ApiError?> syncDoctorPatients();
 
   Future<void> clear();
 }
@@ -33,33 +33,23 @@ final class PatientRepositoryImpl implements PatientRepository {
   final sqflite.Database _db;
 
   @override
-  Future<List<User>> getDoctorPatients(String doctorId) async {
-    final patientsMap = await _db.rawQuery(
-      """
-        SELECT * FROM ${UserEntity.tableName} WHERE ${UserEntity.roleColumn} = ?
-        """,
-      [UserRole.patient.value],
-    );
+  Future<List<User>> getDoctorPatients() async {
+    final patientsMap = await _db.query(UserEntity.tableName);
 
-    return patientsMap.mapToList((e) {
-      final entity = UserEntity.fromMap(e);
+    return patientsMap.mapToList((patientMap) {
+      final entity = UserEntity.fromMap(patientMap);
       return UserMapper.toUser(entity);
     });
   }
 
   @override
-  Future<ApiError?> syncDoctorPatients(String doctorId) async {
-    final (patients, err) = await _api.getDoctorPatients(doctorId);
+  Future<ApiError?> syncDoctorPatients() async {
+    final (patients, err) = await _api.getPatients();
     if (err != null) return err;
 
     final batch = _db.batch();
 
-    batch.rawDelete(
-      """
-        DELETE FROM ${UserEntity.tableName} WHERE ${UserEntity.roleColumn} = ?
-      """,
-      [UserRole.patient.value],
-    );
+    batch.delete(UserEntity.tableName);
 
     for (final patient in patients!) {
       batch.insert(
