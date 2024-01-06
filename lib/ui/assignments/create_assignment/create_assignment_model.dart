@@ -1,9 +1,9 @@
 import 'package:ahpsico/data/repositories/assignment_repository.dart';
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
-import 'package:ahpsico/models/assignment/assignment.dart';
-import 'package:ahpsico/models/assignment/assignment_status.dart';
-import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/assignment.dart';
+import 'package:ahpsico/constants/assignment_status.dart';
+import 'package:ahpsico/models/session.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
@@ -99,10 +99,9 @@ class CreateAssignmentModel extends BaseViewModel<CreateAssignmentEvent> {
       id: 0,
       title: title,
       description: description,
-      doctor: user!,
-      patientId: patient.uuid,
+      userId: patient.id,
       status: AssignmentStatus.pending,
-      deliverySession: session,
+      session: session,
     );
 
     final (_, err) = await _assignmentRepository.create(assignment);
@@ -110,7 +109,8 @@ class CreateAssignmentModel extends BaseViewModel<CreateAssignmentEvent> {
       updateUi(() => _isLoading = false);
       return await handleDefaultErrors(
         err,
-        defaultErrorMessage: "Ocorreu um erro desconhecido ao tentar criar a tarefa. "
+        defaultErrorMessage:
+            "Ocorreu um erro desconhecido ao tentar criar a tarefa. "
             "Tente novamente mais tarde ou entre em contato com o suporte",
       );
     }

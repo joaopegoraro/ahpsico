@@ -1,5 +1,5 @@
-import 'package:ahpsico/models/assignment/assignment.dart';
-import 'package:ahpsico/models/assignment/assignment_status.dart';
+import 'package:ahpsico/models/assignment.dart';
+import 'package:ahpsico/constants/assignment_status.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
@@ -81,7 +81,8 @@ class AssignmentDetail extends StatelessWidget {
     }
   }
 
-  String getAssignmentStatus(Assignment assignment) => switch (assignment.status) {
+  String getAssignmentStatus(Assignment assignment) =>
+      switch (assignment.status) {
         AssignmentStatus.done => "Concluída",
         AssignmentStatus.missed => "Não concluída",
         AssignmentStatus.pending => "Pendente",
@@ -130,7 +131,8 @@ class AssignmentDetail extends StatelessWidget {
               SliverFillRemaining(
                 hasScrollBody: false,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -149,8 +151,8 @@ class AssignmentDetail extends StatelessWidget {
                             backgroundColor: getStatusColor(assignment),
                             label: Text(
                               getAssignmentStatus(assignment),
-                              style:
-                                  AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.light80),
+                              style: AhpsicoText.regular1Style
+                                  .copyWith(color: AhpsicoColors.light80),
                             ),
                           ),
                         ],
@@ -178,14 +180,15 @@ class AssignmentDetail extends StatelessWidget {
                       ),
                       AhpsicoSpacing.verticalSpaceRegular,
                       SessionCard(
-                        session: assignment.deliverySession,
+                        session: assignment.session,
                         onTap: (session) => context.push(
                           SessionDetail.route,
                           extra: session,
                         ),
                         isUserDoctor: model.user!.role.isDoctor,
                       ),
-                      const Expanded(child: AhpsicoSpacing.verticalSpaceMassive),
+                      const Expanded(
+                          child: AhpsicoSpacing.verticalSpaceMassive),
                       Row(
                         children: [
                           HomeButton(

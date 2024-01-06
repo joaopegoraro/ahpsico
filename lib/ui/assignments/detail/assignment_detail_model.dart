@@ -1,8 +1,8 @@
 import 'package:ahpsico/data/repositories/assignment_repository.dart';
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
-import 'package:ahpsico/models/assignment/assignment.dart';
-import 'package:ahpsico/models/assignment/assignment_status.dart';
+import 'package:ahpsico/models/assignment.dart';
+import 'package:ahpsico/constants/assignment_status.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
@@ -89,7 +89,8 @@ class AssignmentDetailModel extends BaseViewModel<AssignmentDetailEvent> {
     if (err != null) {
       await handleDefaultErrors(
         err,
-        defaultErrorMessage: "Ocorreu um erro desconhecido ao tentar concluir a tarefa."
+        defaultErrorMessage:
+            "Ocorreu um erro desconhecido ao tentar concluir a tarefa."
             " Tente novamente mais tarde ou entre em contato com o suporte",
       );
       return updateUi(() => _isLoading = false);
@@ -114,7 +115,8 @@ class AssignmentDetailModel extends BaseViewModel<AssignmentDetailEvent> {
     if (err != null) {
       await handleDefaultErrors(
         err,
-        defaultErrorMessage: "Ocorreu um erro desconhecido ao tentar cancelar a tarefa."
+        defaultErrorMessage:
+            "Ocorreu um erro desconhecido ao tentar cancelar a tarefa."
             " Tente novamente mais tarde ou entre em contato com o suporte",
       );
       return updateUi(() => _isLoading = false);
@@ -137,7 +139,8 @@ class AssignmentDetailModel extends BaseViewModel<AssignmentDetailEvent> {
     if (err != null) {
       await handleDefaultErrors(
         err,
-        defaultErrorMessage: "Ocorreu um erro desconhecido ao tentar deletar a tarefa."
+        defaultErrorMessage:
+            "Ocorreu um erro desconhecido ao tentar deletar a tarefa."
             " Tente novamente mais tarde ou entre em contato com o suporte",
       );
       return updateUi(() => _isLoading = false);

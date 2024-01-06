@@ -1,5 +1,5 @@
-import 'package:ahpsico/models/assignment/assignment.dart';
-import 'package:ahpsico/models/assignment/assignment_status.dart';
+import 'package:ahpsico/models/assignment.dart';
+import 'package:ahpsico/constants/assignment_status.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
@@ -61,30 +61,26 @@ class AssignmentCard extends StatelessWidget {
                       children: [
                         Text(
                           "Status",
-                          style: AhpsicoText.smallStyle.copyWith(color: AhpsicoColors.light20),
+                          style: AhpsicoText.smallStyle
+                              .copyWith(color: AhpsicoColors.light20),
                         ),
                         AhpsicoSpacing.horizontalSpaceSmall,
                         Chip(
                           backgroundColor: statusColor,
                           label: Text(
                             assignmentStatus,
-                            style: AhpsicoText.smallStyle.copyWith(color: AhpsicoColors.light80),
+                            style: AhpsicoText.smallStyle
+                                .copyWith(color: AhpsicoColors.light80),
                           ),
                         ),
                       ],
                     ),
                     AhpsicoSpacing.verticalSpaceSmall,
                     Text(
-                      "Para sessão de ${assignment.deliverySession.readableDate}",
-                      style: AhpsicoText.regular3Style.copyWith(color: AhpsicoColors.dark50),
+                      "Para sessão de ${assignment.session.readableDate}",
+                      style: AhpsicoText.regular3Style
+                          .copyWith(color: AhpsicoColors.dark50),
                     ),
-                    if (!isUserDoctor) ...[
-                      AhpsicoSpacing.verticalSpaceSmall,
-                      Text(
-                        "Enviado por ${assignment.doctor.name}",
-                        style: AhpsicoText.regular3Style.copyWith(color: AhpsicoColors.dark50),
-                      ),
-                    ],
                   ],
                 ),
               ),

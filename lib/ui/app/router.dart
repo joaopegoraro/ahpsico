@@ -1,13 +1,11 @@
-import 'package:ahpsico/models/assignment/assignment.dart';
-import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/assignment.dart';
+import 'package:ahpsico/models/session.dart';
 import 'package:ahpsico/models/user.dart';
-import 'package:ahpsico/ui/advices/list/advices_list.dart';
+import 'package:ahpsico/ui/messages/list/messages_list.dart';
 import 'package:ahpsico/ui/assignments/detail/assignment_detail.dart';
 import 'package:ahpsico/ui/assignments/list/assignments_list.dart';
 import 'package:ahpsico/ui/booking/booking_screen.dart';
-import 'package:ahpsico/ui/doctor/detail/doctor_detail.dart';
 import 'package:ahpsico/ui/doctor/home/doctor_home.dart';
-import 'package:ahpsico/ui/doctor/list/doctor_list.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:ahpsico/ui/patient/detail/patient_detail.dart';
 import 'package:ahpsico/ui/patient/home/patient_home.dart';
@@ -50,19 +48,6 @@ final class AhpsicoRouter {
         path: DoctorHome.route,
         builder: (context, state) => const DoctorHome(),
       ),
-      GoRoute(
-        path: DoctorDetail.route,
-        builder: (context, state) {
-          final doctor = state.extra as User?;
-          return DoctorDetail(doctor);
-        },
-      ),
-      GoRoute(
-        path: DoctorList.route,
-        builder: (context, state) {
-          return const DoctorList();
-        },
-      ),
 
       // Patients
 
@@ -75,7 +60,8 @@ final class AhpsicoRouter {
         builder: (context, state) {
           final args = state.extra as Map<String, dynamic>?;
           final bool selectMode = args?[PatientList.selectModeArgsKey] ?? false;
-          final bool allSelected = args?[PatientList.allSelectedArgsKey] ?? false;
+          final bool allSelected =
+              args?[PatientList.allSelectedArgsKey] ?? false;
           return PatientList(
             selectModeByDefault: selectMode,
             allSelectedByDefault: allSelected,
@@ -90,13 +76,13 @@ final class AhpsicoRouter {
         },
       ),
 
-      // Advices
+      // Messages
 
       GoRoute(
-        path: AdvicesList.route,
+        path: MessagesList.route,
         builder: (context, state) {
           final patient = state.extra as User?;
-          return AdvicesList(patient: patient);
+          return MessagesList(patient: patient);
         },
       ),
 
@@ -114,7 +100,8 @@ final class AhpsicoRouter {
         builder: (context, state) {
           final args = state.extra as Map<String, dynamic>?;
           final User? patient = args?[SessionList.patientArgsKey];
-          final bool navigateBackOnTap = args?[SessionList.navigateBackOnTapArgsKey] ?? false;
+          final bool navigateBackOnTap =
+              args?[SessionList.navigateBackOnTapArgsKey] ?? false;
           return SessionList(
             patient: patient,
             navigateBackOnTap: navigateBackOnTap,

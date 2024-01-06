@@ -1,4 +1,4 @@
-import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/session.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
