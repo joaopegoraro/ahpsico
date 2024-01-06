@@ -1,33 +1,41 @@
 import 'dart:convert';
 
-import 'package:ahpsico/constants/app_constants.dart';
-import 'package:ahpsico/models/session/session_payment_status.dart';
-import 'package:ahpsico/models/session/session_status.dart';
-import 'package:ahpsico/models/session/session_type.dart';
+import 'package:ahpsico/constants/session_payment_status.dart';
+import 'package:ahpsico/constants/session_payment_type.dart';
+import 'package:ahpsico/constants/session_status.dart';
+import 'package:ahpsico/constants/session_type.dart';
+import 'package:ahpsico/constants/user_role.dart';
 import 'package:ahpsico/models/user.dart';
 import 'package:ahpsico/utils/time_utils.dart';
-import 'package:intl/intl.dart';
 
 class Session {
   const Session({
     required this.id,
-    required this.doctor,
-    required this.patient,
+    required this.user,
+    required this.date,
+    required this.type,
     required this.groupIndex,
     required this.status,
     required this.paymentStatus,
-    required this.type,
-    required this.date,
+    required this.paymentType,
+    required this.updatedBy,
+    required this.updateMessage,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   final int id;
-  final User doctor;
-  final User patient;
+  final User user;
+  final DateTime date;
+  final SessionType type;
   final int groupIndex;
   final SessionStatus status;
-  final SessionPaymentStatus paymentStatus;
-  final SessionType type;
-  final DateTime date;
+  final SessionPaymentStatus? paymentStatus;
+  final SessionPaymentType paymentType;
+  final UserRole updatedBy;
+  final String updateMessage;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   String get readableDate {
     return TimeUtils.getReadableDate(date);
@@ -39,63 +47,76 @@ class Session {
 
   Session copyWith({
     int? id,
-    User? doctor,
-    User? patient,
+    User? user,
+    DateTime? date,
+    SessionType? type,
     int? groupIndex,
     SessionStatus? status,
     SessionPaymentStatus? paymentStatus,
-    SessionType? type,
-    DateTime? date,
+    SessionPaymentType? paymentType,
+    UserRole? updatedBy,
+    String? updateMessage,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return Session(
       id: id ?? this.id,
-      doctor: doctor ?? this.doctor,
-      patient: patient ?? this.patient,
+      user: user ?? this.user,
+      date: date ?? this.date,
+      type: type ?? this.type,
       groupIndex: groupIndex ?? this.groupIndex,
       status: status ?? this.status,
       paymentStatus: paymentStatus ?? this.paymentStatus,
-      type: type ?? this.type,
-      date: date ?? this.date,
+      paymentType: paymentType ?? this.paymentType,
+      updatedBy: updatedBy ?? this.updatedBy,
+      updateMessage: updateMessage ?? this.updateMessage,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
-      'doctor': doctor.toMap(),
-      'patient': patient.toMap(),
+      'user': user.toMap(),
+      'date': date.millisecondsSinceEpoch,
+      'type': type.value,
       'groupIndex': groupIndex,
       'status': status.value,
-      'paymentStatus': paymentStatus.value,
-      'type': type.value,
-      'date': TimeUtils.formatDateWithOffset(date, AppConstants.datePattern),
+      'paymentStatus': paymentStatus?.value,
+      'paymentType': paymentType.value,
+      'updatedBy': updatedBy.value,
+      'updateMessage': updateMessage,
+      'createdAt': createdAt.millisecondsSinceEpoch,
+      'updatedAt': updatedAt.millisecondsSinceEpoch,
     };
   }
 
   factory Session.fromMap(Map<String, dynamic> map) {
     return Session(
-      id: map['id'] as int? ?? -1,
-      doctor: User.fromMap(map['doctor'] as Map<String, dynamic>? ?? {}),
-      patient: User.fromMap(map['patient'] as Map<String, dynamic>? ?? {}),
-      groupIndex: map['groupIndex'] as int? ?? 0,
+      id: map['id'] as int,
+      user: User.fromMap(map['user'] as Map<String, dynamic>),
+      date: DateTime.fromMillisecondsSinceEpoch(map['date'] as int),
+      type: SessionType.fromValue(map['type']),
+      groupIndex: map['groupIndex'] as int,
       status: SessionStatus.fromValue(map['status']),
       paymentStatus: SessionPaymentStatus.fromValue(map['paymentStatus']),
-      type: SessionType.fromValue(map['type'] as int? ?? -1),
-      date: DateFormat(AppConstants.datePattern).parse(map['date'] as String? ?? ""),
+      paymentType: SessionPaymentType.fromValue(map['paymentType']),
+      updatedBy: UserRole.fromValue(map['updatedBy']),
+      updateMessage: map['updateMessage'] as String,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int),
     );
   }
 
-  String toJson() {
-    return json.encode(toMap());
-  }
+  String toJson() => json.encode(toMap());
 
-  factory Session.fromJson(String source) {
-    return Session.fromMap(json.decode(source) as Map<String, dynamic>);
-  }
+  factory Session.fromJson(String source) =>
+      Session.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
-    return 'Session(id: $id, doctor: $doctor, patient: $patient, groupIndex: $groupIndex, status: $status, paymentStatus: $paymentStatus, type: $type, date: $date)';
+    return 'Session(id: $id, user: $user, date: $date, type: $type, groupIndex: $groupIndex, status: $status, paymentStatus: $paymentStatus, paymentType: $paymentType, updatedBy: $updatedBy, updateMessage: $updateMessage, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -103,24 +124,32 @@ class Session {
     if (identical(this, other)) return true;
 
     return other.id == id &&
-        other.doctor == doctor &&
-        other.patient == patient &&
+        other.user == user &&
+        other.date == date &&
+        other.type == type &&
         other.groupIndex == groupIndex &&
         other.status == status &&
         other.paymentStatus == paymentStatus &&
-        other.type == type &&
-        other.date == date;
+        other.paymentType == paymentType &&
+        other.updatedBy == updatedBy &&
+        other.updateMessage == updateMessage &&
+        other.createdAt == createdAt &&
+        other.updatedAt == updatedAt;
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
-        doctor.hashCode ^
-        patient.hashCode ^
+        user.hashCode ^
+        date.hashCode ^
+        type.hashCode ^
         groupIndex.hashCode ^
         status.hashCode ^
         paymentStatus.hashCode ^
-        type.hashCode ^
-        date.hashCode;
+        paymentType.hashCode ^
+        updatedBy.hashCode ^
+        updateMessage.hashCode ^
+        createdAt.hashCode ^
+        updatedAt.hashCode;
   }
 }

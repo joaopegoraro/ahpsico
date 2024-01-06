@@ -7,7 +7,7 @@ enum SessionPaymentStatus {
   const SessionPaymentStatus(this.value);
   final String value;
 
-  SessionPaymentStatus? fromValue(String? value) {
+  static SessionPaymentStatus? fromValue(String? value) {
     return SessionPaymentStatus.values.firstWhereOrNull(
       (element) => element.value == value,
     );
