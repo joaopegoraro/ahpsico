@@ -33,12 +33,12 @@ abstract interface class ApiService {
   Future<(List<Session>?, ApiError?)> getDoctorSessions({DateTime? date});
 
   Future<(List<Session>?, ApiError?)> getPatientSessions(
-    String patientId, {
+    int patientId, {
     bool? upcoming,
   });
 
   Future<(List<Assignment>?, ApiError?)> getPatientAssignments(
-    String patientId, {
+    int patientId, {
     bool? pending,
   });
 
@@ -223,7 +223,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<(List<Session>?, ApiError?)> getPatientSessions(
-    String patientId, {
+    int patientId, {
     bool? upcoming,
   }) async {
     return await request(
@@ -242,7 +242,7 @@ class ApiServiceImpl implements ApiService {
 
   @override
   Future<(List<Assignment>?, ApiError?)> getPatientAssignments(
-    String patientId, {
+    int patientId, {
     bool? pending,
   }) async {
     return await request(

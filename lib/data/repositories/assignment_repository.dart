@@ -3,8 +3,8 @@ import 'package:ahpsico/data/database/entities/assignment_entity.dart';
 import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/entities/session_entity.dart';
 import 'package:ahpsico/data/database/mappers/assignment_mapper.dart';
-import 'package:ahpsico/models/assignment/assignment.dart';
-import 'package:ahpsico/models/assignment/assignment_status.dart';
+import 'package:ahpsico/models/assignment.dart';
+import 'package:ahpsico/constants/assignment_status.dart';
 import 'package:ahpsico/services/api/api_service.dart';
 import 'package:ahpsico/services/api/errors.dart';
 import 'package:collection/collection.dart';
@@ -19,12 +19,12 @@ abstract interface class AssignmentRepository {
   Future<ApiError?> delete(int id);
 
   Future<List<Assignment>> getPatientAssignments(
-    String patientId, {
+    int patientId, {
     bool pending = false,
   });
 
   Future<ApiError?> syncPatientAssignments(
-    String patientId, {
+    int patientId, {
     bool? pending,
   });
 
@@ -84,18 +84,22 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
 
   @override
   Future<ApiError?> syncPatientAssignments(
-    String patientId, {
+    int patientId, {
     bool? pending,
   }) async {
-    final (assignments, err) = await _api.getPatientAssignments(patientId, pending: pending);
+    final (assignments, err) =
+        await _api.getPatientAssignments(patientId, pending: pending);
     if (err != null) return err;
 
     final batch = _db.batch();
     batch.delete(
       AssignmentEntity.tableName,
-      where: "${AssignmentEntity.patientIdColumn} = ?"
+      where: "${AssignmentEntity.userIdColumn} = ?"
           "${pending == true ? " AND ${AssignmentEntity.statusColumn} = ?" : ""}",
-      whereArgs: [patientId, if (pending == true) AssignmentStatus.pending.value],
+      whereArgs: [
+        patientId,
+        if (pending == true) AssignmentStatus.pending.value
+      ],
     );
 
     for (final assignment in assignments!) {
@@ -112,12 +116,12 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
 
   @override
   Future<List<Assignment>> getPatientAssignments(
-    String patientId, {
+    int patientId, {
     bool pending = false,
   }) async {
     final assignmentsMap = await _db.query(
       AssignmentEntity.tableName,
-      where: "${AssignmentEntity.patientIdColumn} = ?"
+      where: "${AssignmentEntity.userIdColumn} = ?"
           "${pending ? " AND ${AssignmentEntity.statusColumn} = ?" : ""}",
       whereArgs: [patientId, if (pending) AssignmentStatus.pending.value],
     );
@@ -126,51 +130,41 @@ final class AssignmentRepositoryImpl implements AssignmentRepository {
     for (final assignmentMap in assignmentsMap) {
       final entity = AssignmentEntity.fromMap(assignmentMap);
 
-      final doctorsMap = await _db.query(
-        UserEntity.tableName,
-        where: "${UserEntity.uuidColumn} = ?",
-        whereArgs: [entity.doctorId],
-      );
-      if (doctorsMap.isEmpty) {
-        await _deleteLocally(entity.id);
-        continue;
-      }
-      final doctorEntity = UserEntity.fromMap(doctorsMap.firstOrNull ?? {"uuid": entity.doctorId});
-
       final patientsMap = await _db.query(
         UserEntity.tableName,
-        where: "${UserEntity.uuidColumn} = ?",
-        whereArgs: [entity.patientId],
+        where: "${UserEntity.idColumn} = ?",
+        whereArgs: [entity.userId],
       );
       if (patientsMap.isEmpty) {
         await _deleteLocally(entity.id);
         continue;
       }
       final patientEntity =
-          UserEntity.fromMap(patientsMap.firstOrNull ?? {"uuid": entity.patientId});
+          UserEntity.fromMap(patientsMap.firstOrNull ?? {"id": entity.userId});
 
       final sessionsMap = await _db.query(
         SessionEntity.tableName,
         where: "${SessionEntity.idColumn} = ?",
-        whereArgs: [entity.deliverySessionId],
+        whereArgs: [entity.sessionId],
       );
       if (sessionsMap.isEmpty) {
         await _deleteLocally(entity.id);
         continue;
       }
       final sessionEntity = SessionEntity.fromMap(
-        sessionsMap.firstOrNull ?? {"id": entity.deliverySessionId},
+        sessionsMap.firstOrNull ?? {"id": entity.sessionId},
       );
 
       assignments.add(AssignmentMapper.toAssignment(
         entity,
-        doctorEntity: doctorEntity,
-        patientEntity: patientEntity,
+        userEntity: patientEntity,
         sessionEntity: sessionEntity,
       ));
     }
 
-    return assignments.sorted((a, b) => b.deliverySession.date.compareTo(a.deliverySession.date));
+    return assignments.sorted((first, second) {
+      return first.session.date.compareTo(second.session.date);
+    });
   }
 
   @override
