@@ -12,13 +12,13 @@ class Message {
 
   final int id;
   final String text;
-  final List<String> userIds;
+  final List<int> userIds;
   final DateTime createdAt;
 
   Message copyWith({
     int? id,
     String? text,
-    List<String>? userIds,
+    List<int>? userIds,
     DateTime? createdAt,
   }) {
     return Message(
@@ -42,7 +42,7 @@ class Message {
     return Message(
       id: map['id'] as int,
       text: map['text'] as String,
-      userIds: List<String>.from((map['userIds'] as List<String>),
+      userIds: List<int>.from((map['userIds']),
       createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int),
     );
   }
