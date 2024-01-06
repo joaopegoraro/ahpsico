@@ -3,13 +3,11 @@ import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
-import 'package:ahpsico/ui/components/bottomsheet.dart';
 import 'package:ahpsico/ui/components/dialogs/logout_dialog.dart';
 import 'package:ahpsico/ui/session/card/session_card.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/doctor/detail/doctor_detail.dart';
 import 'package:ahpsico/ui/doctor/home/doctor_home_model.dart';
-import 'package:ahpsico/ui/invite/invite_patient/invite_patient_sheet.dart';
 import 'package:ahpsico/ui/components/expandable_fab.dart';
 import 'package:ahpsico/ui/doctor/widgets/doctor_fab_action.dart';
 import 'package:ahpsico/ui/components/home_button.dart';
@@ -38,11 +36,6 @@ class DoctorHome extends StatelessWidget {
         AhpsicoSnackbar.showError(context, model.snackbarMessage);
       case DoctorHomeEvent.navigateToLoginScreen:
         context.go(LoginScreen.route);
-      case DoctorHomeEvent.openInvitePatientBottomSheet:
-        AhpsicoSheet.show(
-          context: context,
-          builder: (context) => const InvitePatientSheet(),
-        );
       case DoctorHomeEvent.openLogoutDialog:
         showDialog(
           context: context,
@@ -71,10 +64,6 @@ class DoctorHome extends StatelessWidget {
         return ExpandableFab(
           distance: 112,
           children: [
-            DoctorFabAction(
-              onPressed: model.openInvitePatientSheet,
-              icon: const Icon(Icons.person_add),
-            ),
             DoctorFabAction(
               onPressed: () => context.push(
                 PatientList.route,

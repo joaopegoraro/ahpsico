@@ -8,7 +8,6 @@ import 'package:ahpsico/ui/base/base_view_model.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum DoctorHomeEvent {
-  openInvitePatientBottomSheet,
   openLogoutDialog,
   navigateToLoginScreen,
   showSnackbarMessage,
@@ -61,10 +60,6 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
     emitEvent(DoctorHomeEvent.openLogoutDialog);
   }
 
-  void openInvitePatientSheet() {
-    emitEvent(DoctorHomeEvent.openInvitePatientBottomSheet);
-  }
-
   /* Calls */
 
   Future<void> fetchScreenData({bool sync = true}) async {
@@ -80,22 +75,20 @@ class DoctorHomeModel extends BaseViewModel<DoctorHomeEvent> {
   }
 
   Future<void> _getTodaySessions({bool sync = true}) async {
-    final userId = user!.id;
     final now = DateTime.now();
 
     if (sync) {
-      final err =
-          await _sessionRepository.syncDoctorSessions(userId, date: now);
+      final err = await _sessionRepository.syncDoctorSessions(date: now);
       if (err != null) {
         await handleDefaultErrors(err, shouldShowConnectionError: false);
       }
     }
 
-    _sessions = await _sessionRepository.getDoctorSessions(userId, date: now);
+    _sessions = await _sessionRepository.getDoctorSessions(date: now);
   }
 
   Future<void> _syncDoctorPatients() async {
-    final err = await _patientRepository.syncDoctorPatients(user!.uuid);
+    final err = await _patientRepository.syncDoctorPatients();
     if (err != null) {
       await handleDefaultErrors(err, shouldShowConnectionError: false);
     }
