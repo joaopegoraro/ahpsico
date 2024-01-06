@@ -1,7 +1,7 @@
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
 import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
-import 'package:ahpsico/models/session/session.dart';
+import 'package:ahpsico/models/session.dart';
 import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
@@ -61,22 +61,22 @@ class ScheduleModel extends BaseViewModel<ScheduleEvent> {
   }
 
   Future<void> _getSessions() async {
-    final userUid = user!.uuid;
+    final userId = user!.id;
     final isDoctor = user!.role.isDoctor;
     ApiError? err;
     if (isDoctor) {
-      err = await _sessionRepository.syncDoctorSessions(userUid);
+      err = await _sessionRepository.syncDoctorSessions();
     } else {
-      err = await _sessionRepository.syncPatientSessions(userUid);
+      err = await _sessionRepository.syncPatientSessions(userId);
     }
     if (err != null) {
       await handleDefaultErrors(err, shouldShowConnectionError: false);
     }
 
     if (isDoctor) {
-      _sessions = await _sessionRepository.getDoctorSessions(userUid);
+      _sessions = await _sessionRepository.getDoctorSessions();
     } else {
-      _sessions = await _sessionRepository.getPatientSessions(userUid);
+      _sessions = await _sessionRepository.getPatientSessions(userId);
     }
   }
 }

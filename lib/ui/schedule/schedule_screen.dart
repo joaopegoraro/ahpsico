@@ -1,12 +1,11 @@
-import 'package:ahpsico/models/session/session.dart';
-import 'package:ahpsico/models/session/session_status.dart';
+import 'package:ahpsico/models/session.dart';
+import 'package:ahpsico/constants/session_status.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
 import 'package:ahpsico/ui/booking/booking_screen.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/components/topbar.dart';
-import 'package:ahpsico/ui/doctor/list/doctor_list.dart';
 import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:ahpsico/ui/schedule/schedule_model.dart';
 import 'package:ahpsico/ui/session/card/session_card.dart';
@@ -36,31 +35,21 @@ class ScheduleScreen extends StatelessWidget {
     }
   }
 
-  Color _getStatusColor(Session session) {
-    switch (session.status) {
-      case SessionStatus.canceled:
-        return AhpsicoColors.red;
-      case SessionStatus.concluded:
-        return AhpsicoColors.violet;
-      case SessionStatus.confirmed:
-        return AhpsicoColors.green;
-      case SessionStatus.notConfirmed:
-        return AhpsicoColors.yellow;
-    }
-  }
+  Color _getStatusColor(Session session) => switch (session.status) {
+        SessionStatus.canceled => AhpsicoColors.red,
+        SessionStatus.concluded => AhpsicoColors.violet,
+        SessionStatus.confirmed => AhpsicoColors.green,
+        _ => AhpsicoColors.yellow,
+      };
 
-  String _getSessionStatus(Session session) {
-    switch (session.status) {
-      case SessionStatus.canceled:
-        return "Cancelada";
-      case SessionStatus.concluded:
-        return "Concluída";
-      case SessionStatus.confirmed:
-        return "Confirmada";
-      case SessionStatus.notConfirmed:
-        return "Não confirmada";
-    }
-  }
+  String _getSessionStatus(Session session) => switch (session.status) {
+        SessionStatus.canceled => "Cancelada",
+        SessionStatus.concluded => "Concluída",
+        SessionStatus.confirmed => "Confirmada",
+        SessionStatus.notConfirmed => "Não confirmada",
+        SessionStatus.confirmedByDoctor => "Não confirmada pelo paciente",
+        SessionStatus.confirmedByPatient => "Não confirmada pela doutora",
+      };
 
   static const _sessionMetadata = "session";
 
@@ -82,20 +71,17 @@ class ScheduleScreen extends StatelessWidget {
         );
       },
       fabBuilder: (context, model) {
+        if (model.user!.role.isDoctor) return null;
         return FloatingActionButton.extended(
           backgroundColor: AhpsicoColors.blue,
-          label: Text(
-            model.user!.role.isDoctor ? "BLOQUEAR HORÁRIOS" : "AGENDAR SESSÃO",
+          label: const Text(
+            "AGENDAR SESSÃO",
             style: AhpsicoText.tinyStyle,
           ),
-          icon: Icon(model.user!.role.isDoctor ? Icons.block : Icons.schedule),
-          onPressed: () {
-            if (model.user!.role.isDoctor) {
-              context.push(BookingScreen.route).then((_) => model.fetchScreenData());
-            } else {
-              context.push(DoctorList.route).then((_) => model.fetchScreenData());
-            }
-          },
+          icon: const Icon(Icons.schedule),
+          onPressed: () => context
+              .push(BookingScreen.route)
+              .then((_) => model.fetchScreenData()),
         );
       },
       bodyBuilder: (context, model) {
@@ -104,7 +90,7 @@ class ScheduleScreen extends StatelessWidget {
           weekDays: const ['Dom', 'Seg', 'Ter', "Qua", "Qui", "Sex", "Sab"],
           eventsList: model.sessions.mapToList((session) {
             return NeatCleanCalendarEvent(
-              model.user!.role.isDoctor ? session.patient.name : session.doctor.name,
+              model.user!.role.isDoctor ? session.user.name : "Doutora Andréa",
               description: "Status: ${_getSessionStatus(session)}",
               startTime: session.date,
               endTime: session.date.add(const Duration(hours: 1)),
@@ -121,7 +107,8 @@ class ScheduleScreen extends StatelessWidget {
                   child: Text(
                     "Você não possui nenhuma sessão agendada para esse dia",
                     textAlign: TextAlign.center,
-                    style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.dark75),
+                    style: AhpsicoText.regular1Style
+                        .copyWith(color: AhpsicoColors.dark75),
                   ),
                 ),
               );
@@ -130,7 +117,8 @@ class ScheduleScreen extends StatelessWidget {
               child: ListView.builder(
                 itemCount: events.length,
                 itemBuilder: (context, index) {
-                  final session = events[index].metadata![_sessionMetadata] as Session;
+                  final session =
+                      events[index].metadata![_sessionMetadata] as Session;
                   return Padding(
                     padding: EdgeInsets.only(
                       left: 16,
@@ -159,9 +147,12 @@ class ScheduleScreen extends StatelessWidget {
           eventColor: null,
           locale: 'pt_BR',
           todayButtonText: 'Hoje',
-          bottomBarTextStyle: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.dark75),
-          displayMonthTextStyle: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.dark75),
-          dayOfWeekStyle: AhpsicoText.tinyStyle.copyWith(color: AhpsicoColors.dark75),
+          bottomBarTextStyle:
+              AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.dark75),
+          displayMonthTextStyle:
+              AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.dark75),
+          dayOfWeekStyle:
+              AhpsicoText.tinyStyle.copyWith(color: AhpsicoColors.dark75),
         );
       },
     );
