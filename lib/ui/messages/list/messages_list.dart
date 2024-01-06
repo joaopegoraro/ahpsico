@@ -1,9 +1,9 @@
 import 'package:ahpsico/models/user.dart';
-import 'package:ahpsico/ui/advices/list/advices_list_model.dart';
+import 'package:ahpsico/ui/messages/list/messages_list_model.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:ahpsico/ui/base/base_screen.dart';
-import 'package:ahpsico/ui/advices/card/advice_card.dart';
+import 'package:ahpsico/ui/messages/card/message_card.dart';
 import 'package:ahpsico/ui/components/dialogs/ahpsico_dialog.dart';
 import 'package:ahpsico/ui/components/snackbar.dart';
 import 'package:ahpsico/ui/components/topbar.dart';
@@ -11,49 +11,50 @@ import 'package:ahpsico/ui/login/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class AdvicesList extends StatelessWidget {
-  const AdvicesList({super.key, required this.patient});
+class MessagesList extends StatelessWidget {
+  const MessagesList({super.key, required this.patient});
 
-  static const route = "/advices";
+  static const route = "/messages";
 
   final User? patient;
 
   void _onEventEmitted(
     BuildContext context,
-    AdviceListModel model,
-    AdviceListEvent event,
+    MessageListModel model,
+    MessageListEvent event,
   ) {
     switch (event) {
-      case AdviceListEvent.showSnackbarError:
+      case MessageListEvent.showSnackbarError:
         AhpsicoSnackbar.showError(context, model.snackbarMessage);
-      case AdviceListEvent.showSnackbarMessage:
+      case MessageListEvent.showSnackbarMessage:
         AhpsicoSnackbar.showSuccess(context, model.snackbarMessage);
-      case AdviceListEvent.navigateToLogin:
+      case MessageListEvent.navigateToLogin:
         context.go(LoginScreen.route);
-      case AdviceListEvent.openDeleteConfirmationDialog:
+      case MessageListEvent.openDeleteConfirmationDialog:
         AhpsicoDialog.show(
             context: context,
-            content: "Tem certeza que deseja deletar as mensagens selecionadas?",
+            content:
+                "Tem certeza que deseja deletar as mensagens selecionadas?",
             onTapFirstButton: () {
               context.pop();
-              model.deleteSelectedAdvices();
+              model.deleteSelectedMessages();
             },
             firstButtonText: "Sim, tenho certeza",
             secondButtonText: "Não, cancelar");
     }
   }
 
-  String _getTitle(AdviceListModel model) {
+  String _getTitle(MessageListModel model) {
     if (model.isSelectModeOn) {
-      final lenght = model.selectedAdvicesIds.length;
+      final lenght = model.selectedMessagesIds.length;
       if (lenght == 0) return "Nenhum selecionado";
-      if (lenght == model.advices.length) return "Todos selecionados";
+      if (lenght == model.messages.length) return "Todos selecionados";
       return "$lenght ${lenght > 1 ? "selecionados" : "selecionado"}";
     }
     return "Mensagens enviadas";
   }
 
-  bool _shouldPop(AdviceListModel model) {
+  bool _shouldPop(MessageListModel model) {
     if (model.isSelectModeOn) {
       model.clearSelection();
       return false;
@@ -64,14 +65,14 @@ class AdvicesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BaseScreen(
-      provider: adviceListModelProvider,
+      provider: messageListModelProvider,
       onEventEmitted: _onEventEmitted,
       onWillPop: (model) async => _shouldPop(model),
       shouldShowLoading: (context, model) {
         return model.isLoading || model.user == null;
       },
       onCreate: (model) {
-        model.fetchScreenData(patientUuid: patient?.uuid);
+        model.fetchScreenData(patientId: patient?.id);
       },
       topbarBuilder: (context, model) {
         return Topbar(
@@ -91,7 +92,7 @@ class AdvicesList extends StatelessWidget {
         );
       },
       bodyBuilder: (context, model) {
-        if (model.advices.isEmpty) {
+        if (model.messages.isEmpty) {
           return Center(
             child: Text(
               "Nenhuma mensagem encontrada",
@@ -103,19 +104,19 @@ class AdvicesList extends StatelessWidget {
           );
         }
         return ListView.builder(
-          itemCount: model.advices.length,
+          itemCount: model.messages.length,
           itemBuilder: (context, index) {
-            final advice = model.advices[index];
+            final message = model.messages[index];
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: AdviceCard(
-                advice: advice,
+              child: MessageCard(
+                message: message,
                 isUserDoctor: true,
                 selectModeOn: model.isSelectModeOn,
                 showTitle: patient == null,
-                isSelected: model.selectedAdvicesIds.contains(advice.id),
-                onLongPress: model.selectAdvice,
-                onTap: model.isSelectModeOn ? model.selectAdvice : null,
+                isSelected: model.selectedMessagesIds.contains(message.id),
+                onLongPress: model.selectMessage,
+                onTap: model.isSelectModeOn ? model.selectMessage : null,
               ),
             );
           },

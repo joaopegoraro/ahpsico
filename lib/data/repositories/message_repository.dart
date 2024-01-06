@@ -10,7 +10,7 @@ import 'package:sqflite/sqflite.dart' as sqflite;
 
 abstract interface class MessageRepository {
   Future<(Message?, ApiError?)> create(
-    Message advice, {
+    Message message, {
     required List<int> userIds,
   });
 
@@ -25,7 +25,7 @@ abstract interface class MessageRepository {
   Future<int> clear();
 }
 
-final adviceRepositoryProvider = Provider<MessageRepository>((ref) {
+final messageRepositoryProvider = Provider<MessageRepository>((ref) {
   final apiService = ref.watch(apiServiceProvider);
   final database = ref.watch(ahpsicoDatabaseProvider);
   return MessageRepositoryImpl(apiService: apiService, database: database);
@@ -43,11 +43,11 @@ final class MessageRepositoryImpl implements MessageRepository {
 
   @override
   Future<(Message?, ApiError?)> create(
-    Message advice, {
+    Message message, {
     required List<int> userIds,
   }) async {
     final (createdMessage, err) = await _api.createMessage(
-      advice,
+      message,
       userIds: userIds,
     );
     if (err != null) return (createdMessage, err);

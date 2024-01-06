@@ -1,15 +1,15 @@
 import 'dart:math' as math;
-import 'package:ahpsico/models/advice.dart';
+import 'package:ahpsico/models/message.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
 import 'package:flutter/material.dart';
 
 @immutable
-class AdviceCard extends StatefulWidget {
-  const AdviceCard({
+class MessageCard extends StatefulWidget {
+  const MessageCard({
     super.key,
-    required this.advice,
+    required this.message,
     required this.isUserDoctor,
     required this.showTitle,
     this.selectModeOn = false,
@@ -18,26 +18,26 @@ class AdviceCard extends StatefulWidget {
     this.onLongPress,
   });
 
-  final Advice advice;
+  final Message message;
   final bool isUserDoctor;
   final bool selectModeOn;
   final bool isSelected;
   final bool showTitle;
-  final void Function(Advice)? onTap;
-  final void Function(Advice)? onLongPress;
+  final void Function(Message)? onTap;
+  final void Function(Message)? onLongPress;
 
   @override
-  State<AdviceCard> createState() => _AdviceCardState();
+  State<MessageCard> createState() => _MessageCardState();
 }
 
-class _AdviceCardState extends State<AdviceCard> {
+class _MessageCardState extends State<MessageCard> {
   bool isExpanded = false;
   late final bool messageIsTooBig;
 
   @override
   void initState() {
     super.initState();
-    messageIsTooBig = widget.advice.message.length >= 100;
+    messageIsTooBig = widget.message.text.length >= 100;
   }
 
   @override
@@ -49,12 +49,13 @@ class _AdviceCardState extends State<AdviceCard> {
       ),
       child: InkWell(
         onTap: widget.selectModeOn
-            ? () => widget.onTap?.call(widget.advice)
+            ? () => widget.onTap?.call(widget.message)
             : messageIsTooBig
                 ? () => setState(() => isExpanded = !isExpanded)
                 : null,
-        onLongPress:
-            widget.onLongPress == null ? null : () => widget.onLongPress?.call(widget.advice),
+        onLongPress: widget.onLongPress == null
+            ? null
+            : () => widget.onLongPress?.call(widget.message),
         borderRadius: const BorderRadius.all(Radius.circular(4)),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -67,7 +68,8 @@ class _AdviceCardState extends State<AdviceCard> {
                         children: [
                           Checkbox(
                             value: widget.isSelected,
-                            fillColor: const MaterialStatePropertyAll(AhpsicoColors.violet),
+                            fillColor: const MaterialStatePropertyAll(
+                                AhpsicoColors.violet),
                             onChanged: null,
                           ),
                           AhpsicoSpacing.horizontalSpaceSmall,
@@ -79,33 +81,17 @@ class _AdviceCardState extends State<AdviceCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        if (widget.showTitle)
-                          Expanded(
-                            child: Text(
-                              widget.isUserDoctor
-                                  ? "Enviado para ${widget.advice.patientIds.length} paciente(s)"
-                                  : widget.advice.doctor.name,
-                              style: AhpsicoText.regular1Style.copyWith(
-                                color: AhpsicoColors.dark75,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        if (!widget.showTitle && messageIsTooBig) const Spacer(),
-                        if (messageIsTooBig)
-                          Icon(
-                            isExpanded ? Icons.expand_less : Icons.expand_more,
-                          ),
-                      ],
-                    ),
+                    if (messageIsTooBig)
+                      Icon(
+                        isExpanded ? Icons.expand_less : Icons.expand_more,
+                      ),
                     AhpsicoSpacing.verticalSpaceTiny,
                     Text(
                       !messageIsTooBig || isExpanded
-                          ? widget.advice.message
-                          : "${widget.advice.message.substring(0, math.min(widget.advice.message.length, 100))}...",
-                      style: AhpsicoText.regular3Style.copyWith(color: AhpsicoColors.dark50),
+                          ? widget.message.text
+                          : "${widget.message.text.substring(0, math.min(widget.message.text.length, 100))}...",
+                      style: AhpsicoText.regular3Style
+                          .copyWith(color: AhpsicoColors.dark50),
                     ),
                   ],
                 ),

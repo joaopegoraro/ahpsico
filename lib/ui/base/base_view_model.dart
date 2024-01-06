@@ -58,13 +58,13 @@ abstract class BaseViewModel<T> extends ViewModel<T> {
     bool sync = false,
     bool showConnectionError = false,
   }) async {
-    final uuid = await preferencesRepository.findUuid();
-    if (uuid == null) {
+    final id = await preferencesRepository.findId();
+    if (id == null) {
       return await logout(showError: true);
     }
 
     if (sync) {
-      final err = await userRepository.sync(uuid);
+      final err = await userRepository.sync(id);
       if (err != null) {
         await handleDefaultErrors(
           err,
@@ -73,7 +73,7 @@ abstract class BaseViewModel<T> extends ViewModel<T> {
       }
     }
 
-    _user = await userRepository.get(uuid);
+    _user = await userRepository.get(id);
     if (_user == null) {
       return await logout(showError: true);
     }

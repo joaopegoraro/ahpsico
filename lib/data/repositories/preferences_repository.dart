@@ -2,8 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract interface class PreferencesRepository {
-  Future<String?> findUuid();
-  Future<void> saveUuid(String uuid);
+  Future<int?> findId();
+  Future<void> saveId(int id);
   Future<String?> findToken();
   Future<void> saveToken(String token);
   Future<void> clear();
@@ -15,18 +15,18 @@ final preferencesRepositoryProvider = Provider<PreferencesRepository>((ref) {
 
 final class PreferencesRepositoryImpl implements PreferencesRepository {
   static const String _tokenKey = "token";
-  static const String _uuidKey = "uuid";
+  static const String _idKey = "id";
 
   @override
-  Future<String?> findUuid() async {
+  Future<int?> findId() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_uuidKey);
+    return prefs.getInt(_idKey);
   }
 
   @override
-  Future<void> saveUuid(String uuid) async {
+  Future<void> saveId(int id) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString(_uuidKey, uuid);
+    prefs.setInt(_idKey, id);
   }
 
   @override
@@ -45,6 +45,6 @@ final class PreferencesRepositoryImpl implements PreferencesRepository {
   Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString(_tokenKey, "");
-    prefs.setString(_uuidKey, "");
+    prefs.remove(_idKey);
   }
 }
