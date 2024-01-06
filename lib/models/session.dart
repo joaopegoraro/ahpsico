@@ -20,7 +20,6 @@ class Session {
     required this.paymentType,
     required this.updatedBy,
     required this.updateMessage,
-    required this.createdAt,
     required this.updatedAt,
   });
 
@@ -34,7 +33,6 @@ class Session {
   final SessionPaymentType paymentType;
   final UserRole updatedBy;
   final String updateMessage;
-  final DateTime createdAt;
   final DateTime updatedAt;
 
   String get readableDate {
@@ -56,7 +54,6 @@ class Session {
     SessionPaymentType? paymentType,
     UserRole? updatedBy,
     String? updateMessage,
-    DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return Session(
@@ -70,7 +67,6 @@ class Session {
       paymentType: paymentType ?? this.paymentType,
       updatedBy: updatedBy ?? this.updatedBy,
       updateMessage: updateMessage ?? this.updateMessage,
-      createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
@@ -87,7 +83,6 @@ class Session {
       'paymentType': paymentType.value,
       'updatedBy': updatedBy.value,
       'updateMessage': updateMessage,
-      'createdAt': createdAt.millisecondsSinceEpoch,
       'updatedAt': updatedAt.millisecondsSinceEpoch,
     };
   }
@@ -104,7 +99,6 @@ class Session {
       paymentType: SessionPaymentType.fromValue(map['paymentType']),
       updatedBy: UserRole.fromValue(map['updatedBy']),
       updateMessage: map['updateMessage'] as String,
-      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int),
     );
   }
@@ -116,7 +110,7 @@ class Session {
 
   @override
   String toString() {
-    return 'Session(id: $id, user: $user, date: $date, type: $type, groupIndex: $groupIndex, status: $status, paymentStatus: $paymentStatus, paymentType: $paymentType, updatedBy: $updatedBy, updateMessage: $updateMessage, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Session(id: $id, user: $user, date: $date, type: $type, groupIndex: $groupIndex, status: $status, paymentStatus: $paymentStatus, paymentType: $paymentType, updatedBy: $updatedBy, updateMessage: $updateMessage, updatedAt: $updatedAt)';
   }
 
   @override
@@ -133,7 +127,6 @@ class Session {
         other.paymentType == paymentType &&
         other.updatedBy == updatedBy &&
         other.updateMessage == updateMessage &&
-        other.createdAt == createdAt &&
         other.updatedAt == updatedAt;
   }
 
@@ -149,7 +142,6 @@ class Session {
         paymentType.hashCode ^
         updatedBy.hashCode ^
         updateMessage.hashCode ^
-        createdAt.hashCode ^
         updatedAt.hashCode;
   }
 }

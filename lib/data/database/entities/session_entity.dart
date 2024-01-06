@@ -1,99 +1,129 @@
+import "dart:convert";
+
 class SessionEntity {
   SessionEntity({
     required this.id,
-    required this.doctorId,
-    required this.patientId,
+    required this.userId,
+    required this.dateTimestamp,
     required this.groupIndex,
     required this.status,
-    required this.paymentStatus,
     required this.type,
-    required this.dateInMillisecondsSinceEpoch,
+    required this.paymentStatus,
+    required this.paymentType,
+    required this.updatedBy,
+    required this.updateMessage,
+    required this.updatedAtTimestamp,
   });
 
   final int id;
-  final String doctorId;
-  final String patientId;
+  final int userId;
+  final int dateTimestamp;
   final int groupIndex;
-  final int status;
-  final int paymentStatus;
-  final int type;
-  final int dateInMillisecondsSinceEpoch;
+  final String status;
+  final String type;
+  final String? paymentStatus;
+  final String paymentType;
+  final String updatedBy;
+  final String updateMessage;
+  final int updatedAtTimestamp;
 
   static const tableName = "sessions";
   static const idColumn = "_id";
-  static const doctorIdColumn = "doctor_id";
-  static const patientIdColumn = "patient_id";
+  static const userIdColumn = "user_id";
+  static const dateColumn = "date";
   static const groupIndexColumn = "group_index";
   static const statusColumn = "status";
-  static const paymentStatusColumn = "payment_status";
   static const typeColumn = "type";
-  static const dateColumn = "date";
+  static const paymentStatusColumn = "payment_status";
+  static const paymentTypeColumn = "payment_type";
+  static const updatedByColumn = "updated_by";
+  static const updateMessageColumn = "update_message";
+  static const updatedAtColumn = "updated_at";
 
   static const creationStatement = """
     CREATE TABLE $tableName (
      $idColumn INTEGER PRIMARY KEY, 
-     $doctorIdColumn TEXT,
-     $patientIdColumn TEXT,
+     $userIdColumn INTEGER,
+     $dateColumn TIMESTAMP,
      $groupIndexColumn INTEGER,
-     $statusColumn INTEGER,
-     $paymentStatusColumn INTEGER,
-     $typeColumn INTEGER,
-     $dateColumn INTEGER)
+     $statusColumn TEXT,
+     $typeColumn TEXT,
+     $paymentStatusColumn TEXT,
+     $paymentTypeColumn TEXT,
+     $updatedByColumn TEXT,
+     $updateMessageColumn TEXT,
+     $updatedAtColumn TIMESTAMP
+     )
 """;
 
   SessionEntity copyWith({
     int? id,
-    String? doctorId,
-    String? patientId,
-    int? groupId,
+    int? userId,
+    int? dateTimestamp,
     int? groupIndex,
-    int? status,
-    int? paymentStatus,
-    int? type,
-    int? dateInMillisecondsSinceEpoch,
+    String? status,
+    String? type,
+    String? paymentStatus,
+    String? paymentType,
+    String? updatedBy,
+    String? updateMessage,
+    int? updatedAtTimestamp,
   }) {
     return SessionEntity(
       id: id ?? this.id,
-      doctorId: doctorId ?? this.doctorId,
-      patientId: patientId ?? this.patientId,
+      userId: userId ?? this.userId,
+      dateTimestamp: dateTimestamp ?? this.dateTimestamp,
       groupIndex: groupIndex ?? this.groupIndex,
       status: status ?? this.status,
-      paymentStatus: paymentStatus ?? this.paymentStatus,
       type: type ?? this.type,
-      dateInMillisecondsSinceEpoch:
-          dateInMillisecondsSinceEpoch ?? this.dateInMillisecondsSinceEpoch,
+      paymentStatus: paymentStatus ?? this.paymentStatus,
+      paymentType: paymentType ?? this.paymentType,
+      updatedBy: updatedBy ?? this.updatedBy,
+      updateMessage: updateMessage ?? this.updateMessage,
+      updatedAtTimestamp: updatedAtTimestamp ?? this.updatedAtTimestamp,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       idColumn: id,
-      doctorIdColumn: doctorId,
-      patientIdColumn: patientId,
+      userIdColumn: userId,
+      dateColumn: dateTimestamp,
       groupIndexColumn: groupIndex,
       statusColumn: status,
-      paymentStatusColumn: paymentStatus,
       typeColumn: type,
-      dateColumn: dateInMillisecondsSinceEpoch,
+      paymentStatusColumn: paymentStatus,
+      paymentTypeColumn: paymentType,
+      updatedByColumn: updatedBy,
+      updateMessageColumn: updateMessage,
+      updatedAtColumn: updatedAtTimestamp,
     };
   }
 
   factory SessionEntity.fromMap(Map<String, dynamic> map) {
     return SessionEntity(
       id: map[idColumn] as int,
-      doctorId: map[doctorIdColumn] as String,
-      patientId: map[patientIdColumn] as String,
+      userId: map[userIdColumn] as int,
+      dateTimestamp: map[dateColumn] as int,
       groupIndex: map[groupIndexColumn] as int,
-      status: map[statusColumn] as int,
-      paymentStatus: map[paymentStatusColumn] as int,
-      type: map[typeColumn] as int,
-      dateInMillisecondsSinceEpoch: map[dateColumn] as int,
+      status: map[statusColumn] as String,
+      type: map[typeColumn] as String,
+      paymentStatus: map[paymentStatusColumn] as String?,
+      paymentType: map[paymentTypeColumn] as String,
+      updatedBy: map[updatedByColumn] as String,
+      updateMessage: map[updateMessageColumn] as String,
+      updatedAtTimestamp: map[updatedAtColumn] as int,
     );
   }
 
+  String toJson() => json.encode(toMap());
+
+  factory SessionEntity.fromJson(String source) =>
+      SessionEntity.fromMap(json.decode(source) as Map<String, dynamic>);
+
   @override
   String toString() {
-    return 'SessionEntity(id: $id, doctorId: $doctorId, patientId: $patientId, groupIndex: $groupIndex, status: $status, paymentStatus: $paymentStatus, type: $type, date: $dateInMillisecondsSinceEpoch)';
+    return 'SessionEntity(id: $id, userId: $userId, dateTimestamp: $dateTimestamp, groupIndex: $groupIndex, status: $status, type: $type, paymentStatus: $paymentStatus, paymentType: $paymentType, updatedBy: $updatedBy, updateMessage: $updateMessage, updatedAtTimestamp: $updatedAtTimestamp)';
   }
 
   @override
@@ -101,24 +131,30 @@ class SessionEntity {
     if (identical(this, other)) return true;
 
     return other.id == id &&
-        other.doctorId == doctorId &&
-        other.patientId == patientId &&
+        other.userId == userId &&
+        other.dateTimestamp == dateTimestamp &&
         other.groupIndex == groupIndex &&
         other.status == status &&
-        other.paymentStatus == paymentStatus &&
         other.type == type &&
-        other.dateInMillisecondsSinceEpoch == dateInMillisecondsSinceEpoch;
+        other.paymentStatus == paymentStatus &&
+        other.paymentType == paymentType &&
+        other.updatedBy == updatedBy &&
+        other.updateMessage == updateMessage &&
+        other.updatedAtTimestamp == updatedAtTimestamp;
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
-        doctorId.hashCode ^
-        patientId.hashCode ^
+        userId.hashCode ^
+        dateTimestamp.hashCode ^
         groupIndex.hashCode ^
         status.hashCode ^
-        paymentStatus.hashCode ^
         type.hashCode ^
-        dateInMillisecondsSinceEpoch.hashCode;
+        paymentStatus.hashCode ^
+        paymentType.hashCode ^
+        updatedBy.hashCode ^
+        updateMessage.hashCode ^
+        updatedAtTimestamp.hashCode;
   }
 }
