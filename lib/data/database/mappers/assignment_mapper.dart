@@ -1,10 +1,9 @@
+import 'package:ahpsico/constants/assignment_status.dart';
 import 'package:ahpsico/data/database/entities/assignment_entity.dart';
 import 'package:ahpsico/data/database/entities/user_entity.dart';
 import 'package:ahpsico/data/database/entities/session_entity.dart';
 import 'package:ahpsico/data/database/mappers/session_mapper.dart';
-import 'package:ahpsico/data/database/mappers/user_mapper.dart';
-import 'package:ahpsico/models/assignment/assignment.dart';
-import 'package:ahpsico/models/assignment/assignment_status.dart';
+import 'package:ahpsico/models/assignment.dart';
 
 abstract class AssignmentMapper {
   static Assignment toAssignment(
@@ -17,10 +16,9 @@ abstract class AssignmentMapper {
       id: entity.id,
       title: entity.title,
       description: entity.description,
-      patientId: entity.patientId,
-      doctor: UserMapper.toUser(doctorEntity),
+      userId: entity.userId,
       status: AssignmentStatus.fromValue(entity.status),
-      deliverySession: SessionMapper.toSession(
+      session: SessionMapper.toSession(
         sessionEntity,
         doctorEntity: doctorEntity,
         patientEntity: patientEntity,
@@ -33,10 +31,9 @@ abstract class AssignmentMapper {
       id: assignment.id,
       title: assignment.title,
       description: assignment.description,
-      doctorId: assignment.doctor.uuid,
-      patientId: assignment.patientId,
+      userId: assignment.userId,
       status: assignment.status.value,
-      deliverySessionId: assignment.deliverySession.id,
+      sessionId: assignment.session.id,
     );
   }
 }
