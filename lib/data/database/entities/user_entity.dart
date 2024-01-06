@@ -1,122 +1,129 @@
+import "dart:convert";
+
 class UserEntity {
   UserEntity({
-    required this.uuid,
+    required this.id,
     required this.name,
     required this.phoneNumber,
-    required this.description,
-    required this.crp,
-    required this.pixKey,
-    required this.paymentDetails,
+    required this.address,
+    required this.education,
+    required this.occupation,
     required this.role,
+    required this.status,
   });
 
-  final String uuid;
+  final int id;
   final String name;
   final String phoneNumber;
-  final String description;
-  final String crp;
-  final String pixKey;
-  final String paymentDetails;
-  final int role;
+  final String address;
+  final String education;
+  final String occupation;
+  final String role;
+  final String status;
 
-  static const String tableName = "doctors";
-  static const String uuidColumn = "_uuid";
+  static const String tableName = "users";
+  static const String idColumn = "_id";
   static const String nameColumn = "name";
   static const String phoneNumberColumn = "phone_number";
-  static const String descriptionColumn = "description";
-  static const String crpColumn = "crp";
-  static const String pixKeyColumn = "pix_key";
-  static const String paymentDetailsColumn = "payment_details";
+  static const String addressColumn = "address";
+  static const String educationColumn = "education";
+  static const String occupationColumn = "occupation";
   static const String roleColumn = "role";
+  static const String statusColumn = "status";
 
   static const creationStatement = """
     CREATE TABLE $tableName (
-     $uuidColumn UUID PRIMARY KEY, 
+     $idColumn LONG PRIMARY KEY, 
      $nameColumn TEXT, 
      $phoneNumberColumn TEXT,
-     $descriptionColumn TEXT,
-     $crpColumn TEXT,
-     $pixKeyColumn TEXT,
-     $paymentDetailsColumn TEXT,
-     $roleColumn INTEGER)
+     $addressColumn TEXT,
+     $educationColumn TEXT,
+     $occupationColumn TEXT,
+     $roleColumn TEXT,
+     $statusColumn STATUS)
 """;
 
   UserEntity copyWith({
-    String? uuid,
+    int? id,
     String? name,
     String? phoneNumber,
-    String? description,
-    String? crp,
-    String? pixKey,
-    String? paymentDetails,
-    int? role,
+    String? address,
+    String? education,
+    String? occupation,
+    String? role,
+    String? status,
   }) {
     return UserEntity(
-      uuid: uuid ?? this.uuid,
+      id: id ?? this.id,
       name: name ?? this.name,
       phoneNumber: phoneNumber ?? this.phoneNumber,
-      description: description ?? this.description,
-      crp: crp ?? this.crp,
-      pixKey: pixKey ?? this.pixKey,
-      paymentDetails: paymentDetails ?? this.paymentDetails,
+      address: address ?? this.address,
+      education: education ?? this.education,
+      occupation: occupation ?? this.occupation,
       role: role ?? this.role,
+      status: status ?? this.status,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      uuidColumn: uuid,
+      idColumn: id,
       nameColumn: name,
       phoneNumberColumn: phoneNumber,
-      descriptionColumn: description,
-      crpColumn: crp,
-      pixKeyColumn: pixKey,
-      paymentDetailsColumn: paymentDetails,
+      addressColumn: address,
+      educationColumn: education,
+      occupationColumn: occupation,
       roleColumn: role,
+      statusColumn: status,
     };
   }
 
   factory UserEntity.fromMap(Map<String, dynamic> map) {
     return UserEntity(
-      uuid: map[uuidColumn] as String,
+      id: map[idColumn] as int,
       name: map[nameColumn] as String,
       phoneNumber: map[phoneNumberColumn] as String,
-      description: map[descriptionColumn] as String,
-      crp: map[crpColumn] as String,
-      pixKey: map[pixKeyColumn] as String,
-      paymentDetails: map[paymentDetailsColumn] as String,
-      role: map[roleColumn] as int,
+      address: map[addressColumn] as String,
+      education: map[educationColumn] as String,
+      occupation: map[occupationColumn] as String,
+      role: map[roleColumn] as String,
+      status: map[statusColumn] as String,
     );
   }
 
+  String toJson() => json.encode(toMap());
+
+  factory UserEntity.fromJson(String source) =>
+      UserEntity.fromMap(json.decode(source) as Map<String, dynamic>);
+
   @override
   String toString() {
-    return 'UserEntity(uuid: $uuid, name: $name, phoneNumber: $phoneNumber, description: $description, crp: $crp, pixKey: $pixKey, paymentDetails: $paymentDetails, role: $role)';
+    return 'UserEntity(id: $id, name: $name, phoneNumber: $phoneNumber, address: $address, education: $education, occupation: $occupation, role: $role, status: $status)';
   }
 
   @override
   bool operator ==(covariant UserEntity other) {
     if (identical(this, other)) return true;
 
-    return other.uuid == uuid &&
+    return other.id == id &&
         other.name == name &&
         other.phoneNumber == phoneNumber &&
-        other.description == description &&
-        other.crp == crp &&
-        other.pixKey == pixKey &&
-        other.paymentDetails == paymentDetails &&
-        other.role == role;
+        other.address == address &&
+        other.education == education &&
+        other.occupation == occupation &&
+        other.role == role &&
+        other.status == status;
   }
 
   @override
   int get hashCode {
-    return uuid.hashCode ^
+    return id.hashCode ^
         name.hashCode ^
         phoneNumber.hashCode ^
-        description.hashCode ^
-        crp.hashCode ^
-        pixKey.hashCode ^
-        paymentDetails.hashCode ^
-        role.hashCode;
+        address.hashCode ^
+        education.hashCode ^
+        occupation.hashCode ^
+        role.hashCode ^
+        status.hashCode;
   }
 }
