@@ -1,17 +1,14 @@
+import 'package:ahpsico/constants/session_payment_type.dart';
 import 'package:ahpsico/data/repositories/preferences_repository.dart';
-import 'package:ahpsico/data/repositories/schedule_repository.dart';
 import 'package:ahpsico/data/repositories/session_repository.dart';
 import 'package:ahpsico/data/repositories/user_repository.dart';
-import 'package:ahpsico/models/schedule.dart';
-import 'package:ahpsico/models/session/session.dart';
-import 'package:ahpsico/models/session/session_payment_status.dart';
-import 'package:ahpsico/models/session/session_status.dart';
-import 'package:ahpsico/models/session/session_type.dart';
-import 'package:ahpsico/models/user.dart';
+import 'package:ahpsico/models/session.dart';
+import 'package:ahpsico/constants/session_payment_status.dart';
+import 'package:ahpsico/constants/session_status.dart';
+import 'package:ahpsico/constants/session_type.dart';
 import 'package:ahpsico/services/api/errors.dart';
 import 'package:ahpsico/services/auth/auth_service.dart';
 import 'package:ahpsico/ui/base/base_view_model.dart';
-import 'package:collection/collection.dart';
 import 'package:mvvm_riverpod/mvvm_riverpod.dart';
 
 enum BookingEvent {
@@ -28,14 +25,12 @@ final bookingModelProvider = ViewModelProviderFactory.create((ref) {
   final authService = ref.watch(authServiceProvider);
   final userRepository = ref.watch(userRepositoryProvider);
   final sessionRepository = ref.watch(sessionRepositoryProvider);
-  final scheduleRepository = ref.watch(scheduleRepositoryProvider);
   final preferencesRepository = ref.watch(preferencesRepositoryProvider);
   return BookingModel(
     authService,
     userRepository,
     preferencesRepository,
     sessionRepository,
-    scheduleRepository,
   );
 });
 
@@ -45,7 +40,6 @@ class BookingModel extends BaseViewModel<BookingEvent> {
     super.userRepository,
     super.preferencesRepository,
     this._sessionRepository,
-    this._scheduleRepository,
   ) : super(
           errorEvent: BookingEvent.showSnackbarError,
           messageEvent: BookingEvent.showSnackbarMessage,
@@ -55,7 +49,6 @@ class BookingModel extends BaseViewModel<BookingEvent> {
   /* Services */
 
   final SessionRepository _sessionRepository;
-  final ScheduleRepository _scheduleRepository;
 
   /* Utils */
 
@@ -102,9 +95,6 @@ class BookingModel extends BaseViewModel<BookingEvent> {
   DateTime _selectedDate = DateTime.now();
   DateTime get selectedDate => _selectedDate;
 
-  List<Schedule> _schedule = [];
-  List<Schedule> get schedule => _schedule;
-
   /* Methods */
 
   void setSelectedDate(DateTime date) {
@@ -133,37 +123,46 @@ class BookingModel extends BaseViewModel<BookingEvent> {
   /* Calls */
 
   Future<List<Session>> scheduleSession({
-    required User doctor,
-    required bool monthly,
+    String? message,
+    required SessionPaymentType paymentType,
+    required SessionType sessionType,
   }) async {
     updateUi(() => _isLoading = true);
 
     final newSessions = <Session>[];
 
-    if (monthly) {
+    if (sessionType.isMonthly) {
       for (int index = 0; index < 4; index++) {
         final newSession = Session(
           id: 0,
-          doctor: doctor,
-          patient: user!,
+          user: user!,
+          date: _newSessionTime!.add(Duration(days: 7 * index)),
           groupIndex: index,
           status: SessionStatus.notConfirmed,
-          paymentStatus: SessionPaymentStatus.notPayed,
-          type: SessionType.monthly,
-          date: _newSessionTime!.add(Duration(days: 7 * index)),
+          type: sessionType,
+          paymentStatus:
+              paymentType.isParticular ? SessionPaymentStatus.notPayed : null,
+          paymentType: paymentType,
+          updatedBy: user!.role,
+          updatedAt: DateTime.now(),
+          updateMessage: message,
         );
         newSessions.add(newSession);
       }
     } else {
       final newSession = Session(
         id: 0,
-        doctor: doctor,
-        patient: user!,
+        user: user!,
+        date: _newSessionTime!,
         groupIndex: 0,
         status: SessionStatus.notConfirmed,
-        paymentStatus: SessionPaymentStatus.notPayed,
-        type: SessionType.individual,
-        date: _newSessionTime!,
+        type: sessionType,
+        paymentStatus:
+            paymentType.isParticular ? SessionPaymentStatus.notPayed : null,
+        paymentType: paymentType,
+        updatedBy: user!.role,
+        updatedAt: DateTime.now(),
+        updateMessage: message,
       );
       newSessions.add(newSession);
     }
@@ -186,7 +185,9 @@ class BookingModel extends BaseViewModel<BookingEvent> {
     }
 
     showSnackbar(
-      monthly ? "Sessões agendadas com sucesso!" : "Sessão agendada com sucesso!",
+      sessionType.isMonthly
+          ? "Sessões agendadas com sucesso!"
+          : "Sessão agendada com sucesso!",
       BookingEvent.showSnackbarMessage,
     );
     updateUi(() => _isLoading = false);
@@ -194,12 +195,17 @@ class BookingModel extends BaseViewModel<BookingEvent> {
     return newSessions;
   }
 
-  Future<Session?> rescheduleSession({required Session session}) async {
+  Future<Session?> rescheduleSession({
+    String? message,
+    required Session session,
+  }) async {
     updateUi(() => _isLoading = true);
 
     final updatedSession = session.copyWith(
       date: _newSessionTime!,
       status: SessionStatus.notConfirmed,
+      updateMessage: message,
+      updatedBy: user!.role,
     );
 
     final (result, err) = await _sessionRepository.update(updatedSession);
@@ -224,77 +230,9 @@ class BookingModel extends BaseViewModel<BookingEvent> {
     return result;
   }
 
-  Future<void> blockSchedule(DateTime blockTime) async {
-    updateUi(() => _isLoading = true);
-
-    final newBlockedSchedule = Schedule(
-      // id is created in the server
-      id: -1,
-      doctorUuid: user!.uuid,
-      date: blockTime,
-      isSession: false,
-    );
-
-    final (createdSchedule, err) = await _scheduleRepository.create(newBlockedSchedule);
-    if (err != null) {
-      await handleDefaultErrors(err);
-      return updateUi(() => _isLoading = false);
-    }
-
-    showSnackbar(
-      "Horário bloqueado com sucesso!",
-      BookingEvent.showSnackbarMessage,
-    );
-
-    _schedule.add(createdSchedule!);
-    updateUi(() => _isLoading = false);
-  }
-
-  Future<void> unblockSchedule(int blockedScheduleId) async {
-    updateUi(() => _isLoading = true);
-
-    final blockedSchedule = schedule.firstWhereOrNull((item) {
-      return item.id == blockedScheduleId;
-    });
-    if (blockedSchedule?.isSession == true) {
-      updateUi(() => _isLoading = false);
-      return emitEvent(BookingEvent.openScheduleAlreadyBookedDialog);
-    }
-
-    final err = await _scheduleRepository.delete(blockedScheduleId);
-    if (err != null) {
-      await handleDefaultErrors(err);
-      return updateUi(() => _isLoading = false);
-    }
-
-    showSnackbar(
-      "Horário desbloqueado com sucesso!",
-      BookingEvent.showSnackbarMessage,
-    );
-    _schedule.remove(blockedSchedule);
-
-    updateUi(() => _isLoading = false);
-  }
-
-  Future<void> fetchScreenData({required String? doctorUuid}) async {
+  Future<void> fetchScreenData() async {
     updateUi(() => _isLoadingFetchData = true);
     await getUserData();
-    await _getSchedules(doctorUuid: doctorUuid);
-    updateUi(() => _isLoadingFetchData = false);
-  }
-
-  Future<void> _getSchedules({required String? doctorUuid}) async {
-    final userUid = user!.uuid;
-
-    final (schedule, err) = await _scheduleRepository.getDoctorSchedule(doctorUuid ?? userUid);
-    if (err != null) {
-      await handleDefaultErrors(err);
-      emitEvent(BookingEvent.navigateBack);
-      return updateUi(() => _isLoadingFetchData = false);
-    }
-
-    _schedule = schedule ?? [];
-
     updateUi(() => _isLoadingFetchData = false);
   }
 }

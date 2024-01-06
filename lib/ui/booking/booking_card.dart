@@ -1,6 +1,5 @@
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 typedef Booking = MapEntry<String, DateTime>;
@@ -11,17 +10,11 @@ class BookingCard extends StatefulWidget {
   const BookingCard({
     super.key,
     required this.booking,
-    required this.blockedTimeRanges,
-    required this.isBlockingSchedule,
     required this.onTapAvailable,
-    required this.onTapBlocked,
   });
 
   final Booking booking;
-  final TimeRanges blockedTimeRanges;
-  final bool isBlockingSchedule;
   final void Function(DateTime bookingTime) onTapAvailable;
-  final void Function(int blockedScheduleId) onTapBlocked;
 
   @override
   State<BookingCard> createState() => _BookingCardState();
@@ -34,18 +27,6 @@ class _BookingCardState extends State<BookingCard> {
   @override
   void initState() {
     super.initState();
-    final bookingTimeStart = widget.booking.value;
-    final bookingTimeEnd = widget.booking.value.add(
-      widget.isBlockingSchedule ? const Duration(minutes: 30) : const Duration(hours: 1),
-    );
-
-    _blockedScheduleId = widget.blockedTimeRanges.entries.firstWhereOrNull((range) {
-      final isStartAfterStart = bookingTimeStart.compareTo(range.value.start) >= 0;
-      final isStartBeforeEnd = bookingTimeStart.compareTo(range.value.end) < 0;
-      final isEndAfterStart = bookingTimeEnd.compareTo(range.value.start) > 0;
-      final isEndBeforeEnd = bookingTimeEnd.compareTo(range.value.end) < 0;
-      return (isStartAfterStart && isStartBeforeEnd) || (isEndAfterStart && isEndBeforeEnd);
-    })?.key;
 
     final bookingLimit = DateTime.now().add(const Duration(hours: 3));
     final isBookingTooSoon = widget.booking.value.isBefore(bookingLimit);
@@ -63,8 +44,6 @@ class _BookingCardState extends State<BookingCard> {
         onTap: () {
           if (_isAvailable) {
             widget.onTapAvailable(widget.booking.value);
-          } else if (_blockedScheduleId != null) {
-            widget.onTapBlocked(_blockedScheduleId!);
           }
         },
         borderRadius: const BorderRadius.all(Radius.circular(4)),

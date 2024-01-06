@@ -32,7 +32,7 @@ class Session {
   final SessionPaymentStatus? paymentStatus;
   final SessionPaymentType paymentType;
   final UserRole updatedBy;
-  final String updateMessage;
+  final String? updateMessage;
   final DateTime updatedAt;
 
   String get readableDate {
@@ -98,7 +98,7 @@ class Session {
       paymentStatus: SessionPaymentStatus.fromValue(map['paymentStatus']),
       paymentType: SessionPaymentType.fromValue(map['paymentType']),
       updatedBy: UserRole.fromValue(map['updatedBy']),
-      updateMessage: map['updateMessage'] as String,
+      updateMessage: map['updateMessage'] as String?,
       updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int),
     );
   }

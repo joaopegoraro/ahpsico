@@ -1,3 +1,5 @@
+import 'package:ahpsico/constants/session_payment_type.dart';
+import 'package:ahpsico/constants/session_type.dart';
 import 'package:ahpsico/ui/app/theme/colors.dart';
 import 'package:ahpsico/ui/app/theme/spacing.dart';
 import 'package:ahpsico/ui/app/theme/text.dart';
@@ -13,14 +15,20 @@ class CreateSessionDialog extends StatefulWidget {
   });
 
   final DateTime dateTime;
-  final void Function(bool isChecked) onConfirm;
+  final void Function(
+    String? message,
+    SessionPaymentType paymentType,
+    SessionType sessionType,
+  ) onConfirm;
 
   @override
   State<CreateSessionDialog> createState() => _CreateSessionDialogState();
 }
 
 class _CreateSessionDialogState extends State<CreateSessionDialog> {
-  bool _isChecked = false;
+  String? _message = null;
+  SessionType _sessionType = SessionType.individual;
+  SessionPaymentType _paymentType = SessionPaymentType.particular;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +44,8 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                 "às ${TimeUtils.getDateAsHours(widget.dateTime)}?",
               ),
               AhpsicoSpacing.verticalSpaceMedium,
-              const Text("Escolha se a sessão que você está agendando é mensal, ou individual."),
+              const Text(
+                  "Escolha se a sessão que você está agendando é mensal, ou individual."),
               AhpsicoSpacing.verticalSpaceMedium,
             ],
           ),
@@ -51,10 +60,12 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
               child: Row(
                 children: [
                   Checkbox(
-                    visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+                    visualDensity:
+                        const VisualDensity(horizontal: -4, vertical: -4),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     value: _isChecked,
-                    fillColor: const MaterialStatePropertyAll(AhpsicoColors.violet),
+                    fillColor:
+                        const MaterialStatePropertyAll(AhpsicoColors.violet),
                     onChanged: null,
                   ),
                   AhpsicoSpacing.horizontalSpaceSmall,
@@ -67,11 +78,16 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => widget.onConfirm(_isChecked),
+          onPressed: () => widget.onConfirm(
+            _message,
+            _paymentType,
+            _sessionType,
+          ),
           child: Text(
             "Confirmar",
             textAlign: TextAlign.end,
-            style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
+            style:
+                AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
           ),
         ),
         TextButton(
@@ -79,7 +95,8 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
           child: Text(
             "Cancelar",
             textAlign: TextAlign.end,
-            style: AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
+            style:
+                AhpsicoText.regular1Style.copyWith(color: AhpsicoColors.violet),
           ),
         ),
       ],
