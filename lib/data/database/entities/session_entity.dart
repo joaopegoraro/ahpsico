@@ -24,7 +24,7 @@ class SessionEntity {
   final String? paymentStatus;
   final String paymentType;
   final String updatedBy;
-  final String updateMessage;
+  final String? updateMessage;
   final int updatedAtTimestamp;
 
   static const tableName = "sessions";
@@ -111,7 +111,7 @@ class SessionEntity {
       paymentStatus: map[paymentStatusColumn] as String?,
       paymentType: map[paymentTypeColumn] as String,
       updatedBy: map[updatedByColumn] as String,
-      updateMessage: map[updateMessageColumn] as String,
+      updateMessage: map[updateMessageColumn] as String?,
       updatedAtTimestamp: map[updatedAtColumn] as int,
     );
   }
